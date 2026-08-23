@@ -1,12 +1,16 @@
 # SVG Studio
 
-Three transparent-canvas studies that treat vector geometry as a programmable medium. Paper.js constructs the precise geometry; Rough.js supplies selective hand-drawn texture.
+Twelve transparent-canvas studies that treat vector geometry as a programmable medium. Paper.js constructs precise geometry; Rough.js supplies selective hand-drawn texture.
 
-| Scene | Preview | Visual system |
-|---|---|---|
-| Botanical atlas | ![botanical](out/botanical-transparent.png) | Bézier petals, veins, translucent layering |
-| Metro currents | ![metro](out/metro-transparent.png) | Routed ribbons, stations, sketch overlays |
-| Orbital cartography | ![orbits](out/orbits-transparent.png) | Parametric ellipses, satellites, annotations |
+`catalog.json` records the design use, motivating question, family, complexity, and tags for every scene.
+
+| Botanical | Metro | Orbits | Topology |
+|---|---|---|---|
+| ![botanical](out/botanical-transparent.png) | ![metro](out/metro-transparent.png) | ![orbits](out/orbits-transparent.png) | ![topology](out/topology-transparent.png) |
+| Isometric city | Wave lab | Contour map | Circuit |
+| ![isometric city](out/isometric-city-transparent.png) | ![wave lab](out/wave-lab-transparent.png) | ![contour map](out/contour-map-transparent.png) | ![circuit](out/circuit-transparent.png) |
+| Timeline | Molecule | Loom | Type system |
+| ![timeline](out/timeline-transparent.png) | ![molecule](out/molecule-transparent.png) | ![loom](out/loom-transparent.png) | ![type system](out/type-system-transparent.png) |
 
 ```bash
 npm install

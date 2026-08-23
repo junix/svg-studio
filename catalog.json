@@ -1,0 +1,14 @@
+[
+  {"id":"botanical","use":"organic geometry","family":"organic geometry","question":"How can layered Bézier petals encode radial structure?","complexity":"advanced","tags":["bezier","paper.js","botanical"]},
+  {"id":"metro","use":"information design","family":"information design","question":"How can a synthetic transit system remain legible across crossings?","complexity":"advanced","tags":["network","routing","rough.js"]},
+  {"id":"orbits","use":"scientific illustration","family":"scientific illustration","question":"How can nested orbital families show resonance and eccentricity?","complexity":"advanced","tags":["parametric","annotation","astronomy"]},
+  {"id":"topology","use":"system diagram","family":"system diagram","question":"How do services, queues, and stores form one observable topology?","complexity":"advanced","tags":["architecture","edges","clusters"]},
+  {"id":"isometric-city","use":"spatial diagram","family":"spatial diagram","question":"How can an isometric district communicate layers and circulation?","complexity":"advanced","tags":["isometric","urban","depth"]},
+  {"id":"wave-lab","use":"scientific dashboard","family":"scientific dashboard","question":"How do four signal views explain one coupled oscillator?","complexity":"advanced","tags":["waveform","small-multiples","annotation"]},
+  {"id":"contour-map","use":"cartography","family":"cartography","question":"How can routes, contours, and landmarks coexist without a basemap?","complexity":"advanced","tags":["contour","route","map"]},
+  {"id":"circuit","use":"technical schematic","family":"technical schematic","question":"How does signal flow through an analog synthesizer voice?","complexity":"advanced","tags":["circuit","schematic","signal"]},
+  {"id":"timeline","use":"narrative","family":"narrative","question":"How can a mission timeline expose parallel work and dependencies?","complexity":"advanced","tags":["timeline","lanes","milestones"]},
+  {"id":"molecule","use":"scientific illustration","family":"scientific illustration","question":"How can bonding geometry and functional groups be read at a glance?","complexity":"advanced","tags":["molecule","graph","chemistry"]},
+  {"id":"loom","use":"generative vector","family":"generative vector","question":"How can crossing ribbons reveal a repeatable weaving grammar?","complexity":"advanced","tags":["ribbons","pattern","masking"]},
+  {"id":"type-system","use":"editorial graphic","family":"editorial graphic","question":"How can a modular typographic scale become a reusable poster system?","complexity":"advanced","tags":["typography","grid","poster"]}
+]

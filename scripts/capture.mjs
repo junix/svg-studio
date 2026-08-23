@@ -3,7 +3,9 @@ import { mkdir, readFile } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
 import { PNG } from 'pngjs';
 
-const scenes = JSON.parse(process.env.SCENES ?? '["botanical","metro","orbits"]');
+const catalog = JSON.parse(await readFile(new URL('../catalog.json', import.meta.url), 'utf8'));
+if (!Array.isArray(catalog) || catalog.length < 12) throw new Error('reference library requires at least 12 cataloged scenes');
+const scenes = JSON.parse(process.env.SCENES ?? JSON.stringify(catalog.map(item => item.id)));
 const port = Number(process.env.PORT ?? 4173);
 const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port)], {stdio:'pipe'});
 const stop = () => server.kill('SIGTERM');
