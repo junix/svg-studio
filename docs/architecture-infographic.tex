@@ -1,0 +1,365 @@
+% SVG Studio — 架构信息图
+% 叙事：十二个透明画布研究，将矢量几何作为可编程媒介。
+% 构图：左右分层。左栏 = 项目总览（项目身份 + 核心理念 + 12 场景家族图）。
+%       右栏 = 技术栈与构建流水线（渲染管道 + 测试/验证 + 目录结构）。
+% 读法：从左上标题进入，沿左栏向下理解"是什么 / 有哪些场景"，
+%       再沿右栏向下理解"怎么实现 / 怎么验证"。
+
+\documentclass[border=12pt,varwidth=19cm]{standalone}
+\usepackage[UTF8,fontset=none]{ctex}
+\IfFontExistsTF{Source Han Serif SC}{
+  \setmainfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setsansfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setCJKmainfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setCJKsansfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+}{
+  \PackageWarningNoLine{tikz-infographic}{Source Han Serif SC not found; using Fandol}
+  \setCJKmainfont[BoldFont={FandolSong-Bold}]{FandolSong-Regular}
+  \setCJKsansfont[BoldFont={FandolHei-Bold}]{FandolHei-Regular}
+}
+\IfFontExistsTF{Sarasa Mono SC}{
+  \setmonofont{Sarasa Mono SC}
+  \setCJKmonofont{Sarasa Mono SC}
+}{
+  \PackageWarningNoLine{tikz-infographic}{Sarasa Mono SC not found; using TeX defaults}
+  \setmonofont{Latin Modern Mono}
+  \setCJKmonofont{FandolFang-Regular}
+}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{listings}
+\usetikzlibrary{arrows.meta,backgrounds,calc,fit,positioning,shapes.geometric}
+\pgfdeclarelayer{edge layer}
+\pgfdeclarelayer{back layer}
+\pgfsetlayers{background,back layer,edge layer,main}
+
+% ── 语义调色板 ────────────────────────────────────────────────────────────
+% 深色太空背景 + 霓虹色点缀，呼应项目本身的深空蓝美学。
+\definecolor{Deep}{HTML}{0D1B30}       % 主背景
+\definecolor{Panel}{HTML}{132741}      % 面板背景
+\definecolor{Ink}{HTML}{EDF8FF}        % 主文字
+\definecolor{Muted}{HTML}{82A4BA}      % 次级文字
+\definecolor{Fog}{HTML}{57768C}        % 弱线条
+\definecolor{Teal}{HTML}{54D6C6}       % 青绿（系统/边）
+\definecolor{Blue}{HTML}{7B9CFF}       % 蓝（流/队列）
+\definecolor{Coral}{HTML}{FF6F91}      % 珊瑚（产品/告警）
+\definecolor{Gold}{HTML}{FFD166}       % 金（重点/标注）
+\definecolor{Purple}{HTML}{B889FF}     % 紫（输出）
+\definecolor{Paper}{HTML}{F7F4EE}      % 对比浅色区
+
+% 代码样式
+\lstdefinestyle{deep-code}{
+  basicstyle=\ttfamily\scriptsize\color{Ink},
+  keywordstyle=\bfseries\color{Gold},
+  commentstyle=\itshape\color{Teal!80},
+  stringstyle=\color{Coral},
+  numberstyle=\scriptsize\color{Muted},
+  numbers=left,
+  numbersep=7pt,
+  frame=single,
+  rulecolor=\color{Fog},
+  backgroundcolor=\color{Panel},
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  tabsize=2,
+  xleftmargin=8pt,
+  framexleftmargin=6pt,
+  aboveskip=5pt,
+  belowskip=0pt
+}
+
+\tikzset{
+  every node/.style={font=\rmfamily},
+  % 主色带：渲染主路径
+  spine/.style={draw=Teal!35, line width=5mm, line cap=round, line join=round},
+  % 家族色块
+  family/.style={
+    rounded corners=2.5mm, line width=1.2pt,
+    minimum width=22mm, minimum height=14mm,
+    align=center, font=\rmfamily\footnotesize\bfseries, text=Ink,
+    inner sep=2pt
+  },
+  % 技术模块
+  module/.style={
+    rounded corners=2mm, line width=1pt,
+    minimum width=30mm, minimum height=10mm,
+    align=center, font=\rmfamily\footnotesize\bfseries, text=Ink,
+    inner sep=3pt
+  },
+  % 阶段编号圆
+  stage/.style={
+    circle, draw=Teal, fill=Teal, text=Deep, inner sep=0pt,
+    minimum size=7.5mm, font=\rmfamily\scriptsize\bfseries
+  },
+  % 连线
+  call/.style={
+    -{Latex[length=2mm,width=1.4mm]}, draw=Teal,
+    line width=1pt, rounded corners=2mm
+  },
+  reply/.style={
+    -{Latex[length=2mm,width=1.4mm]}, draw=Blue,
+    densely dashed, line width=.9pt, rounded corners=2mm
+  },
+  flow/.style={
+    -{Latex[length=2mm,width=1.4mm]}, draw=Gold,
+    line width=1pt, rounded corners=2mm
+  },
+  boundary/.style={draw=Fog!60, dash pattern=on 2pt off 2.4pt, line width=.6pt},
+  % 文字
+  kicker/.style={font=\rmfamily\scriptsize\bfseries, text=Teal},
+  h1/.style={font=\rmfamily\huge\bfseries, text=Ink},
+  h2/.style={font=\rmfamily\large\bfseries, text=Ink},
+  h3/.style={font=\rmfamily\footnotesize\bfseries, text=Gold},
+  body/.style={font=\rmfamily\scriptsize, text=Muted},
+  label/.style={font=\rmfamily\scriptsize\bfseries, text=Ink},
+  note/.style={font=\rmfamily\scriptsize, text=Muted},
+  pill/.style={
+    rounded corners=3mm, fill=Panel, text=Teal,
+    inner xsep=2.8mm, inner ysep=1mm,
+    font=\rmfamily\scriptsize\bfseries, draw=Teal!50, line width=.6pt
+  },
+  % 场景小徽章
+  dot/.style={circle, inner sep=0pt, minimum size=3mm},
+}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  % ── 背景 ─────────────────────────────────────────────────────────────────
+  \begin{pgfonlayer}{background}
+    \fill[Deep,rounded corners=3mm] (-.6,-.5) rectangle (18.4,25.0);
+    % 细微网格点
+    \foreach \x in {0,1,...,18}
+      \foreach \y in {0,1,...,24}
+        \fill[Fog!18] (\x,\y) circle (.3pt);
+  \end{pgfonlayer}
+
+  % ── 标题区 ───────────────────────────────────────────────────────────────
+  \node[kicker,anchor=west] at (0,24.2) {SVG STUDIO / 矢量几何工作室};
+  \node[h1,anchor=west] at (0,23.4) {十二个透明画布，};
+  \node[h1,anchor=west] at (0,22.5) {将矢量几何作为可编程媒介};
+  \node[body,anchor=west] at (0,21.7)
+    {Paper.js 构建精确几何 · Rough.js 注入手绘质感 · Playwright 做端到端像素级验证};
+
+  % 右上：元数据徽章
+  \node[pill,anchor=east] at (17.9,23.7) {12 个场景};
+  \node[pill,anchor=east] at (17.9,22.8) {9 大家族};
+  \node[pill,anchor=east] at (17.9,21.9) {全透明画布};
+
+  % ── 分割线 ───────────────────────────────────────────────────────────────
+  \draw[boundary] (0,21.0) -- (17.9,21.0);
+
+  % ════════════════════════════════════════════════════════════════════════
+  % 左栏：场景家族图谱（主角：12 个场景按家族组织）
+  % ════════════════════════════════════════════════════════════════════════
+
+  \node[h2,anchor=west] at (0,20.2) {场景家族图谱};
+  \node[body,anchor=west] at (0,19.65)
+    {每个场景回答一个设计问题；从有机几何到信息设计，从科学图示到编排图形。};
+
+  % 三行四列的家族网格（12 个场景）
+  % 行 1: botanical, metro, orbits, topology
+  % 行 2: isometric-city, wave-lab, contour-map, circuit
+  % 行 3: timeline, molecule, loom, type-system
+
+  \begin{scope}[local bounding box=scenes]
+    % 第一行
+    \node[family, fill=Coral!18, draw=Coral!70] (s1) at (1.8,18.3) {植物花房\\[-1mm]\scriptsize\color{Muted}botanical};
+    \node[family, fill=Blue!18, draw=Blue!70] (s2) at (4.8,18.3) {地铁线路\\[-1mm]\scriptsize\color{Muted}metro};
+    \node[family, fill=Gold!18, draw=Gold!70] (s3) at (7.8,18.3) {星轨图\\[-1mm]\scriptsize\color{Muted}orbits};
+    \node[family, fill=Teal!18, draw=Teal!70] (s4) at (10.8,18.3) {系统拓扑\\[-1mm]\scriptsize\color{Muted}topology};
+
+    % 第二行
+    \node[family, fill=Purple!18, draw=Purple!70] (s5) at (1.8,16.5) {等距城市\\[-1mm]\scriptsize\color{Muted}isometric-city};
+    \node[family, fill=Coral!18, draw=Coral!70] (s6) at (4.8,16.5) {波动实验室\\[-1mm]\scriptsize\color{Muted}wave-lab};
+    \node[family, fill=Teal!18, draw=Teal!70] (s7) at (7.8,16.5) {等高线地图\\[-1mm]\scriptsize\color{Muted}contour-map};
+    \node[family, fill=Gold!18, draw=Gold!70] (s8) at (10.8,16.5) {模拟电路\\[-1mm]\scriptsize\color{Muted}circuit};
+
+    % 第三行
+    \node[family, fill=Blue!18, draw=Blue!70] (s9) at (1.8,14.7) {任务时间线\\[-1mm]\scriptsize\color{Muted}timeline};
+    \node[family, fill=Coral!18, draw=Coral!70] (s10) at (4.8,14.7) {分子几何\\[-1mm]\scriptsize\color{Muted}molecule};
+    \node[family, fill=Gold!18, draw=Gold!70] (s11) at (7.8,14.7) {算法织机\\[-1mm]\scriptsize\color{Muted}loom};
+    \node[family, fill=Purple!18, draw=Purple!70] (s12) at (10.8,14.7) {字体系统\\[-1mm]\scriptsize\color{Muted}type-system};
+  \end{scope}
+
+  % 家族标注（右侧 9 大家族）
+  \node[h3,anchor=west] at (13.0,19.1) {九大家族};
+  \node[body,anchor=west] at (13.0,18.55) {有机几何 · 信息设计};
+  \node[body,anchor=west] at (13.0,18.05) {科学图示 · 系统图};
+  \node[body,anchor=west] at (13.0,17.55) {空间图 · 科学仪表盘};
+  \node[body,anchor=west] at (13.0,17.05) {制图 · 技术原理图};
+  \node[body,anchor=west] at (13.0,16.55) {叙事时间线 · 生成矢量};
+  \node[body,anchor=west] at (13.0,16.05) {编辑图形};
+
+  % 复杂度标签
+  \node[pill,anchor=west] at (13.0,15.2) {全部：advanced 级别};
+
+  % catalog.json 数据来源
+  \node[note,anchor=west] at (0,13.9)
+    {数据来源：\texttt{catalog.json} · 每条记录包含 id、用途、家族、设计问题、复杂度与标签};
+
+  % ════════════════════════════════════════════════════════════════════════
+  % 中下：渲染管道（主叙事）
+  % ════════════════════════════════════════════════════════════════════════
+
+  \node[h2,anchor=west] at (0,12.9) {渲染管道};
+  \node[body,anchor=west] at (0,12.35)
+    {从场景选择到透明画布输出：Paper.js 绘制精确路径，Rough.js 叠加手绘纹理。};
+
+  % 渲染流程阶段
+  \node[stage] (p1) at (1.2,11.2) {01};
+  \node[stage] (p2) at (4.5,11.2) {02};
+  \node[stage] (p3) at (7.8,11.2) {03};
+  \node[stage] (p4) at (11.1,11.2) {04};
+  \node[stage] (p5) at (14.4,11.2) {05};
+
+  \node[label,anchor=south] at (1.2,11.75) {URL 参数\\选择场景};
+  \node[label,anchor=south] at (4.5,11.75) {Paper.js\\构建几何};
+  \node[label,anchor=south] at (7.8,11.75) {Rough.js\\注入手绘感};
+  \node[label,anchor=south] at (11.1,11.75) {Canvas\\透明渲染};
+  \node[label,anchor=south] at (14.4,11.75) {omitBackground\\导出 PNG};
+
+  \node[note,anchor=north] at (1.2,10.65) {\texttt{?scene=botanical}};
+  \node[note,anchor=north] at (4.5,10.65) {贝塞尔/路径/渐变};
+  \node[note,anchor=north] at (7.8,10.65) {粗䊁度 · 弯曲};
+  \node[note,anchor=north] at (11.1,10.65) {1400×900};
+  \node[note,anchor=north] at (14.4,10.65) {Alpha 通道保留};
+
+  \begin{pgfonlayer}{edge layer}
+    \draw[spine] (1.2,11.2) -- (4.5,11.2);
+    \draw[spine] (4.5,11.2) -- (7.8,11.2);
+    \draw[spine] (7.8,11.2) -- (11.1,11.2);
+    \draw[spine] (11.1,11.2) -- (14.4,11.2);
+  \end{pgfonlayer}
+
+  % 渲染就绪标志
+  \node[pill,anchor=center] at (17.0,11.2) {\texttt{\_\_VIS\_READY\_\_}};
+  \draw[flow] (14.4,11.2) -- (16.1,11.2);
+
+  % ════════════════════════════════════════════════════════════════════════
+  % 左下：代码片段（核心结构）
+  % ════════════════════════════════════════════════════════════════════════
+
+  \node[h3,anchor=west] at (0,9.2) {核心代码结构};
+  \node[body,anchor=west] at (0,8.75)
+    {\texttt{src/main.ts} 统一定义 12 个渲染函数，通过查找表分发。};
+
+  \node[anchor=north west] at (0,8.5) {
+    \begin{minipage}{10.8cm}
+    \begin{lstlisting}[style=deep-code,language=c++]
+const W = 1400, H = 900;
+const scene = new URLSearchParams(location.search)
+  .get('scene') ?? 'botanical';
+
+function botanical() { /* 花瓣、渐变、标注 */ }
+function metro()     { /* 线路、站点、Rough边框 */ }
+// ... 共 12 个渲染函数
+
+const renderers = { botanical, metro, orbits,
+  topology, 'isometric-city': isometricCity,
+  'wave-lab': waveLab, 'contour-map': contourMap,
+  circuit, timeline, molecule, loom,
+  'type-system': typeSystem };
+(renderers[scene] ?? botanical)();
+window.__VIS_READY__ = true;
+    \end{lstlisting}
+    \end{minipage}
+  };
+
+  % ════════════════════════════════════════════════════════════════════════
+  % 右下：测试与验证流水线
+  % ════════════════════════════════════════════════════════════════════════
+
+  \node[h3,anchor=west] at (12.0,9.2) {像素级验证流水线};
+  \node[body,anchor=west] at (12.0,8.75)
+    {Playwright 无头浏览器 + pngjs 像素统计。};
+
+  \node[module, fill=Panel, draw=Teal!60, anchor=north, align=left, text width=34mm]
+    (t1) at (14.0,8.0) {
+      \hphantom{0}1. Vite 构建\\
+      \scriptsize\color{Muted}\hphantom{000}启动本地服务器
+    };
+  \node[module, fill=Panel, draw=Blue!60, anchor=north, align=left, text width=34mm]
+    (t2) at (14.0,7.05) {
+      \hphantom{0}2. Playwright 加载\\
+      \scriptsize\color{Muted}\hphantom{000}断网模式 + headless
+    };
+  \node[module, fill=Panel, draw=Gold!60, anchor=north, align=left, text width=34mm]
+    (t3) at (14.0,6.1) {
+      \hphantom{0}3. 交互触发验证\\
+      \scriptsize\color{Muted}\hphantom{000}pointer 事件计数
+    };
+  \node[module, fill=Panel, draw=Coral!60, anchor=north, align=left, text width=34mm]
+    (t4) at (14.0,5.15) {
+      \hphantom{0}4. 像素统计断言\\
+      \scriptsize\color{Muted}\hphantom{000}透明 / 可见 / 彩色像素
+    };
+
+  \begin{pgfonlayer}{edge layer}
+    \draw[flow] (t1.south) -- (t2.north);
+    \draw[flow] (t2.south) -- (t3.north);
+    \draw[flow] (t3.south) -- (t4.north);
+  \end{pgfonlayer}
+
+  % 断网标识
+  \node[pill, anchor=west] at (12.0,4.4) {禁外网：仅 localhost + data: 通过};
+
+  % ════════════════════════════════════════════════════════════════════════
+  % 底部：目录结构与依赖
+  % ════════════════════════════════════════════════════════════════════════
+
+  \draw[boundary] (0,2.9) -- (17.9,2.9);
+
+  \node[h3,anchor=west] at (0,2.3) {项目结构};
+
+  % 目录树（简洁版）
+  \node[body,anchor=north west, font=\ttfamily\scriptsize, text=Muted] at (0,1.9) {
+    \begin{minipage}[t]{4.2cm}
+      \color{Ink}svg-studio/\\
+      \hspace{1ex}\color{Teal}src/\\
+      \hspace{2ex}main.ts\quad\color{Muted}12 场景\\
+      \hspace{2ex}style.css\\
+      \hspace{1ex}\color{Teal}scripts/\\
+      \hspace{2ex}capture.mjs\\
+      \hspace{1ex}\color{Teal}out/\quad\color{Muted}PNG 产物\\
+      \hspace{1ex}catalog.json\quad\color{Muted}场景元数据\\
+      \hspace{1ex}package.json\\
+      \hspace{1ex}tsconfig.json
+    \end{minipage}
+  };
+
+  % 依赖
+  \node[h3,anchor=west] at (5.4,2.3) {核心依赖};
+  \node[body,anchor=north west] at (5.4,1.9) {
+    \begin{minipage}[t]{4.0cm}
+      \color{Ink}\textbf{paper 0.12}\\\color{Muted}矢量几何操作\\[1.2mm]
+      \color{Ink}\textbf{roughjs 4.6}\\\color{Muted}手绘质感生成\\[1.2mm]
+      \color{Ink}\textbf{vite 8.x}\\\color{Muted}开发与构建\\[1.2mm]
+      \color{Ink}\textbf{playwright-core}\\\color{Muted}无头浏览器测试
+    \end{minipage}
+  };
+
+  % 构建命令
+  \node[h3,anchor=west] at (10.0,2.3) {构建与测试};
+  \node[body,anchor=north west, font=\ttfamily\scriptsize] at (10.0,1.9) {
+    \begin{minipage}[t]{7.8cm}
+      \color{Gold}\$ \color{Ink}npm install\\
+      \color{Gold}\$ \color{Ink}npm test\\
+      \color{Muted}├── typecheck (tsc --noEmit)\\
+      \color{Muted}└── render (build + capture.mjs)\\
+      \color{Muted}\hspace{3.5ex}├── 12 场景全量截图\\
+      \color{Muted}\hspace{3.5ex}├── 交互契约验证\\
+      \color{Muted}\hspace{3.5ex}└── 像素阈值断言
+    \end{minipage}
+  };
+
+  % 底部脚注
+  \node[note,anchor=west] at (0,0.1)
+    {SVG Studio · 十二个透明画布研究 · 全部场景支持指针交互与透明背景导出};
+  \node[note,anchor=east] at (17.9,0.1) {矢量即媒介 · 代码即图纸};
+
+\end{tikzpicture}
+\end{document}

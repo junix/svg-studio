@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SVG Studio · 架构文档</title>
+<style>
+:root{
+  --bg:#fafbfc;
+  --surface:#ffffff;
+  --ink:#1a2a3a;
+  --ink-soft:#4a6078;
+  --ink-mute:#7d93a8;
+  --line:#e3eaf1;
+  --line-soft:#eef3f7;
+  --accent:#3a8fb7;
+  --teal:#2fb3a5;
+  --coral:#ee6b7a;
+  --gold:#e6a73c;
+  --violet:#8a6fd1;
+  --blue:#5b8ad6;
+  --shadow:0 1px 2px rgba(26,42,58,.04),0 4px 16px rgba(26,42,58,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;line-height:1.7;font-size:16px;-webkit-font-smoothing:antialiased}
+body{max-width:960px;margin:0 auto;padding:56px 32px 96px}
+h1{font-size:34px;font-weight:700;margin:0 0 6px;letter-spacing:-.5px}
+h2{font-size:24px;font-weight:700;margin:56px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--line);letter-spacing:-.3px}
+h3{font-size:18px;font-weight:600;margin:28px 0 10px;color:var(--ink)}
+p{margin:0 0 14px;color:var(--ink-soft)}
+strong{color:var(--ink);font-weight:600}
+.subtitle{color:var(--ink-mute);font-size:15px;margin-bottom:32px}
+.hero{background:linear-gradient(135deg,#eef7fa 0%,#f5f0fa 100%);border-radius:16px;padding:36px 40px;margin-bottom:40px;box-shadow:var(--shadow)}
+.hero h1{color:var(--ink)}
+.hero p{color:var(--ink-soft);font-size:16px;margin:8px 0 0;max-width:640px}
+.tag-row{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 0}
+.tag{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(58,143,183,.1);color:var(--accent);border:1px solid rgba(58,143,183,.2)}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin:20px 0}
+.feat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;transition:transform .25s ease, box-shadow .25s ease}
+.feat:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.feat-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;margin-bottom:10px}
+.feat h4{margin:0 0 4px;font-size:14px;font-weight:600}
+.feat p{margin:0;font-size:13px;color:var(--ink-mute);line-height:1.5}
+.diagram-wrap{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px;margin:20px 0 24px;box-shadow:var(--shadow);overflow:hidden}
+.diagram-title{font-size:14px;font-weight:600;color:var(--ink-mute);text-transform:uppercase;letter-spacing:1.5px;margin:0 0 18px}
+svg.diagram{width:100%;height:auto;display:block}
+.note{background:#f7fafc;border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px;color:var(--ink-soft)}
+.note b{color:var(--accent)}
+.walk-steps{counter-reset:step;list-style:none;padding:0;margin:20px 0}
+.walk-steps li{counter-increment:step;position:relative;padding:14px 20px 14px 52px;background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;transition:border-color .2s ease}
+.walk-steps li:hover{border-color:var(--accent)}
+.walk-steps li::before{content:counter(step);position:absolute;left:16px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.walk-steps li b{color:var(--ink)}
+.walk-steps li span{color:var(--ink-soft);font-size:14px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+th{font-weight:600;color:var(--ink-soft);font-size:13px;background:var(--bg)}
+td{color:var(--ink-soft)}
+code{font-family:"SF Mono",Monaco,Consolas,monospace;font-size:13px;background:#eef3f7;padding:2px 6px;border-radius:4px;color:var(--ink)}
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:var(--ink-mute);font-size:13px;text-align:center}
+
+/* Diagram element animation */
+@keyframes fadeSlideIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes drawLine{
+  from{stroke-dashoffset:var(--len,300)}
+  to{stroke-dashoffset:0}
+}
+@keyframes pulse{
+  0%,100%{opacity:.6}
+  50%{opacity:1}
+}
+.anim-node{opacity:0}
+.anim-node.in{animation:fadeSlideIn .5s ease forwards}
+.anim-edge{stroke-dasharray:var(--len,300);stroke-dashoffset:var(--len,300)}
+.anim-edge.in{animation:drawLine .8s ease forwards}
+.anim-pulse{animation:pulse 2.5s ease-in-out infinite}
+
+/* Print */
+@media print{
+  body{max-width:none;padding:24px;font-size:12px}
+  h1{font-size:24px}
+  h2{font-size:18px;margin-top:32px}
+  .hero{padding:20px;box-shadow:none;border:1px solid var(--line)}
+  .diagram-wrap{break-inside:avoid;box-shadow:none;padding:16px}
+  .feat{break-inside:avoid}
+  .tag-row .tag{border:1px solid #aaa;color:#333}
+  .anim-node,.anim-edge{animation:none!important;opacity:1!important;stroke-dashoffset:0!important}
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .anim-node{opacity:1}
+  .anim-edge{stroke-dashoffset:0}
+  .anim-node.in,.anim-edge.in{animation:none}
+  .anim-pulse{animation:none}
+  .feat:hover{transform:none}
+}
+
+/* No-JS fallback */
+.no-js .anim-node{opacity:1}
+.no-js .anim-edge{stroke-dashoffset:0}
+</style>
+</head>
+<body>
+<noscript><style>.anim-node{opacity:1}.anim-edge{stroke-dashoffset:0}</style></noscript>
+
+<section class="hero">
+  <h1>SVG Studio 架构概览</h1>
+  <p class="subtitle">十二幅透明画布研究，将矢量几何视作可编程媒介</p>
+  <p>SVG Studio 是一个基于浏览器的矢量可视化实验集。它以 <strong>Paper.js</strong> 构建精确几何，以 <strong>Rough.js</strong> 注入手绘质感，在一张 1400×900 的透明画布上输出 12 种风格各异的场景——从植物形态、地铁线路到系统拓扑，全部以参数化方式即时渲染。</p>
+  <div class="tag-row">
+    <span class="tag">Paper.js</span>
+    <span class="tag">Rough.js</span>
+    <span class="tag">TypeScript</span>
+    <span class="tag">Vite</span>
+    <span class="tag">Playwright</span>
+    <span class="tag">透明背景</span>
+    <span class="tag">参数化设计</span>
+  </div>
+</section>
+
+<h2>产品定位与核心特性</h2>
+<p>SVG Studio 不是一个应用或框架，而是一个<strong>矢量可视化研究作品集</strong>。每个场景都是一个独立的小实验，回答一个具体的设计问题：分层贝塞尔花瓣如何表达径向结构？合成公交系统在交叉处如何保持可读性？系统拓扑如何把服务、队列、存储组织成可观察的整体？</p>
+<p>项目的技术核心在于两条管线的融合：<strong>Paper.js</strong> 负责精确的路径数学（贝塞尔、布尔运算、平滑、等距投影），<strong>Rough.js</strong> 则为选定元素叠加手绘的粗糙纹理，形成"精确结构 + 有机质感"的视觉张力。</p>
+
+<div class="feat-grid">
+  <div class="feat">
+    <div class="feat-icon" style="background:rgba(47,179,165,.12);color:var(--teal)">◆</div>
+    <h4>12 个参数化场景</h4>
+    <p>覆盖有机几何、信息设计、科学图示、系统拓扑、等距城市等 10 个家族。</p>
+  </div>
+  <div class="feat">
+    <div class="feat-icon" style="background:rgba(238,107,122,.12);color:var(--coral)">◇</div>
+    <h4>透明画布输出</h4>
+    <p>画布背景完全透明，便于叠加在任意底色或素材上使用。</p>
+  </div>
+  <div class="feat">
+    <div class="feat-icon" style="background:rgba(91,138,214,.12);color:var(--blue)">◈</div>
+    <h4>双引擎渲染</h4>
+    <p>Paper.js 提供精准几何，Rough.js 提供手绘质感，按需切换。</p>
+  </div>
+  <div class="feat">
+    <div class="feat-icon" style="background:rgba(230,167,60,.12);color:var(--gold)">◉</div>
+    <h4>端到端视觉测试</h4>
+    <p>Playwright 无头渲染 + PNG 像素校验，确保透明、可见、色彩三指标达标。</p>
+  </div>
+  <div class="feat">
+    <div class="feat-icon" style="background:rgba(138,111,209,.12);color:var(--violet)">◎</div>
+    <h4>目录驱动</h4>
+    <p>catalog.json 记录每个场景的用途、问题、复杂度与标签，可外部索引。</p>
+  </div>
+  <div class="feat">
+    <div class="feat-icon" style="background:rgba(58,143,183,.12);color:var(--accent)">⬡</div>
+    <h4>交互契约</h4>
+    <p>指针移动/点击触发状态变更，测试管线验证交互确实生效。</p>
+  </div>
+</div>
+
+<h2>系统架构总览</h2>
+<p>SVG Studio 是一个典型的<strong>前端单页应用 + 自动化测试管线</strong>结构。运行时由 Vite 开发服务器将 TypeScript 源码编译后注入浏览器，浏览器端的 Paper.js 在 Canvas 上执行场景渲染。测试侧则由 Playwright 驱动无头 Chrome，逐场景截图并进行像素级质量校验。</p>
+
+<div class="diagram-wrap">
+  <div class="diagram-title">图 1 · 系统分层架构</div>
+  <svg class="diagram" viewBox="0 0 800 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="系统分层架构图">
+    <defs>
+      <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#eef7fa"/><stop offset="1" stop-color="#ffffff"/>
+      </linearGradient>
+    </defs>
+
+    <!-- 浏览器层 -->
+    <g class="layer-browser">
+      <rect x="40" y="30" width="720" height="120" rx="12" fill="url(#g1)" stroke="#c8dbe8" stroke-width="1"/>
+      <text x="60" y="55" font-size="12" font-weight="600" fill="#5b7a92" letter-spacing="1">浏览器运行时</text>
+
+      <g class="anim-node" data-delay="0">
+        <rect x="80" y="75" width="150" height="56" rx="8" fill="#fff" stroke="#2fb3a5" stroke-width="1.5"/>
+        <text x="155" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">Paper.js 引擎</text>
+        <text x="155" y="116" text-anchor="middle" font-size="11" fill="#7d93a8">路径 · 贝塞尔 · 平滑</text>
+      </g>
+
+      <g class="anim-node" data-delay="150">
+        <rect x="260" y="75" width="150" height="56" rx="8" fill="#fff" stroke="#ee6b7a" stroke-width="1.5"/>
+        <text x="335" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">Rough.js 引擎</text>
+        <text x="335" y="116" text-anchor="middle" font-size="11" fill="#7d93a8">手绘纹理 · 粗糙感</text>
+      </g>
+
+      <g class="anim-node" data-delay="300">
+        <rect x="440" y="75" width="150" height="56" rx="8" fill="#fff" stroke="#5b8ad6" stroke-width="1.5"/>
+        <text x="515" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">场景渲染器</text>
+        <text x="515" y="116" text-anchor="middle" font-size="11" fill="#7d93a8">12 个场景函数</text>
+      </g>
+
+      <g class="anim-node" data-delay="450">
+        <rect x="620" y="75" width="120" height="56" rx="8" fill="#fff" stroke="#e6a73c" stroke-width="1.5"/>
+        <text x="680" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">Canvas 画布</text>
+        <text x="680" y="116" text-anchor="middle" font-size="11" fill="#7d93a8">1400×900 透明</text>
+      </g>
+
+      <!-- 引擎间连线 -->
+      <path class="anim-edge" data-delay="700" d="M230 103 L260 103" stroke="#2fb3a5" stroke-width="1.5" fill="none" style="--len:30"/>
+      <path class="anim-edge" data-delay="800" d="M410 103 L440 103" stroke="#ee6b7a" stroke-width="1.5" fill="none" style="--len:30"/>
+      <path class="anim-edge" data-delay="900" d="M590 103 L620 103" stroke="#5b8ad6" stroke-width="1.5" fill="none" style="--len:30"/>
+    </g>
+
+    <!-- 构建层 -->
+    <g class="layer-build">
+      <rect x="40" y="180" width="720" height="100" rx="12" fill="url(#g1)" stroke="#c8dbe8" stroke-width="1"/>
+      <text x="60" y="205" font-size="12" font-weight="600" fill="#5b7a92" letter-spacing="1">构建与开发</text>
+
+      <g class="anim-node" data-delay="1000">
+        <rect x="80" y="220" width="150" height="44" rx="8" fill="#fff" stroke="#8a6fd1" stroke-width="1.5"/>
+        <text x="155" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">TypeScript 源码</text>
+      </g>
+
+      <g class="anim-node" data-delay="1150">
+        <rect x="260" y="220" width="150" height="44" rx="8" fill="#fff" stroke="#3a8fb7" stroke-width="1.5"/>
+        <text x="335" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">Vite 构建</text>
+      </g>
+
+      <g class="anim-node" data-delay="1300">
+        <rect x="440" y="220" width="150" height="44" rx="8" fill="#fff" stroke="#e6a73c" stroke-width="1.5"/>
+        <text x="515" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">catalog.json</text>
+        <text x="515" y="262" text-anchor="middle" font-size="10" fill="#7d93a8">场景元数据</text>
+      </g>
+
+      <g class="anim-node" data-delay="1450">
+        <rect x="620" y="220" width="120" height="44" rx="8" fill="#fff" stroke="#2fb3a5" stroke-width="1.5"/>
+        <text x="680" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">index.html</text>
+      </g>
+
+      <path class="anim-edge" data-delay="1600" d="M230 242 L260 242" stroke="#8a6fd1" stroke-width="1.5" fill="none" style="--len:30"/>
+      <path class="anim-edge" data-delay="1700" d="M410 242 L440 242" stroke="#3a8fb7" stroke-width="1.5" fill="none" style="--len:30"/>
+      <path class="anim-edge" data-delay="1800" d="M590 242 L620 242" stroke="#e6a73c" stroke-width="1.5" fill="none" style="--len:30"/>
+    </g>
+
+    <!-- 测试层 -->
+    <g class="layer-test">
+      <rect x="40" y="310" width="720" height="110" rx="12" fill="url(#g1)" stroke="#c8dbe8" stroke-width="1"/>
+      <text x="60" y="335" font-size="12" font-weight="600" fill="#5b7a92" letter-spacing="1">测试与验证</text>
+
+      <g class="anim-node" data-delay="1900">
+        <rect x="80" y="350" width="150" height="50" rx="8" fill="#fff" stroke="#ee6b7a" stroke-width="1.5"/>
+        <text x="155" y="372" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">Playwright</text>
+        <text x="155" y="390" text-anchor="middle" font-size="10" fill="#7d93a8">无头 Chrome 驱动</text>
+      </g>
+
+      <g class="anim-node" data-delay="2050">
+        <rect x="260" y="350" width="150" height="50" rx="8" fill="#fff" stroke="#5b8ad6" stroke-width="1.5"/>
+        <text x="335" y="372" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">capture.mjs</text>
+        <text x="335" y="390" text-anchor="middle" font-size="10" fill="#7d93a8">截图 + 交互验证</text>
+      </g>
+
+      <g class="anim-node" data-delay="2200">
+        <rect x="440" y="350" width="150" height="50" rx="8" fill="#fff" stroke="#2fb3a5" stroke-width="1.5"/>
+        <text x="515" y="372" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">PNG 像素校验</text>
+        <text x="515" y="390" text-anchor="middle" font-size="10" fill="#7d93a8">pngjs · 透明/可见/色彩</text>
+      </g>
+
+      <g class="anim-node" data-delay="2350">
+        <rect x="620" y="350" width="120" height="50" rx="8" fill="#fff" stroke="#e6a73c" stroke-width="1.5"/>
+        <text x="680" y="372" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">out/*.png</text>
+        <text x="680" y="390" text-anchor="middle" font-size="10" fill="#7d93a8">12 张透明截图</text>
+      </g>
+
+      <path class="anim-edge" data-delay="2500" d="M230 375 L260 375" stroke="#ee6b7a" stroke-width="1.5" fill="none" style="--len:30"/>
+      <path class="anim-edge" data-delay="2600" d="M410 375 L440 375" stroke="#5b8ad6" stroke-width="1.5" fill="none" style="--len:30"/>
+      <path class="anim-edge" data-delay="2700" d="M590 375 L620 375" stroke="#2fb3a5" stroke-width="1.5" fill="none" style="--len:30"/>
+    </g>
+
+    <!-- 垂直连线 -->
+    <path class="anim-edge" data-delay="2800" d="M400 150 L400 180" stroke="#c8dbe8" stroke-width="1.5" fill="none" stroke-dasharray="4 3" style="--len:30"/>
+    <path class="anim-edge" data-delay="2900" d="M400 280 L400 310" stroke="#c8dbe8" stroke-width="1.5" fill="none" stroke-dasharray="4 3" style="--len:30"/>
+  </svg>
+</div>
+
+<p>整个系统分为三层，各自职责清晰、边界明确：</p>
+<p><strong>浏览器运行时层</strong>是渲染的实际发生地。场景函数接收 URL 参数决定渲染哪个场景，调用 Paper.js 的路径、形状、文本 API 在 Canvas 上构建画面；少数场景（如 metro）还会叠加 Rough.js 的手绘外框。渲染完成后，设置 <code>window.__VIS_READY__</code> 标志位供测试方探测。</p>
+<p><strong>构建与开发层</strong>负责将 TypeScript 源码、静态 HTML 与场景元数据打包。Vite 提供开发服务器与生产构建，<code>catalog.json</code> 作为场景目录的单一数据源，既被测试脚本读取，也可供外部工具索引。</p>
+<p><strong>测试与验证层</strong>是项目的质量保障核心。Playwright 启动无头 Chrome，逐场景加载页面、等待就绪标志、截图保存，并通过 pngjs 对输出 PNG 进行像素级分析——验证透明像素比例、可见像素比例和彩色像素数量三道门槛，确保每幅画面都符合设计预期。</p>
+
+<div class="note">
+<b>设计要点：</b>测试管线的网络拦截策略很有意思——它会拦截所有非本地、非 data: 协议的请求，确保项目在完全离线的环境下仍能正常运行。这既验证了自包含性，也避免了任何意外的外部依赖。
+</div>
+
+<h2>渲染管线与场景机制</h2>
+<p>12 个场景共享同一套渲染骨架，但每个场景的内部逻辑完全独立。理解渲染管线有助于把握项目的扩展方式。</p>
+
+<div class="diagram-wrap">
+  <div class="diagram-title">图 2 · 场景渲染管线</div>
+  <svg class="diagram" viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="场景渲染管线图">
+    <defs>
+      <marker id="arrow1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0,0 L10,5 L0,10 Z" fill="#5b7a92"/>
+      </marker>
+    </defs>
+
+    <!-- 入口 -->
+    <g class="anim-node" data-delay="0">
+      <rect x="40" y="130" width="120" height="70" rx="10" fill="#fff" stroke="#3a8fb7" stroke-width="1.5"/>
+      <text x="100" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">URL 参数解析</text>
+      <text x="100" y="180" text-anchor="middle" font-size="11" fill="#7d93a8">?scene=xxx</text>
+    </g>
+
+    <!-- Paper 初始化 -->
+    <g class="anim-node" data-delay="200">
+      <rect x="200" y="130" width="120" height="70" rx="10" fill="#fff" stroke="#2fb3a5" stroke-width="1.5"/>
+      <text x="260" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">Paper.js 初始化</text>
+      <text x="260" y="180" text-anchor="middle" font-size="11" fill="#7d93a8">setup + clear</text>
+    </g>
+
+    <!-- 场景分发 -->
+    <g class="anim-node" data-delay="400">
+      <rect x="360" y="130" width="120" height="70" rx="10" fill="#fff" stroke="#8a6fd1" stroke-width="1.5"/>
+      <text x="420" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">场景分发</text>
+      <text x="420" y="180" text-anchor="middle" font-size="11" fill="#7d93a8">renderers 映射表</text>
+    </g>
+
+    <!-- 场景函数 -->
+    <g class="anim-node" data-delay="600">
+      <rect x="520" y="60" width="110" height="50" rx="8" fill="#fff" stroke="#ee6b7a" stroke-width="1.5"/>
+      <text x="575" y="82" text-anchor="middle" font-size="12" font-weight="600" fill="#1a2a3a">botanical</text>
+      <text x="575" y="100" text-anchor="middle" font-size="10" fill="#7d93a8">有机几何</text>
+
+      <rect x="520" y="120" width="110" height="50" rx="8" fill="#fff" stroke="#e6a73c" stroke-width="1.5"/>
+      <text x="575" y="142" text-anchor="middle" font-size="12" font-weight="600" fill="#1a2a3a">topology</text>
+      <text x="575" y="160" text-anchor="middle" font-size="10" fill="#7d93a8">系统拓扑</text>
+
+      <rect x="520" y="180" width="110" height="50" rx="8" fill="#fff" stroke="#5b8ad6" stroke-width="1.5"/>
+      <text x="575" y="202" text-anchor="middle" font-size="12" font-weight="600" fill="#1a2a3a">wave-lab</text>
+      <text x="575" y="220" text-anchor="middle" font-size="10" fill="#7d93a8">波动实验室</text>
+
+      <rect x="520" y="240" width="110" height="50" rx="8" fill="#fff" stroke="#2fb3a5" stroke-width="1.5"/>
+      <text x="575" y="262" text-anchor="middle" font-size="12" font-weight="600" fill="#1a2a3a">+9 more</text>
+      <text x="575" y="280" text-anchor="middle" font-size="10" fill="#7d93a8">地铁·轨道·分子…</text>
+    </g>
+
+    <!-- 输出 -->
+    <g class="anim-node" data-delay="800">
+      <rect x="680" y="130" width="90" height="70" rx="10" fill="#fff" stroke="#1a2a3a" stroke-width="1.5"/>
+      <text x="725" y="160" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">Canvas</text>
+      <text x="725" y="180" text-anchor="middle" font-size="11" fill="#7d93a8">渲染输出</text>
+    </g>
+
+    <!-- 箭头 -->
+    <path class="anim-edge" data-delay="1000" d="M160 165 L200 165" stroke="#5b7a92" stroke-width="1.5" fill="none" marker-end="url(#arrow1)" style="--len:40"/>
+    <path class="anim-edge" data-delay="1100" d="M320 165 L360 165" stroke="#5b7a92" stroke-width="1.5" fill="none" marker-end="url(#arrow1)" style="--len:40"/>
+    <path class="anim-edge" data-delay="1200" d="M480 145 L520 145" stroke="#ee6b7a" stroke-width="1.5" fill="none" marker-end="url(#arrow1)" style="--len:40"/>
+    <path class="anim-edge" data-delay="1300" d="M480 165 L520 165" stroke="#e6a73c" stroke-width="1.5" fill="none" marker-end="url(#arrow1)" style="--len:40"/>
+    <path class="anim-edge" data-delay="1400" d="M480 185 L520 205" stroke="#5b8ad6" stroke-width="1.5" fill="none" marker-end="url(#arrow1)" style="--len:50"/>
+    <path class="anim-edge" data-delay="1500" d="M480 205 L520 265" stroke="#2fb3a5" stroke-width="1.5" fill="none" marker-end="url(#arrow1)" style="--len:75"/>
+    <path class="anim-edge" data-delay="1600" d="M630 145 L680 165" stroke="#1a2a3a" stroke-width="1.5" fill="none" marker-end="url(#arrow1)" style="--len:55"/>
+    <path class="anim-edge" data-delay="1700" d="M630 205 L680 185" stroke="#1a2a3a" stroke-width="1.5" fill="none" marker-end="url(#arrow1)" style="--len:55"/>
+
+    <!-- 交互反馈 -->
+    <g class="anim-node" data-delay="1900">
+      <rect x="670" y="250" width="110" height="50" rx="8" fill="#fff" stroke="#e6a73c" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="725" y="272" text-anchor="middle" font-size="12" font-weight="600" fill="#1a2a3a">交互事件监听</text>
+      <text x="725" y="290" text-anchor="middle" font-size="10" fill="#7d93a8">pointermove / down</text>
+    </g>
+    <path class="anim-edge" data-delay="2000" d="M725 200 L725 250" stroke="#e6a73c" stroke-width="1.5" fill="none" stroke-dasharray="4 3" style="--len:50"/>
+  </svg>
+</div>
+
+<p>渲染流程是一条简洁的线性管线：</p>
+<p><strong>第一步，参数解析。</strong>页面加载后，从 URL 的 <code>scene</code> 查询参数中读取场景 ID。未提供时默认渲染 <code>botanical</code>，保证页面不会空白。</p>
+<p><strong>第二步，引擎初始化。</strong>调用 <code>paper.setup(canvas)</code> 将 Paper.js 绑定到 1400×900 的 Canvas 元素，然后清空项目画布，确保每次渲染都是干净的起点。</p>
+<p><strong>第三步，场景分发。</strong>一个名为 <code>renderers</code> 的对象字面量作为分发表，将场景 ID 映射到对应的渲染函数。新增场景只需在表中注册即可，无需修改调用方。</p>
+<p><strong>第四步，场景执行。</strong>每个场景函数内部独立构建自己的几何——贝塞尔花瓣、地铁线路、轨道椭圆、拓扑节点……都使用 Paper.js 提供的 Path、Circle、Rectangle、PointText 等基元。函数内还定义了两个公共辅助：<code>line()</code> 用于绘制带平滑的折线，<code>label()</code> 用于放置统一样式的文本标签。</p>
+<p><strong>第五步，视图更新与就绪标记。</strong>调用 <code>paper.view.update()</code> 触发渲染，然后将 <code>window.__VIS_READY__</code> 置为 <code>true</code>。这个标记是测试脚本的同步信号——没有它，测试就不知道什么时候该截图。</p>
+<p>此外，画布还监听了 <code>pointermove</code> 和 <code>pointerdown</code> 事件，每次交互都会递增 <code>__INTERACTION_COUNT__</code> 计数。测试管线会模拟鼠标移动后检查计数是否增长，以验证交互契约确实被触发。</p>
+
+<h2>主走查：场景渲染与测试闭环</h2>
+<p>我们选择"<strong>拓扑图渲染测试</strong>"作为端到端走查场景。这个场景覆盖了项目最核心的运转路径：从测试脚本启动，到浏览器渲染一幅系统拓扑图，再到截图保存与像素校验——完整走通开发、构建、渲染、验证四个环节。</p>
+
+<ol class="walk-steps">
+  <li>
+    <b>启动 Vite 开发服务器</b><br>
+    <span>测试脚本 <code>capture.mjs</code> 以子进程方式启动 Vite，监听 127.0.0.1:4173。它扫描 stdout 中的"Local:"字样来确认服务就绪，超时 15 秒则报错退出。</span>
+  </li>
+  <li>
+    <b>无头浏览器加载拓扑场景</b><br>
+    <span>Playwright 启动无头 Chrome，打开 <code>/index.html?scene=topology</code>。网络拦截层确保所有外部请求被阻断，仅放行本地与 data: 协议，验证项目自包含。</span>
+  </li>
+  <li>
+    <b>Paper.js 绘制系统拓扑</b><br>
+    <span>浏览器端执行 <code>topology()</code> 函数：绘制三个分组框（EDGE / STREAM / PRODUCTS）、八个节点矩形、八条连接线，以及底部的状态指示点。渲染完成后设置 <code>__VIS_READY__</code>。</span>
+  </li>
+  <li>
+    <b>截图与交互验证</b><br>
+    <span>测试脚本等待就绪标志，对 <code>#stage</code> 画布以 <code>omitBackground</code> 模式截图保存为 PNG。随后模拟鼠标移动，读取 <code>__INTERACTION_COUNT__</code> 确认交互事件被触发。</span>
+  </li>
+  <li>
+    <b>像素级质量校验</b><br>
+    <span>pngjs 读取 PNG 数据，逐像素统计：透明像素占比 &gt; 8%、可见像素占比 &gt; 3.5%、彩色像素数 &gt; 2500。三项全部达标才算通过，否则抛出错误终止测试。</span>
+  </li>
+</ol>
+
+<div class="note">
+<b>为什么是这三道门槛？</b>透明像素比例确保画布确实是透明背景而非填充底色；可见像素比例确保画面不是几乎全空；彩色像素数则防止意外的灰度退化或严重褪色。三者结合，形成了一个轻量但有效的视觉回归防线。
+</div>
+
+<h2>场景目录与家族</h2>
+<p>12 个场景分布在 10 个设计家族中，每个场景都回答一个独立的设计问题。<code>catalog.json</code> 是场景目录的单一数据源，记录了用途、核心问题、所属家族、复杂度和标签。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>场景</th>
+      <th>家族</th>
+      <th>设计问题</th>
+      <th>核心技术</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>botanical</td><td>有机几何</td><td>分层贝塞尔花瓣如何表达径向结构？</td><td>贝塞尔曲线 · 极坐标</td></tr>
+    <tr><td>metro</td><td>信息设计</td><td>合成公交系统在交叉处如何保持可读性？</td><td>折线平滑 · Rough.js</td></tr>
+    <tr><td>orbits</td><td>科学图示</td><td>嵌套轨道族如何展示共振与偏心率？</td><td>椭圆旋转 · 渐变</td></tr>
+    <tr><td>topology</td><td>系统图示</td><td>服务、队列、存储如何形成可观察拓扑？</td><td>分组框 · 连接线</td></tr>
+    <tr><td>isometric-city</td><td>空间图示</td><td>等距街区如何传达层次与流线？</td><td>等距投影 · 体块</td></tr>
+    <tr><td>wave-lab</td><td>科学仪表盘</td><td>四种视图如何解释同一个耦合振荡器？</td><td>小多图 · 波形</td></tr>
+    <tr><td>contour-map</td><td>制图学</td><td>路线、等高线、地标如何无底图共存？</td><td>等高线 · 极坐标扰动</td></tr>
+    <tr><td>circuit</td><td>技术原理图</td><td>信号如何流过模拟合成器声部？</td><td>模块框 · 信号流</td></tr>
+    <tr><td>timeline</td><td>叙事</td><td>任务时间线如何暴露并行与依赖？</td><td>泳道 · 时间条</td></tr>
+    <tr><td>molecule</td><td>科学图示</td><td>键合几何与官能团如何一目了然？</td><td>分子图 · 椭圆云</td></tr>
+    <tr><td>loom</td><td>生成矢量</td><td>交叉织带如何揭示可重复的编织文法？</td><td>参数波动 · 遮罩</td></tr>
+    <tr><td>type-system</td><td>编辑图形</td><td>模块化字号系统如何成为可复用海报？</td><td>排版网格 · 字号梯</td></tr>
+  </tbody>
+</table>
+
+<h2>测试与质量保障</h2>
+<p>SVG Studio 的测试策略是<strong>视觉回归测试</strong>的一个轻量实现。它不做图像对比（screenshot diff），而是做像素级健康度检查——这种设计取舍很符合一个研究型项目的定位：不需要精确到像素的回归，只需要确保每个场景都有实质性的、彩色的、透明背景的输出。</p>
+
+<div class="diagram-wrap">
+  <div class="diagram-title">图 3 · 测试校验流程</div>
+  <svg class="diagram" viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="测试校验流程图">
+    <defs>
+      <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0,0 L10,5 L0,10 Z" fill="#5b7a92"/>
+      </marker>
+    </defs>
+
+    <g class="anim-node" data-delay="0">
+      <rect x="40" y="100" width="130" height="80" rx="10" fill="#fff" stroke="#3a8fb7" stroke-width="1.5"/>
+      <text x="105" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">加载场景</text>
+      <text x="105" y="150" text-anchor="middle" font-size="11" fill="#7d93a8">networkidle</text>
+      <text x="105" y="168" text-anchor="middle" font-size="11" fill="#7d93a8">+ __VIS_READY__</text>
+    </g>
+
+    <g class="anim-node" data-delay="150">
+      <rect x="210" y="100" width="130" height="80" rx="10" fill="#fff" stroke="#2fb3a5" stroke-width="1.5"/>
+      <text x="275" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">透明截图</text>
+      <text x="275" y="150" text-anchor="middle" font-size="11" fill="#7d93a8">omitBackground</text>
+      <text x="275" y="168" text-anchor="middle" font-size="11" fill="#7d93a8">→ out/*.png</text>
+    </g>
+
+    <g class="anim-node" data-delay="300">
+      <rect x="380" y="100" width="130" height="80" rx="10" fill="#fff" stroke="#e6a73c" stroke-width="1.5"/>
+      <text x="445" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">交互验证</text>
+      <text x="445" y="150" text-anchor="middle" font-size="11" fill="#7d93a8">鼠标移动</text>
+      <text x="445" y="168" text-anchor="middle" font-size="11" fill="#7d93a8">→ 计数增长</text>
+    </g>
+
+    <g class="anim-node" data-delay="450">
+      <rect x="550" y="100" width="130" height="80" rx="10" fill="#fff" stroke="#ee6b7a" stroke-width="1.5"/>
+      <text x="615" y="130" text-anchor="middle" font-size="13" font-weight="600" fill="#1a2a3a">像素分析</text>
+      <text x="615" y="150" text-anchor="middle" font-size="11" fill="#7d93a8">pngjs 逐像素</text>
+      <text x="615" y="168" text-anchor="middle" font-size="11" fill="#7d93a8">t / v / c 统计</text>
+    </g>
+
+    <g class="anim-node" data-delay="600">
+      <rect x="720" y="100" width="60" height="80" rx="10" fill="#fff" stroke="#8a6fd1" stroke-width="1.5"/>
+      <text x="750" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#1a2a3a">通过</text>
+      <text x="750" y="150" text-anchor="middle" font-size="10" fill="#7d93a8">/</text>
+      <text x="750" y="170" text-anchor="middle" font-size="12" font-weight="600" fill="#ee6b7a">失败</text>
+    </g>
+
+    <path class="anim-edge" data-delay="800" d="M170 140 L210 140" stroke="#5b7a92" stroke-width="1.5" fill="none" marker-end="url(#arrow2)" style="--len:40"/>
+    <path class="anim-edge" data-delay="900" d="M340 140 L380 140" stroke="#5b7a92" stroke-width="1.5" fill="none" marker-end="url(#arrow2)" style="--len:40"/>
+    <path class="anim-edge" data-delay="1000" d="M510 140 L550 140" stroke="#5b7a92" stroke-width="1.5" fill="none" marker-end="url(#arrow2)" style="--len:40"/>
+    <path class="anim-edge" data-delay="1100" d="M680 140 L720 140" stroke="#5b7a92" stroke-width="1.5" fill="none" marker-end="url(#arrow2)" style="--len:40"/>
+
+    <!-- 三指标图标 -->
+    <g class="anim-node" data-delay="1200">
+      <circle cx="615" cy="220" r="22" fill="rgba(47,179,165,.12)" stroke="#2fb3a5" stroke-width="1.5"/>
+      <text x="615" y="224" text-anchor="middle" font-size="11" font-weight="600" fill="#2fb3a5">透</text>
+      <text x="615" y="258" text-anchor="middle" font-size="10" fill="#7d93a8">&gt; 8%</text>
+    </g>
+    <g class="anim-node" data-delay="1300">
+      <circle cx="675" cy="220" r="22" fill="rgba(91,138,214,.12)" stroke="#5b8ad6" stroke-width="1.5"/>
+      <text x="675" y="224" text-anchor="middle" font-size="11" font-weight="600" fill="#5b8ad6">见</text>
+      <text x="675" y="258" text-anchor="middle" font-size="10" fill="#7d93a8">&gt; 3.5%</text>
+    </g>
+    <g class="anim-node" data-delay="1400">
+      <circle cx="735" cy="220" r="22" fill="rgba(238,107,122,.12)" stroke="#ee6b7a" stroke-width="1.5"/>
+      <text x="735" y="224" text-anchor="middle" font-size="11" font-weight="600" fill="#ee6b7a">彩</text>
+      <text x="735" y="258" text-anchor="middle" font-size="10" fill="#7d93a8">&gt; 2500</text>
+    </g>
+
+    <path class="anim-edge" data-delay="1500" d="M615 180 L615 200" stroke="#2fb3a5" stroke-width="1.5" fill="none" stroke-dasharray="3 2" style="--len:20"/>
+  </svg>
+</div>
+
+<p>测试管线的每个环节都有明确的校验点：</p>
+<p><strong>加载阶段</strong>使用 <code>waitUntil:'networkidle'</code> 确保网络请求完成，再用 <code>waitForFunction</code> 等待 <code>__VIS_READY__</code> 标志，双重保证场景确实渲染完毕。超时阈值 15 秒。</p>
+<p><strong>截图阶段</strong>使用 Playwright 内置的 <code>omitBackground</code> 选项，让 PNG 保留透明通道而非填充白色。这是透明背景输出的关键开关。</p>
+<p><strong>交互验证阶段</strong>先读取交互计数，模拟两次鼠标移动，再读取计数并断言增长。这个机制确保了画布的指针事件监听没有意外失效。</p>
+<p><strong>像素分析阶段</strong>是质量的最后一道关。它使用 pngjs 读取 PNG 原始像素数据，按 RGBA 四通道逐像素判断：alpha 为 0 计入透明、alpha 大于 20 计入可见、可见像素中 RGB 最大最小之差超过 24 计入彩色。三项指标全部达标才通过。</p>
+
+<h2>扩展方式与设计边界</h2>
+<p>作为一个研究型项目，SVG Studio 的扩展路径非常清晰：</p>
+<p><strong>新增场景</strong>只需三步——在 <code>src/main.ts</code> 中编写场景函数，在 <code>renderers</code> 映射表中注册 ID，再在 <code>catalog.json</code> 中补充元数据。测试管线会自动遍历所有目录场景，无需修改测试代码。</p>
+<p><strong>新增渲染引擎</strong>的成本稍高。当前 Paper.js 是主力引擎，Rough.js 作为补充以"叠加绘制"的方式存在（在同一 Canvas 上二次绘制）。若要引入新的矢量库，需要考虑坐标系对齐与 z-order 穿插的问题。</p>
+
+<div class="note">
+<b>边界说明：</b>这个项目的定位是"可视化研究集"而非"可复用组件库"。场景之间不共享复杂逻辑，也没有抽象出场景基类或插件系统。每个场景都是自包含的函数，这种极简设计使实验成本很低——想试一个新点子，写一个函数就行，不需要理解任何框架约束。
+</div>
+
+<h2>技术栈清单</h2>
+<table>
+  <thead>
+    <tr><th>类别</th><th>技术</th><th>版本</th><th>用途</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>几何引擎</td><td>Paper.js</td><td>0.12.18</td><td>矢量路径、贝塞尔、布尔运算、文本</td></tr>
+    <tr><td>手绘纹理</td><td>Rough.js</td><td>4.6.6</td><td>粗糙感边框、手绘风格叠加</td></tr>
+    <tr><td>语言</td><td>TypeScript</td><td>5.9.3</td><td>类型安全的场景代码</td></tr>
+    <tr><td>构建工具</td><td>Vite</td><td>8.2.2</td><td>开发服务器与生产打包</td></tr>
+    <tr><td>浏览器自动化</td><td>Playwright Core</td><td>1.62.1</td><td>无头 Chrome 驱动与截图</td></tr>
+    <tr><td>PNG 解析</td><td>pngjs</td><td>7.0.0</td><td>像素级图像质量校验</td></tr>
+    <tr><td>Node 类型</td><td>@types/node</td><td>26.0.0</td><td>脚本的 TypeScript 类型</td></tr>
+  </tbody>
+</table>
+
+<footer>
+  SVG Studio · 架构文档 · 生成于 2026-08-24
+</footer>
+
+<script>
+(function(){
+  // 如果 prefers-reduced-motion，直接显示全部
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.anim-node, .anim-edge').forEach(function(el){
+      el.classList.add('in');
+    });
+    return;
+  }
+
+  // IntersectionObserver 触发动画
+  var nodes = document.querySelectorAll('.anim-node, .anim-edge');
+  function getDelay(el){
+    var d = el.getAttribute('data-delay');
+    return d ? parseInt(d,10) : 0;
+  }
+
+  function handleIntersection(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting){
+        var target = entry.target;
+        var delay = getDelay(target);
+        setTimeout(function(){
+          target.classList.add('in');
+        }, delay);
+        observer.unobserve(target);
+      }
+    });
+  }
+
+  var observer = new IntersectionObserver(handleIntersection, {threshold: 0.15});
+  nodes.forEach(function(el){ observer.observe(el); });
+
+  // 兜底：2 秒后强制显示所有未触发的元素
+  setTimeout(function(){
+    document.querySelectorAll('.anim-node:not(.in), .anim-edge:not(.in)').forEach(function(el){
+      el.classList.add('in');
+    });
+  }, 2000);
+})();
+</script>
+</body>
+</html>

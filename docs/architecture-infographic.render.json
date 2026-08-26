@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "project": "svg-studio",
+  "project_path": "~/projects/plot/svg-studio",
+  "infographic_id": "architecture-infographic",
+  "output_dir": "~/projects/plot/svg-studio/docs",
+  "language": "zh-CN",
+  "thesis": "十二个透明画布研究将矢量几何作为可编程媒介：Paper.js 构建精确几何，Rough.js 注入手绘质感，Playwright 做端到端像素级验证。",
+  "reader_question": "SVG Studio 是什么、包含哪些场景、技术上如何构建与验证？",
+  "narrative_sections": [
+    {
+      "id": "title",
+      "role": "hero_title",
+      "claim": "十二个透明画布，将矢量几何作为可编程媒介",
+      "evidence": "README.md: Twelve transparent-canvas studies that treat vector geometry as a programmable medium."
+    },
+    {
+      "id": "scene-gallery",
+      "role": "main_evidence",
+      "claim": "12 个场景覆盖 9 大家族：从有机几何到信息设计，从科学图示到编排图形",
+      "evidence": "catalog.json 中 12 条记录，9 个不同 family 值",
+      "scenes": [
+        "botanical", "metro", "orbits", "topology",
+        "isometric-city", "wave-lab", "contour-map", "circuit",
+        "timeline", "molecule", "loom", "type-system"
+      ]
+    },
+    {
+      "id": "render-pipeline",
+      "role": "mechanism",
+      "claim": "5 步渲染管道：URL 选场景 → Paper.js 几何 → Rough.js 质感 → Canvas 渲染 → 透明 PNG 导出",
+      "evidence": "src/main.ts: paper.setup(canvas) + rough.canvas(canvas); scripts/capture.mjs: omitBackground screenshot"
+    },
+    {
+      "id": "code-structure",
+      "role": "implementation",
+      "claim": "12 个渲染函数通过查找表分发，单文件 main.ts 集中管理",
+      "evidence": "src/main.ts: renderers 记录 12 个函数，(renderers[scene] ?? botanical)()"
+    },
+    {
+      "id": "verification",
+      "role": "quality",
+      "claim": "像素级验证流水线：Vite 构建 → Playwright 断网加载 → 交互触发 → pngjs 像素统计断言",
+      "evidence": "scripts/capture.mjs: chromium headless, route abort 非 localhost, pngjs 透明/可见/彩色像素统计"
+    },
+    {
+      "id": "project-structure",
+      "role": "reference",
+      "claim": "项目含 src/、scripts/、out/、catalog.json，依赖 paper、roughjs、vite、playwright-core",
+      "evidence": "package.json 与目录列表"
+    }
+  ],
+  "visual_contract": {
+    "audience": "对矢量图形、生成艺术、前端可视化感兴趣的开发者与设计师",
+    "medium": "静态矢量图（TikZ 源 → PDF/SVG/PNG）",
+    "palette": "深空蓝背景 + 青绿/蓝/金/珊瑚/紫五色家族，呼应项目本身配色",
+    "layout": "纵向叙事：标题 → 场景家族图谱（主视觉） → 渲染管道 → 代码结构 + 验证流水线（双栏） → 项目结构与依赖",
+    "dimensions_px": {
+      "png": "1172x1635",
+      "density_dpi": 150
+    }
+  },
+  "backend": {
+    "compositor": "TikZ/PGF (XeLaTeX + ctex)",
+    "fonts": ["Source Han Serif SC", "Sarasa Mono SC"],
+    "render_commands": [
+      "xelatex -interaction=nonstopmode architecture-infographic.tex",
+      "pdf2svg architecture-infographic.pdf architecture-infographic.svg",
+      "pdftoppm -png -r 150 architecture-infographic.pdf architecture-infographic"
+    ]
+  },
+  "artifacts": {
+    "source": {
+      "file": "architecture-infographic.tex",
+      "size_bytes": 17521,
+      "editable": true,
+      "description": "TikZ/PGF 可编辑源文件，含完整中文排版与语义样式"
+    },
+    "pdf": {
+      "file": "architecture-infographic.pdf",
+      "size_bytes": 163543,
+      "format": "PDF 1.5",
+      "vector": true,
+      "font_embedded": true
+    },
+    "svg": {
+      "file": "architecture-infographic.svg",
+      "size_bytes": 1199728,
+      "format": "SVG 1.1",
+      "vector": true,
+      "converted_from": "PDF via pdf2svg"
+    },
+    "png": {
+      "file": "architecture-infographic.png",
+      "size_bytes": 359988,
+      "format": "PNG",
+      "dimensions": "1172x1635",
+      "dpi": 150,
+      "converted_from": "PDF via pdftoppm"
+    }
+  },
+  "verification": {
+    "compiled": true,
+    "xelatex_no_errors": true,
+    "pdf_valid": true,
+    "svg_valid": true,
+    "png_rendered": true,
+    "cjk_glyphs": "Source Han Serif SC 嵌入",
+    "visual_inspection": "已通过缩略图与完整图检查，无文字裁切、无元素重叠、层次清晰"
+  },
+  "provenance": {
+    "sourced_from": [
+      "README.md — 项目概述与场景清单",
+      "catalog.json — 12 场景元数据（id/family/use/question/complexity/tags）",
+      "src/main.ts — 渲染管道、12 个场景函数、分发逻辑",
+      "scripts/capture.mjs — Playwright 测试流水线与像素断言",
+      "package.json — 依赖与脚本"
+    ],
+    "generated_date": "2026-08-24"
+  }
+}
