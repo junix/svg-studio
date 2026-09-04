@@ -1,0 +1,227 @@
+<svg id="stage" xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="library-title library-desc">
+  <title id="library-title">SVG 箭头组件体系</title>
+  <desc id="library-desc">十六种可复用箭头组件：八种由路径和 marker 组成的线型箭头，以及八种由实心几何拼接的 Powerline 风格 segment 接头。</desc>
+  <style>
+    :root { color-scheme: dark; }
+    text { font-family: "Avenir Next", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+    .eyebrow { fill: #6f91a9; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+    .heading { fill: #f2f8ff; font-size: 30px; font-weight: 700; }
+    .subheading { fill: #91aabd; font-size: 13px; font-weight: 500; }
+    .readout { fill: #c9d9e7; font-size: 13px; font-weight: 600; }
+    .legend-pill { fill: #10233a; stroke: #2d4d68; stroke-width: 1; }
+    .legend-text { fill: #aac0d1; font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+    .arrow-component { cursor: pointer; outline: none; }
+    .card { fill: #0f1d31; fill-opacity: .88; stroke: #29455f; stroke-width: 1; transition: stroke .15s ease, fill-opacity .15s ease; }
+    .arrow-component:hover > .card, .arrow-component:focus > .card, .arrow-component.is-active > .card { fill-opacity: .98; stroke: #58d6c8; stroke-width: 1.5; }
+    .card-id { fill: #58d6c8; font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+    .power-id { fill: #ffd166; }
+    .card-title { fill: #edf6ff; font-size: 14px; font-weight: 650; }
+    .card-meta { fill: #6f8ca3; font-size: 9.5px; font-weight: 700; letter-spacing: .08em; }
+    .arrow { fill: none; stroke: #58d6c8; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .blue { stroke: #7fa6ff; }
+    .gold { stroke: #ffd166; }
+    .coral { stroke: #ff718d; }
+    .purple { stroke: #b891ff; }
+    .label-guide { fill: none; stroke: none; }
+    .edge-label { fill: #e4eef8; font-size: 11.5px; font-weight: 650; }
+    .edge-label-small { fill: #b7cad9; font-size: 10px; font-weight: 650; letter-spacing: .04em; }
+    .mask { fill: #0f1d31; }
+    .chip { fill: #162b45; stroke: #3a607e; stroke-width: 1; }
+    .segment-label { fill: #f7fbff; font-size: 11px; font-weight: 750; letter-spacing: .03em; }
+    .footer { fill: #7897ad; font-size: 11px; font-weight: 650; letter-spacing: .05em; }
+  </style>
+
+  <defs>
+    <marker id="ac-filled-teal" viewBox="-1.5 -1.5 14 13" markerWidth="14" markerHeight="13" refX="11" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse" overflow="visible">
+      <path d="M0 0 11 5 0 10 2.8 5Z" fill="#58d6c8"/>
+    </marker>
+    <marker id="ac-stealth-blue" viewBox="-1.5 -1.5 15 13" markerWidth="15" markerHeight="13" refX="12" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse" overflow="visible">
+      <path d="M0 0 12 5 0 10 3.4 5Z" fill="#7fa6ff"/>
+    </marker>
+    <marker id="ac-open-gold" viewBox="-2 -2 14 14" markerWidth="14" markerHeight="14" refX="10" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse" overflow="visible">
+      <path d="M0 0 10 5 0 10" fill="none" stroke="#ffd166" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="ac-filled-coral" viewBox="-1.5 -1.5 14 13" markerWidth="14" markerHeight="13" refX="11" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse" overflow="visible">
+      <path d="M0 0 11 5 0 10 2.8 5Z" fill="#ff718d"/>
+    </marker>
+    <marker id="ac-filled-purple" viewBox="-1.5 -1.5 14 13" markerWidth="14" markerHeight="13" refX="11" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse" overflow="visible">
+      <path d="M0 0 11 5 0 10 2.8 5Z" fill="#b891ff"/>
+    </marker>
+    <linearGradient id="ac-terminal-gradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7fa6ff"/><stop offset="1" stop-color="#b891ff"/>
+    </linearGradient>
+    <clipPath id="ac-strip-clip" clipPathUnits="userSpaceOnUse">
+      <rect x="24" y="82" width="272" height="44" rx="10"/>
+    </clipPath>
+  </defs>
+
+  <g aria-hidden="true">
+    <text class="eyebrow" x="42" y="34">SVG STUDIO / REFERENCE 15</text>
+    <text class="heading" x="42" y="72">箭头组件体系：路径终端 × 块状接头</text>
+    <text class="subheading" x="43" y="100">S 系列用 path + marker；P 系列用重叠的 rect + path / polygon。不要用字体箭头代替几何。</text>
+    <rect class="legend-pill" x="1016" y="28" width="150" height="28" rx="14"/>
+    <circle cx="1035" cy="42" r="4" fill="#58d6c8"/><text class="legend-text" x="1047" y="46">S / STROKE</text>
+    <rect class="legend-pill" x="1176" y="28" width="182" height="28" rx="14"/>
+    <circle cx="1195" cy="42" r="4" fill="#ffd166"/><text class="legend-text" x="1207" y="46">P / POWERLINE</text>
+    <text id="selected-readout" class="readout" x="1358" y="92" text-anchor="end">S01 · 流程 / 因果 / 同轴连接</text>
+  </g>
+
+  <g id="component-S01" class="arrow-component is-active" transform="translate(42 132)" role="button" tabindex="0" aria-labelledby="title-S01 desc-S01" data-id="S01" data-system="stroke" data-primitive="line-marker" data-use="流程 / 因果 / 同轴连接">
+    <title id="title-S01">S01 轴向直线</title><desc id="desc-S01">一条水平 line 使用 marker-end 自动连接实心箭头，标签与线保持二十二单位的净距。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id" x="18" y="25">S01</text><text class="card-title" x="57" y="25">轴向直线</text><text class="card-meta" x="302" y="24" text-anchor="end">LINE + MARKER</text>
+    <line class="arrow" x1="25" y1="120" x2="294" y2="120" marker-end="url(#ac-filled-teal)"/>
+    <rect class="mask" x="96" y="76" width="128" height="22" rx="4"/><text class="edge-label" x="160" y="91" text-anchor="middle">submit / 提交任务</text>
+  </g>
+
+  <g id="component-S02" class="arrow-component" transform="translate(375 132)" role="button" tabindex="0" aria-labelledby="title-S02 desc-S02" data-id="S02" data-system="stroke" data-primitive="rounded-path-marker" data-use="流程图 / 端口路由">
+    <title id="title-S02">S02 圆角流程折线</title><desc id="desc-S02">Path 使用两个八单位二次曲线完成正交转角，再挂接自动定向箭头。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id" x="18" y="25">S02</text><text class="card-title" x="57" y="25">圆角流程折线</text><text class="card-meta" x="302" y="24" text-anchor="end">PATH · R=8</text>
+    <path class="arrow blue" d="M25 126H102Q110 126 110 118V92Q110 84 118 84H294" marker-end="url(#ac-stealth-blue)"/>
+    <rect class="mask" x="150" y="50" width="106" height="22" rx="4"/><text class="edge-label-small" x="203" y="65" text-anchor="middle">route / 路由</text>
+  </g>
+
+  <g id="component-S03" class="arrow-component" transform="translate(708 132)" role="button" tabindex="0" aria-labelledby="title-S03 desc-S03" data-id="S03" data-system="stroke" data-primitive="quadratic-path-marker" data-use="单弓形关系 / 柔和映射">
+    <title id="title-S03">S03 二次弧线</title><desc id="desc-S03">单控制点 Q 曲线与独立偏移的文字引导路径。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id" x="18" y="25">S03</text><text class="card-title" x="57" y="25">二次弧线</text><text class="card-meta" x="302" y="24" text-anchor="end">Q CURVE</text>
+    <path class="arrow purple" d="M25 130Q160 66 294 130" marker-end="url(#ac-filled-purple)"/>
+    <path id="label-guide-S03" class="label-guide" d="M25 130Q160 66 294 130" transform="translate(0 -15)"/>
+    <text class="edge-label-small"><textPath href="#label-guide-S03" startOffset="50%" text-anchor="middle">soft mapping / 柔和映射</textPath></text>
+  </g>
+
+  <g id="component-S04" class="arrow-component" transform="translate(1041 132)" role="button" tabindex="0" aria-labelledby="title-S04 desc-S04" data-id="S04" data-system="stroke" data-primitive="cubic-path-marker" data-use="独立控制入射与出射切线">
+    <title id="title-S04">S04 三次弧线</title><desc id="desc-S04">两个控制点分别控制曲线起点和终点的切线，终端朝向稳定。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id" x="18" y="25">S04</text><text class="card-title" x="57" y="25">三次弧线</text><text class="card-meta" x="302" y="24" text-anchor="end">C CURVE</text>
+    <path class="arrow coral" d="M25 130C82 70 231 70 294 130" marker-end="url(#ac-filled-coral)"/>
+    <rect class="mask" x="103" y="43" width="114" height="22" rx="4"/><text class="edge-label-small" x="160" y="58" text-anchor="middle">stable tangent</text>
+  </g>
+
+  <g id="component-S05" class="arrow-component" transform="translate(42 304)" role="button" tabindex="0" aria-labelledby="title-S05 desc-S05" data-id="S05" data-system="stroke" data-primitive="arc-path-marker" data-use="半圆 / 环绕 / 弧形流程">
+    <title id="title-S05">S05 规整圆弧</title><desc id="desc-S05">椭圆弧 A 命令创建尺寸稳定的半圆关系，标签放在弧内空白区。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id" x="18" y="25">S05</text><text class="card-title" x="57" y="25">规整圆弧</text><text class="card-meta" x="302" y="24" text-anchor="end">A RX RY</text>
+    <path class="arrow gold" d="M38 132A122 70 0 0 1 282 132" marker-end="url(#ac-open-gold)"/>
+    <rect class="mask" x="111" y="98" width="98" height="22" rx="4"/><text class="edge-label-small" x="160" y="113" text-anchor="middle">arc 0 0 1</text>
+  </g>
+
+  <g id="component-S06" class="arrow-component" transform="translate(375 304)" role="button" tabindex="0" aria-labelledby="title-S06 desc-S06" data-id="S06" data-system="stroke" data-primitive="segmented-loop-marker" data-use="循环 / 刷新 / 持续过程">
+    <title id="title-S06">S06 分段环形箭头</title><desc id="desc-S06">四十二度顶部缺口由角度计算得到，其余三百一十八度拆成两段小于一百八十度的 A 命令。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id" x="18" y="25">S06</text><text class="card-title" x="57" y="25">分段环形箭头</text><text class="card-meta" x="302" y="24" text-anchor="end">42° GAP · 2A</text>
+    <path class="arrow" d="M176.5 54.1A46 46 0 0 1 160 143A46 46 0 0 1 143.5 54.1" marker-end="url(#ac-filled-teal)"/>
+    <text class="edge-label-small" x="160" y="101" text-anchor="middle">loop</text>
+  </g>
+
+  <g id="component-S07" class="arrow-component" transform="translate(708 304)" role="button" tabindex="0" aria-labelledby="title-S07 desc-S07" data-id="S07" data-system="stroke" data-primitive="return-arc-marker" data-use="撤销 / 回退 / 逆向循环">
+    <title id="title-S07">S07 逆时针回转</title><desc id="desc-S07">Sweep flag 为零的长弧表达返回和撤销方向。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id" x="18" y="25">S07</text><text class="card-title" x="57" y="25">逆时针回转</text><text class="card-meta" x="302" y="24" text-anchor="end">SWEEP = 0</text>
+    <path class="arrow blue" d="M251 75A76 54 0 1 0 86 124" marker-end="url(#ac-stealth-blue)"/>
+    <rect class="mask" x="119" y="84" width="84" height="22" rx="4"/><text class="edge-label-small" x="161" y="99" text-anchor="middle">undo / 回退</text>
+  </g>
+
+  <g id="component-S08" class="arrow-component" transform="translate(1041 304)" role="button" tabindex="0" aria-labelledby="title-S08 desc-S08" data-id="S08" data-system="stroke" data-primitive="split-ring-marker" data-use="同步 / 刷新 / 双阶段循环">
+    <title id="title-S08">S08 双弧刷新</title><desc id="desc-S08">两段方向一致、端点分离的圆弧组成刷新符号，避免完整圆首尾重叠。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id" x="18" y="25">S08</text><text class="card-title" x="57" y="25">双弧刷新</text><text class="card-meta" x="302" y="24" text-anchor="end">SPLIT RING</text>
+    <path class="arrow gold" d="M122 65A50 50 0 0 1 211 85" marker-end="url(#ac-open-gold)"/>
+    <path class="arrow coral" d="M198 132A50 50 0 0 1 109 112" marker-end="url(#ac-filled-coral)"/>
+    <text class="edge-label-small" x="160" y="103" text-anchor="middle">sync</text>
+  </g>
+
+  <g id="component-P01" class="arrow-component" transform="translate(42 476)" role="button" tabindex="0" aria-labelledby="title-P01 desc-P01" data-id="P01" data-system="segment" data-primitive="rect-polygon" data-use="终端提示符 / 状态段">
+    <title id="title-P01">P01 经典 Powerline</title><desc id="desc-P01">右侧色块完整铺底，左侧颜色的三角接头覆盖其上，避免抗锯齿裂缝。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id power-id" x="18" y="25">P01</text><text class="card-title" x="57" y="25">经典 Powerline</text><text class="card-meta" x="302" y="24" text-anchor="end">OVERLAP TIP</text>
+    <g clip-path="url(#ac-strip-clip)">
+      <rect x="24" y="82" width="130" height="44" fill="#557ee8"/><rect x="154" y="82" width="142" height="44" fill="#20ad91"/>
+      <polygon points="154,82 180,104 154,126" fill="#557ee8"/>
+      <text class="segment-label" x="82" y="108" text-anchor="middle">main</text><text class="segment-label" x="234" y="108" text-anchor="middle">node 20</text>
+    </g>
+  </g>
+
+  <g id="component-P02" class="arrow-component" transform="translate(375 476)" role="button" tabindex="0" aria-labelledby="title-P02 desc-P02" data-id="P02" data-system="segment" data-primitive="path-rect" data-use="前后段咬合 / 层级切换">
+    <title id="title-P02">P02 内凹接头</title><desc id="desc-P02">右侧段的左边界使用内凹路径，底层前段延伸进凹口以消除透明缝隙。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id power-id" x="18" y="25">P02</text><text class="card-title" x="57" y="25">内凹接头</text><text class="card-meta" x="302" y="24" text-anchor="end">NOTCHED</text>
+    <g clip-path="url(#ac-strip-clip)">
+      <rect x="24" y="82" width="130" height="44" fill="#ff718d"/><rect x="154" y="82" width="142" height="44" fill="#263d5b"/>
+      <path d="M154 82L130 104L154 126Z" fill="#263d5b"/>
+      <text class="segment-label" x="82" y="108" text-anchor="middle">feature</text><text class="segment-label" x="236" y="108" text-anchor="middle">dirty</text>
+    </g>
+  </g>
+
+  <g id="component-P03" class="arrow-component" transform="translate(708 476)" role="button" tabindex="0" aria-labelledby="title-P03 desc-P03" data-id="P03" data-system="segment" data-primitive="rect-path" data-use="步骤导航 / 面包屑">
+    <title id="title-P03">P03 Chevron 分隔</title><desc id="desc-P03">两个完整色块共享边界，一条对比色的闭合 Chevron 带跨过接缝，内外轮廓保持平行。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id power-id" x="18" y="25">P03</text><text class="card-title" x="57" y="25">Chevron 分隔</text><text class="card-meta" x="302" y="24" text-anchor="end">CONTRAST BAND</text>
+    <g clip-path="url(#ac-strip-clip)">
+      <rect x="24" y="82" width="130" height="44" fill="#557ee8"/><rect x="154" y="82" width="142" height="44" fill="#20ad91"/>
+      <path d="M146 82L180 104L146 126H158L168 104L158 82Z" fill="#ffd166"/>
+      <text class="segment-label" x="82" y="108" text-anchor="middle">build</text><text class="segment-label" x="234" y="108" text-anchor="middle">deploy</text>
+    </g>
+  </g>
+
+  <g id="component-P04" class="arrow-component" transform="translate(1041 476)" role="button" tabindex="0" aria-labelledby="title-P04 desc-P04" data-id="P04" data-system="segment" data-primitive="overlap-polygons" data-use="仪表条 / 速度感分段">
+    <title id="title-P04">P04 斜切接缝</title><desc id="desc-P04">两个斜切 polygon 相互重叠四单位，接缝保持连续且具有前进感。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id power-id" x="18" y="25">P04</text><text class="card-title" x="57" y="25">斜切接缝</text><text class="card-meta" x="302" y="24" text-anchor="end">4 PX OVERLAP</text>
+    <g clip-path="url(#ac-strip-clip)">
+      <path d="M24 82H171L151 126H24Z" fill="#7fa6ff"/>
+      <path d="M167 82H296V126H147Z" fill="#b891ff"/>
+      <text class="segment-label" x="81" y="108" text-anchor="middle">42%</text><text class="segment-label" x="234" y="108" text-anchor="middle">render</text>
+    </g>
+  </g>
+
+  <g id="component-P05" class="arrow-component" transform="translate(42 648)" role="button" tabindex="0" aria-labelledby="title-P05 desc-P05" data-id="P05" data-system="segment" data-primitive="curved-rect-path" data-use="柔和 UI 标签 / 状态栏分隔">
+    <title id="title-P05">P05 曲面接头</title><desc id="desc-P05">统一 clipPath 只处理整条 segment 的外圆角，内部接头由前段颜色的三次曲线覆盖后段。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id power-id" x="18" y="25">P05</text><text class="card-title" x="57" y="25">曲面接头</text><text class="card-meta" x="302" y="24" text-anchor="end">CURVED + CLIP</text>
+    <g clip-path="url(#ac-strip-clip)">
+      <rect x="24" y="82" width="130" height="44" fill="#20ad91"/><rect x="154" y="82" width="142" height="44" fill="#263d5b"/>
+      <path d="M154 82C181 82 181 126 154 126Z" fill="#20ad91"/>
+      <text class="segment-label" x="82" y="108" text-anchor="middle">ready</text><text class="segment-label" x="236" y="108" text-anchor="middle">local</text>
+    </g>
+  </g>
+
+  <g id="component-P06" class="arrow-component" transform="translate(375 648)" role="button" tabindex="0" aria-labelledby="title-P06 desc-P06" data-id="P06" data-system="segment" data-primitive="rect-polyline" data-use="低强调分隔 / 透明背景">
+    <title id="title-P06">P06 空心接头</title><desc id="desc-P06">透明 segment 使用描边矩形和 polyline Chevron，在浅色或复杂背景中仍可复用。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id power-id" x="18" y="25">P06</text><text class="card-title" x="57" y="25">空心接头</text><text class="card-meta" x="302" y="24" text-anchor="end">OUTLINE</text>
+    <rect x="24" y="82" width="272" height="44" rx="5" fill="none" stroke="#7fa6ff" stroke-width="2"/>
+    <polyline points="143,83 169,104 143,125" fill="#0f1d31" stroke="#7fa6ff" stroke-width="2.5" stroke-linejoin="round"/>
+    <text class="segment-label" x="82" y="108" text-anchor="middle">quiet</text><text class="segment-label" x="232" y="108" text-anchor="middle">context</text>
+  </g>
+
+  <g id="component-P07" class="arrow-component" transform="translate(708 648)" role="button" tabindex="0" aria-labelledby="title-P07 desc-P07" data-id="P07" data-system="segment" data-primitive="multi-rect-path" data-use="分支 / 环境 / Git 状态提示">
+    <title id="title-P07">P07 多段状态链</title><desc id="desc-P07">三个矩形先完整铺底，每个前段的尖头再覆盖下一段，形成无缝状态链。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id power-id" x="18" y="25">P07</text><text class="card-title" x="57" y="25">多段状态链</text><text class="card-meta" x="302" y="24" text-anchor="end">COMPOSED</text>
+    <g clip-path="url(#ac-strip-clip)">
+      <rect x="24" y="82" width="85" height="44" fill="#557ee8"/><rect x="109" y="82" width="89" height="44" fill="#20ad91"/><rect x="198" y="82" width="98" height="44" fill="#e35f7b"/>
+      <path d="M109 82L133 104L109 126Z" fill="#557ee8"/><path d="M198 82L222 104L198 126Z" fill="#20ad91"/>
+      <text class="segment-label" x="66" y="108" text-anchor="middle">git</text><text class="segment-label" x="154" y="108" text-anchor="middle">main</text><text class="segment-label" x="247" y="108" text-anchor="middle">+2</text>
+    </g>
+  </g>
+
+  <g id="component-P08" class="arrow-component" transform="translate(1041 648)" role="button" tabindex="0" aria-labelledby="title-P08 desc-P08" data-id="P08" data-system="segment" data-primitive="path-circle" data-use="状态链终点 / 独立徽章">
+    <title id="title-P08">P08 终止封口段</title><desc id="desc-P08">圆形起始封口和右侧楔形终端组合成独立 segment，适合结束状态链。</desc>
+    <rect class="card" width="320" height="160" rx="16"/>
+    <text class="card-id power-id" x="18" y="25">P08</text><text class="card-title" x="57" y="25">终止封口段</text><text class="card-meta" x="302" y="24" text-anchor="end">TERMINAL CAP</text>
+    <g clip-path="url(#ac-strip-clip)">
+      <path d="M46 82H267L296 104L267 126H46Z" fill="url(#ac-terminal-gradient)"/>
+      <circle cx="46" cy="104" r="22" fill="#7fa6ff"/>
+      <circle cx="48" cy="104" r="5" fill="#f7fbff"/>
+      <text class="segment-label" x="166" y="108" text-anchor="middle">complete</text>
+    </g>
+  </g>
+
+  <g aria-hidden="true">
+    <line x1="42" y1="838" x2="1358" y2="838" stroke="#29455f"/>
+    <text class="footer" x="42" y="864">线型：终端由路径切线自动定向 · 块型：后段完整铺底，前段接头覆盖，避免 1px seam</text>
+    <text class="footer" x="1358" y="864" text-anchor="end">16 COMPONENTS · CLICK OR PRESS ENTER</text>
+  </g>
+</svg>

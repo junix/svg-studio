@@ -1,6 +1,8 @@
 import paper from 'paper';
 import rough from 'roughjs/bundled/rough.esm.js';
+import { mountArrowComponents } from './arrow-components';
 import { mountArrowLibrary } from './arrow-library';
+import { mountIconLibrary } from './icon-library';
 import './style.css';
 
 declare global { interface Window { __VIS_READY__?: boolean; __INTERACTION_COUNT__?: number } }
@@ -178,7 +180,11 @@ function typeSystem() {
 
 const renderers:Record<string,()=>void>={botanical,metro,orbits,topology,'isometric-city':isometricCity,'wave-lab':waveLab,'contour-map':contourMap,circuit,timeline,molecule,loom,'type-system':typeSystem};
 
-if (scene === 'arrow-library') {
+if (scene === 'arrow-components') {
+  mountArrowComponents(app);
+} else if (scene === 'icon-library') {
+  mountIconLibrary(app);
+} else if (scene === 'arrow-library') {
   mountArrowLibrary(app);
 } else {
   (renderers[scene]??botanical)();

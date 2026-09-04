@@ -1,0 +1,219 @@
+<svg id="stage" xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="library-title library-desc">
+  <title id="library-title">SVG 图标设计素材库</title>
+  <desc id="library-desc">二十四个可复用的原生 SVG 图标，覆盖轮廓、实心、双色以及渐变、自然形、像素、等距、负空间和霓虹风格。</desc>
+  <style>
+    :root { color-scheme: dark; }
+    text { font-family: "Avenir Next", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+    .eyebrow { fill: #6f91a9; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+    .heading { fill: #f2f8ff; font-size: 30px; font-weight: 700; letter-spacing: .01em; }
+    .subheading { fill: #91aabd; font-size: 13px; font-weight: 500; }
+    .readout { fill: #c9d9e7; font-size: 13px; font-weight: 600; }
+    .legend-pill { fill: #10233a; stroke: #2d4d68; stroke-width: 1; }
+    .legend-text { fill: #aac0d1; font-size: 10.5px; font-weight: 700; letter-spacing: .1em; }
+    .icon-specimen { cursor: pointer; outline: none; }
+    .card { fill: #0f1d31; fill-opacity: .88; stroke: #29455f; stroke-width: 1; transition: stroke .15s ease, fill-opacity .15s ease; }
+    .icon-specimen:hover > .card, .icon-specimen:focus > .card, .icon-specimen.is-active > .card { fill-opacity: .98; stroke: #58d6c8; stroke-width: 1.5; }
+    .card-id { font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+    .id-outline { fill: #58d6c8; }.id-filled { fill: #ff718d; }.id-duotone { fill: #7fa6ff; }.id-expressive { fill: #b891ff; }
+    .card-style { fill: #6988a0; font-size: 9.5px; font-weight: 750; letter-spacing: .1em; }
+    .card-title { fill: #edf6ff; font-size: 15px; font-weight: 650; }
+    .card-use { fill: #aec2d2; font-size: 11px; font-weight: 550; }
+    .card-code { fill: #66839a; font-size: 9.5px; font-weight: 650; letter-spacing: .06em; }
+    .divider { stroke: #29465f; stroke-width: 1; }
+    .outline-teal, .outline-blue, .outline-gold, .outline-coral { fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+    .outline-teal { stroke: #58d6c8; }.outline-blue { stroke: #7fa6ff; }.outline-gold { stroke: #ffd166; }.outline-coral { stroke: #ff718d; }
+  </style>
+
+  <defs>
+    <linearGradient id="il-spark-gradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd166"/><stop offset=".5" stop-color="#ff718d"/><stop offset="1" stop-color="#b891ff"/></linearGradient>
+    <linearGradient id="il-leaf-gradient" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2fae9f"/><stop offset="1" stop-color="#8cebdc"/></linearGradient>
+    <linearGradient id="il-cube-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d2c0ff"/><stop offset="1" stop-color="#8e72dc"/></linearGradient>
+    <linearGradient id="il-cube-left" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6d8de6"/><stop offset="1" stop-color="#3658a8"/></linearGradient>
+    <linearGradient id="il-cube-right" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8da2"/><stop offset="1" stop-color="#b74368"/></linearGradient>
+    <linearGradient id="il-orbit-gradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#58d6c8"/><stop offset=".5" stop-color="#7fa6ff"/><stop offset="1" stop-color="#ff718d"/></linearGradient>
+    <radialGradient id="il-core-gradient"><stop offset="0" stop-color="#fff4c4"/><stop offset=".45" stop-color="#ffd166"/><stop offset="1" stop-color="#ff718d"/></radialGradient>
+    <filter id="il-neon-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <clipPath id="il-chart-clip"><rect x="7" y="8" width="50" height="48" rx="9"/></clipPath>
+    <mask id="il-badge-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="white"/><path d="M19 33 28 42 47 21" fill="none" stroke="black" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></mask>
+    <symbol id="il-spark-unit" viewBox="0 0 24 24"><path d="M12 1C13.5 7.2 16.8 10.5 23 12C16.8 13.5 13.5 16.8 12 23C10.5 16.8 7.2 13.5 1 12C7.2 10.5 10.5 7.2 12 1Z"/></symbol>
+  </defs>
+
+  <g aria-hidden="true">
+    <text class="eyebrow" x="42" y="34">SVG STUDIO / REFERENCE 14</text>
+    <text class="heading" x="42" y="72">图标设计素材库</text>
+    <text class="subheading" x="43" y="100">24 个可复制图标：统一光学尺寸，不同构造语言。点击卡片查看语义用途。</text>
+    <rect class="legend-pill" x="785" y="28" width="132" height="28" rx="14"/><circle cx="803" cy="42" r="4" fill="#58d6c8"/><text class="legend-text" x="815" y="46">O / 轮廓</text>
+    <rect class="legend-pill" x="927" y="28" width="132" height="28" rx="14"/><circle cx="945" cy="42" r="4" fill="#ff718d"/><text class="legend-text" x="957" y="46">F / 实心</text>
+    <rect class="legend-pill" x="1069" y="28" width="132" height="28" rx="14"/><circle cx="1087" cy="42" r="4" fill="#7fa6ff"/><text class="legend-text" x="1099" y="46">D / 双色</text>
+    <rect class="legend-pill" x="1211" y="28" width="147" height="28" rx="14"/><circle cx="1229" cy="42" r="4" fill="#b891ff"/><text class="legend-text" x="1241" y="46">E / 表现性</text>
+    <text id="selected-readout" class="readout" x="1358" y="94" text-anchor="end">O01 · 首页 / 空间 / 起点</text>
+  </g>
+
+  <g id="icon-O01" class="icon-specimen is-active" transform="translate(42 132)" role="button" tabindex="0" aria-labelledby="title-O01 desc-O01" data-id="O01" data-style="outline" data-use="首页 / 空间 / 起点">
+    <title id="title-O01">O01 Home outline</title><desc id="desc-O01">圆角单线条住宅图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-outline" x="18" y="25">O01</text><text class="card-style" x="300" y="24" text-anchor="end">OUTLINE / ROUNDED</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path class="outline-teal" d="M8 30 32 10 56 30V55H40V39H24V55H8Z"/></g>
+    <text class="card-title" x="122" y="59">Home / 主页</text><text class="card-use" x="122" y="79">稳定、亲和的入口语义</text><text class="card-code" x="122" y="97">PATH + RECT LOGIC</text>
+  </g>
+
+  <g id="icon-O02" class="icon-specimen" transform="translate(42 256)" role="button" tabindex="0" aria-labelledby="title-O02 desc-O02" data-id="O02" data-style="outline" data-use="搜索 / 检查 / 放大">
+    <title id="title-O02">O02 Search outline</title><desc id="desc-O02">圆形镜片与相切手柄组成的搜索图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-outline" x="18" y="25">O02</text><text class="card-style" x="300" y="24" text-anchor="end">OUTLINE / TANGENT</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><circle class="outline-blue" cx="27" cy="27" r="17"/><path class="outline-blue" d="M39.5 39.5 56 56"/></g>
+    <text class="card-title" x="122" y="59">Search / 搜索</text><text class="card-use" x="122" y="79">手柄沿圆切线自然延伸</text><text class="card-code" x="122" y="97">CIRCLE + LINE</text>
+  </g>
+
+  <g id="icon-O03" class="icon-specimen" transform="translate(42 380)" role="button" tabindex="0" aria-labelledby="title-O03 desc-O03" data-id="O03" data-style="outline" data-use="喜欢 / 收藏 / 健康">
+    <title id="title-O03">O03 Heart outline</title><desc id="desc-O03">由连续对称三次贝塞尔曲线构成的心形。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-outline" x="18" y="25">O03</text><text class="card-style" x="300" y="24" text-anchor="end">OUTLINE / BEZIER</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path class="outline-coral" d="M32 56C27 50 8 39 8 23C8 10 23 6 32 17C41 6 56 10 56 23C56 39 37 50 32 56Z"/></g>
+    <text class="card-title" x="122" y="59">Heart / 喜爱</text><text class="card-use" x="122" y="79">连续曲率比机械对称更柔和</text><text class="card-code" x="122" y="97">CUBIC PATH</text>
+  </g>
+
+  <g id="icon-O04" class="icon-specimen" transform="translate(42 504)" role="button" tabindex="0" aria-labelledby="title-O04 desc-O04" data-id="O04" data-style="outline" data-use="设置 / 筛选 / 调节">
+    <title id="title-O04">O04 Sliders outline</title><desc id="desc-O04">三条轨道与错落控制点组成的调节图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-outline" x="18" y="25">O04</text><text class="card-style" x="300" y="24" text-anchor="end">OUTLINE / RHYTHM</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path class="outline-gold" d="M8 16H56M8 32H56M8 48H56"/><circle cx="22" cy="16" r="5" fill="#0f1d31" stroke="#ffd166" stroke-width="3.2"/><circle cx="43" cy="32" r="5" fill="#0f1d31" stroke="#ffd166" stroke-width="3.2"/><circle cx="29" cy="48" r="5" fill="#0f1d31" stroke="#ffd166" stroke-width="3.2"/></g>
+    <text class="card-title" x="122" y="59">Sliders / 调节</text><text class="card-use" x="122" y="79">控制点错落形成节奏</text><text class="card-code" x="122" y="97">LINES + KNOBS</text>
+  </g>
+
+  <g id="icon-O05" class="icon-specimen" transform="translate(42 628)" role="button" tabindex="0" aria-labelledby="title-O05 desc-O05" data-id="O05" data-style="outline" data-use="相机 / 图像 / 拍摄">
+    <title id="title-O05">O05 Camera outline</title><desc id="desc-O05">圆角机身、镜头和取景点构成的相机图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-outline" x="18" y="25">O05</text><text class="card-style" x="300" y="24" text-anchor="end">OUTLINE / CONTAINER</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path class="outline-teal" d="M8 20H19L24 13H40L45 20H56V54H8Z"/><circle class="outline-teal" cx="32" cy="37" r="11"/><circle cx="49" cy="27" r="2.5" fill="#58d6c8"/></g>
+    <text class="card-title" x="122" y="59">Camera / 相机</text><text class="card-use" x="122" y="79">容器、主焦点与细节点</text><text class="card-code" x="122" y="97">RECT + LENS</text>
+  </g>
+
+  <g id="icon-O06" class="icon-specimen" transform="translate(42 752)" role="button" tabindex="0" aria-labelledby="title-O06 desc-O06" data-id="O06" data-style="outline" data-use="链接 / 关联 / 依赖">
+    <title id="title-O06">O06 Link outline</title><desc id="desc-O06">两个旋转圆角环与中间连接段组成的链接图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-outline" x="18" y="25">O06</text><text class="card-style" x="300" y="24" text-anchor="end">OUTLINE / INTERLOCK</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><rect class="outline-blue" x="4" y="20" width="34" height="18" rx="9" transform="rotate(-38 21 29)"/><rect class="outline-blue" x="26" y="26" width="34" height="18" rx="9" transform="rotate(-38 43 35)"/><path class="outline-blue" d="M24 39 40 25"/></g>
+    <text class="card-title" x="122" y="59">Link / 链接</text><text class="card-use" x="122" y="79">重叠环保持负空间清楚</text><text class="card-code" x="122" y="97">ROTATED RINGS</text>
+  </g>
+
+  <g id="icon-F01" class="icon-specimen" transform="translate(374 132)" role="button" tabindex="0" aria-labelledby="title-F01 desc-F01" data-id="F01" data-style="filled" data-use="评分 / 精选 / 重要">
+    <title id="title-F01">F01 Filled star</title><desc id="desc-F01">具有均衡内外半径的实心五角星。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-filled" x="18" y="25">F01</text><text class="card-style" x="300" y="24" text-anchor="end">FILLED / SILHOUETTE</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M32 5 39.5 22.5 58 24.5 44 37 48 56 32 46 16 56 20 37 6 24.5 24.5 22.5Z" fill="#ffd166"/></g>
+    <text class="card-title" x="122" y="59">Star / 星标</text><text class="card-use" x="122" y="79">轮廓先读，细节后读</text><text class="card-code" x="122" y="97">SINGLE SILHOUETTE</text>
+  </g>
+
+  <g id="icon-F02" class="icon-specimen" transform="translate(374 256)" role="button" tabindex="0" aria-labelledby="title-F02 desc-F02" data-id="F02" data-style="filled" data-use="书签 / 保存 / 稍后">
+    <title id="title-F02">F02 Filled bookmark</title><desc id="desc-F02">下方带清晰缺口的实心书签。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-filled" x="18" y="25">F02</text><text class="card-style" x="300" y="24" text-anchor="end">FILLED / NOTCH</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M14 7H50V58L32 46 14 58Z" fill="#ff718d"/></g>
+    <text class="card-title" x="122" y="59">Bookmark / 书签</text><text class="card-use" x="122" y="79">缺口深度决定识别速度</text><text class="card-code" x="122" y="97">NOTCHED PATH</text>
+  </g>
+
+  <g id="icon-F03" class="icon-specimen" transform="translate(374 380)" role="button" tabindex="0" aria-labelledby="title-F03 desc-F03" data-id="F03" data-style="filled" data-use="通知 / 提醒 / 订阅">
+    <title id="title-F03">F03 Filled bell</title><desc id="desc-F03">穹顶轮廓、裙边和独立铃舌组成的通知图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-filled" x="18" y="25">F03</text><text class="card-style" x="300" y="24" text-anchor="end">FILLED / MASS</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M10 47C16 42 17 36 17 27C17 17 23 10 32 10C41 10 47 17 47 27C47 36 48 42 54 47V51H10Z" fill="#b891ff"/><path d="M25 54H39C37 59 27 59 25 54Z" fill="#d8c8ff"/></g>
+    <text class="card-title" x="122" y="59">Bell / 通知</text><text class="card-use" x="122" y="79">主体和铃舌分层更有弹性</text><text class="card-code" x="122" y="97">MASS + DETAIL</text>
+  </g>
+
+  <g id="icon-F04" class="icon-specimen" transform="translate(374 504)" role="button" tabindex="0" aria-labelledby="title-F04 desc-F04" data-id="F04" data-style="filled-negative" data-use="安全 / 验证 / 保护">
+    <title id="title-F04">F04 Shield with negative check</title><desc id="desc-F04">实心盾牌中使用深色负空间勾号。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-filled" x="18" y="25">F04</text><text class="card-style" x="300" y="24" text-anchor="end">FILLED / NEGATIVE</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M32 5 54 13V29C54 44 45 54 32 59C19 54 10 44 10 29V13Z" fill="#7fa6ff"/><path d="M21 31 29 39 44 23" fill="none" stroke="#0f1d31" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text class="card-title" x="122" y="59">Shield / 安全</text><text class="card-use" x="122" y="79">内部负空间要足够粗</text><text class="card-code" x="122" y="97">FILL + CUT DETAIL</text>
+  </g>
+
+  <g id="icon-F05" class="icon-specimen" transform="translate(374 628)" role="button" tabindex="0" aria-labelledby="title-F05 desc-F05" data-id="F05" data-style="filled" data-use="位置 / 地图 / 地点">
+    <title id="title-F05">F05 Filled map pin</title><desc id="desc-F05">水滴轮廓内带圆形负空间的地图位置图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-filled" x="18" y="25">F05</text><text class="card-style" x="300" y="24" text-anchor="end">FILLED / COMPOUND</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path fill="#58d6c8" fill-rule="evenodd" d="M32 4C18 4 9 14 9 27C9 43 25 57 32 61C39 57 55 43 55 27C55 14 46 4 32 4ZM32 18A9 9 0 1 0 32 36A9 9 0 1 0 32 18Z"/></g>
+    <text class="card-title" x="122" y="59">Pin / 位置</text><text class="card-use" x="122" y="79">evenodd 保持洞口可靠</text><text class="card-code" x="122" y="97">COMPOUND PATH</text>
+  </g>
+
+  <g id="icon-F06" class="icon-specimen" transform="translate(374 752)" role="button" tabindex="0" aria-labelledby="title-F06 desc-F06" data-id="F06" data-style="filled-negative" data-use="播放 / 启动 / 预览">
+    <title id="title-F06">F06 Filled play</title><desc id="desc-F06">珊瑚色圆盘和经过光学校正的深色播放三角。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-filled" x="18" y="25">F06</text><text class="card-style" x="300" y="24" text-anchor="end">FILLED / OPTICAL</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><circle cx="32" cy="32" r="27" fill="#ff718d"/><path d="M27 20 46 32 27 44Z" fill="#0f1d31" transform="translate(2 0)"/></g>
+    <text class="card-title" x="122" y="59">Play / 播放</text><text class="card-use" x="122" y="79">三角形需向右光学偏移</text><text class="card-code" x="122" y="97">DISC + OFFSET GLYPH</text>
+  </g>
+
+  <g id="icon-D01" class="icon-specimen" transform="translate(706 132)" role="button" tabindex="0" aria-labelledby="title-D01 desc-D01" data-id="D01" data-style="duotone" data-use="上传 / 同步 / 云端">
+    <title id="title-D01">D01 Duotone cloud upload</title><desc id="desc-D01">半透明云体与高对比上传箭头。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-duotone" x="18" y="25">D01</text><text class="card-style" x="300" y="24" text-anchor="end">DUOTONE / LAYERED</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M16 50C8 50 5 44 5 37C5 29 11 24 19 24C22 14 30 9 40 12C47 14 51 19 52 26C59 28 62 33 61 40C60 47 56 50 49 50Z" fill="#7fa6ff" opacity=".25" stroke="#7fa6ff" stroke-width="2.5"/><path class="outline-gold" d="M32 48V24M22 34 32 24 42 34"/></g>
+    <text class="card-title" x="122" y="59">Cloud / 上传</text><text class="card-use" x="122" y="79">低权重容器、高权重动作</text><text class="card-code" x="122" y="97">TINT + ACTION STROKE</text>
+  </g>
+
+  <g id="icon-D02" class="icon-specimen" transform="translate(706 256)" role="button" tabindex="0" aria-labelledby="title-D02 desc-D02" data-id="D02" data-style="duotone" data-use="图层 / 堆栈 / 层级">
+    <title id="title-D02">D02 Duotone layers</title><desc id="desc-D02">三个错位菱形以透明度表达图层顺序。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-duotone" x="18" y="25">D02</text><text class="card-style" x="300" y="24" text-anchor="end">DUOTONE / STACK</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M7 39 32 52 57 39 32 26Z" fill="#7fa6ff" opacity=".28" stroke="#7fa6ff" stroke-width="2"/><path d="M7 29 32 42 57 29 32 16Z" fill="#b891ff" opacity=".45" stroke="#b891ff" stroke-width="2"/><path d="M7 19 32 32 57 19 32 6Z" fill="#58d6c8" opacity=".78" stroke="#8cebdc" stroke-width="2"/></g>
+    <text class="card-title" x="122" y="59">Layers / 图层</text><text class="card-use" x="122" y="79">位移和透明度共同编码层级</text><text class="card-code" x="122" y="97">STACKED RHOMBI</text>
+  </g>
+
+  <g id="icon-D03" class="icon-specimen" transform="translate(706 380)" role="button" tabindex="0" aria-labelledby="title-D03 desc-D03" data-id="D03" data-style="duotone" data-use="收件 / 归档 / 输入">
+    <title id="title-D03">D03 Duotone inbox</title><desc id="desc-D03">柔和托盘底色与明亮收件折线。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-duotone" x="18" y="25">D03</text><text class="card-style" x="300" y="24" text-anchor="end">DUOTONE / CONTAINER</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M8 25 16 10H48L56 25V54H8Z" fill="#58d6c8" opacity=".22" stroke="#58d6c8" stroke-width="2.5"/><path class="outline-gold" d="M8 35H22L27 42H37L42 35H56"/></g>
+    <text class="card-title" x="122" y="59">Inbox / 收件</text><text class="card-use" x="122" y="79">状态线与容器色分离</text><text class="card-code" x="122" y="97">SOFT MASS + FLAP</text>
+  </g>
+
+  <g id="icon-D04" class="icon-specimen" transform="translate(706 504)" role="button" tabindex="0" aria-labelledby="title-D04 desc-D04" data-id="D04" data-style="duotone" data-use="团队 / 成员 / 协作">
+    <title id="title-D04">D04 Duotone people</title><desc id="desc-D04">前后错位的头像和肩部形状表达多人群组。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-duotone" x="18" y="25">D04</text><text class="card-style" x="300" y="24" text-anchor="end">DUOTONE / OVERLAP</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><circle cx="20" cy="22" r="9" fill="#7fa6ff" opacity=".45"/><path d="M4 52C5 40 10 34 20 34S35 40 36 52Z" fill="#7fa6ff" opacity=".35"/><circle cx="42" cy="20" r="10" fill="#ff718d"/><path d="M24 54C25 39 31 33 42 33S59 39 60 54Z" fill="#ff718d" opacity=".78"/></g>
+    <text class="card-title" x="122" y="59">People / 团队</text><text class="card-use" x="122" y="79">遮挡顺序表达主次角色</text><text class="card-code" x="122" y="97">OVERLAPPING MASSES</text>
+  </g>
+
+  <g id="icon-D05" class="icon-specimen" transform="translate(706 628)" role="button" tabindex="0" aria-labelledby="title-D05 desc-D05" data-id="D05" data-style="duotone" data-use="日期 / 日程 / 计划">
+    <title id="title-D05">D05 Duotone calendar</title><desc id="desc-D05">双色日历框架与明确日期状态。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-duotone" x="18" y="25">D05</text><text class="card-style" x="300" y="24" text-anchor="end">DUOTONE / FRAME</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><rect x="7" y="11" width="50" height="46" rx="8" fill="#7fa6ff" opacity=".22" stroke="#7fa6ff" stroke-width="2.5"/><path d="M7 24H57V18C57 14 54 11 50 11H14C10 11 7 14 7 18Z" fill="#ff718d"/><path class="outline-gold" d="M21 8V16M43 8V16M22 40 29 47 44 32"/></g>
+    <text class="card-title" x="122" y="59">Calendar / 日程</text><text class="card-use" x="122" y="79">固定框架承载可变状态</text><text class="card-code" x="122" y="97">FRAME + COLOR BAND</text>
+  </g>
+
+  <g id="icon-D06" class="icon-specimen" transform="translate(706 752)" role="button" tabindex="0" aria-labelledby="title-D06 desc-D06" data-id="D06" data-style="duotone" data-use="指标 / 分析 / 统计">
+    <title id="title-D06">D06 Duotone analytics</title><desc id="desc-D06">裁切在圆角面板中的三根数据柱。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-duotone" x="18" y="25">D06</text><text class="card-style" x="300" y="24" text-anchor="end">DUOTONE / CLIP</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><g clip-path="url(#il-chart-clip)"><rect x="7" y="8" width="50" height="48" fill="#7fa6ff" opacity=".2"/><rect x="15" y="35" width="8" height="21" rx="2" fill="#58d6c8"/><rect x="28" y="24" width="8" height="32" rx="2" fill="#ffd166"/><rect x="41" y="15" width="8" height="41" rx="2" fill="#ff718d"/></g><rect x="7" y="8" width="50" height="48" rx="9" fill="none" stroke="#7fa6ff" stroke-width="2.5"/></g>
+    <text class="card-title" x="122" y="59">Analytics / 分析</text><text class="card-use" x="122" y="79">共享基线，不共享柱宽节奏</text><text class="card-code" x="122" y="97">CLIP + COLOR BARS</text>
+  </g>
+
+  <g id="icon-E01" class="icon-specimen" transform="translate(1038 132)" role="button" tabindex="0" aria-labelledby="title-E01 desc-E01" data-id="E01" data-style="gradient" data-use="AI / 生成 / 增强">
+    <title id="title-E01">E01 Gradient spark</title><desc id="desc-E01">使用 symbol 重复与渐变着色的闪光图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-expressive" x="18" y="25">E01</text><text class="card-style" x="300" y="24" text-anchor="end">GRADIENT / SYMBOL</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><use href="#il-spark-unit" x="14" y="13" width="36" height="36" fill="url(#il-spark-gradient)"/><use href="#il-spark-unit" x="1" y="2" width="17" height="17" fill="#58d6c8"/><use href="#il-spark-unit" x="47" y="4" width="14" height="14" fill="#ffd166"/><use href="#il-spark-unit" x="47" y="47" width="12" height="12" fill="#ff718d"/></g>
+    <text class="card-title" x="122" y="59">Spark / 增强</text><text class="card-use" x="122" y="79">symbol 复用保持形状一致</text><text class="card-code" x="122" y="97">SYMBOL + USE + GRADIENT</text>
+  </g>
+
+  <g id="icon-E02" class="icon-specimen" transform="translate(1038 256)" role="button" tabindex="0" aria-labelledby="title-E02 desc-E02" data-id="E02" data-style="organic" data-use="自然 / 节能 / 生长">
+    <title id="title-E02">E02 Organic leaf</title><desc id="desc-E02">非对称叶片贝塞尔外形与独立叶脉。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-expressive" x="18" y="25">E02</text><text class="card-style" x="300" y="24" text-anchor="end">ORGANIC / BEZIER</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M8 54C10 25 25 6 57 7C58 34 43 55 15 56Z" fill="url(#il-leaf-gradient)"/><path d="M13 53C24 40 36 29 53 12M25 40 23 25M36 29 49 31" fill="none" stroke="#d9fff7" stroke-width="2.2" stroke-linecap="round" opacity=".8"/></g>
+    <text class="card-title" x="122" y="59">Leaf / 叶片</text><text class="card-use" x="122" y="79">避免镜像般的机械对称</text><text class="card-code" x="122" y="97">ASYMMETRIC BEZIER</text>
+  </g>
+
+  <g id="icon-E03" class="icon-specimen" transform="translate(1038 380)" role="button" tabindex="0" aria-labelledby="title-E03 desc-E03" data-id="E03" data-style="pixel" data-use="消息 / 复古 / 开发者工具">
+    <title id="title-E03">E03 Pixel chat</title><desc id="desc-E03">严格对齐整数网格的像素对话气泡。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-expressive" x="18" y="25">E03</text><text class="card-style" x="300" y="24" text-anchor="end">PIXEL / INTEGER GRID</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(27 42) scale(.72)" shape-rendering="crispEdges"><path d="M8 8H56V44H40V52H32V60H24V44H8Z" fill="#7fa6ff"/><rect x="17" y="23" width="7" height="7" fill="#0f1d31"/><rect x="29" y="23" width="7" height="7" fill="#0f1d31"/><rect x="41" y="23" width="7" height="7" fill="#0f1d31"/></g>
+    <text class="card-title" x="122" y="59">Pixel chat / 消息</text><text class="card-use" x="122" y="79">只用整数坐标和硬边</text><text class="card-code" x="122" y="97">CRISP RECT GRID</text>
+  </g>
+
+  <g id="icon-E04" class="icon-specimen" transform="translate(1038 504)" role="button" tabindex="0" aria-labelledby="title-E04 desc-E04" data-id="E04" data-style="isometric" data-use="模块 / 包 / 三维对象">
+    <title id="title-E04">E04 Isometric cube</title><desc id="desc-E04">由三个独立菱形面组成的等距立方体。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-expressive" x="18" y="25">E04</text><text class="card-style" x="300" y="24" text-anchor="end">ISOMETRIC / FACETS</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M32 5 58 19 32 33 6 19Z" fill="url(#il-cube-top)"/><path d="M6 19 32 33V61L6 47Z" fill="url(#il-cube-left)"/><path d="M58 19 32 33V61L58 47Z" fill="url(#il-cube-right)"/><path d="M32 33V61M6 19 32 33 58 19" fill="none" stroke="#eef4ff" stroke-width="1.2" opacity=".45"/></g>
+    <text class="card-title" x="122" y="59">Iso cube / 模块</text><text class="card-use" x="122" y="79">每个面独立控制色阶</text><text class="card-code" x="122" y="97">THREE FACETS</text>
+  </g>
+
+  <g id="icon-E05" class="icon-specimen" transform="translate(1038 628)" role="button" tabindex="0" aria-labelledby="title-E05 desc-E05" data-id="E05" data-style="negative-space" data-use="认证 / 完成 / 可信">
+    <title id="title-E05">E05 Negative-space badge</title><desc id="desc-E05">通过 mask 从实心徽章中切出勾号。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-expressive" x="18" y="25">E05</text><text class="card-style" x="300" y="24" text-anchor="end">CUTOUT / MASK</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)"><path d="M32 3 40 8 50 8 56 16 61 24 58 34 61 44 53 51 45 59 34 57 24 61 16 55 7 49 7 38 3 29 8 20 12 11 23 9Z" fill="#ff718d" mask="url(#il-badge-cut)"/></g>
+    <text class="card-title" x="122" y="59">Badge / 认证</text><text class="card-use" x="122" y="79">负空间必须经得起缩小</text><text class="card-code" x="122" y="97">MASK-CUT GLYPH</text>
+  </g>
+
+  <g id="icon-E06" class="icon-specimen" transform="translate(1038 752)" role="button" tabindex="0" aria-labelledby="title-E06 desc-E06" data-id="E06" data-style="neon" data-use="网络 / 轨道 / 生态系统">
+    <title id="title-E06">E06 Neon orbit</title><desc id="desc-E06">两条渐变轨道与发光核心组成的系统图标。</desc><rect class="card" width="318" height="112" rx="16"/>
+    <text class="card-id id-expressive" x="18" y="25">E06</text><text class="card-style" x="300" y="24" text-anchor="end">NEON / FILTER</text><line class="divider" x1="103" y1="42" x2="103" y2="98"/>
+    <g transform="translate(25 40) scale(.78)" filter="url(#il-neon-glow)"><ellipse cx="32" cy="32" rx="28" ry="12" fill="none" stroke="url(#il-orbit-gradient)" stroke-width="2.2" transform="rotate(-18 32 32)"/><ellipse cx="32" cy="32" rx="27" ry="10" fill="none" stroke="url(#il-orbit-gradient)" stroke-width="1.6" transform="rotate(58 32 32)" opacity=".78"/><circle cx="32" cy="32" r="7" fill="url(#il-core-gradient)"/><circle cx="54" cy="22" r="3.5" fill="#58d6c8"/></g>
+    <text class="card-title" x="122" y="59">Orbit / 系统</text><text class="card-use" x="122" y="79">发光只服务于视觉焦点</text><text class="card-code" x="122" y="97">GRADIENT + GLOW</text>
+  </g>
+</svg>

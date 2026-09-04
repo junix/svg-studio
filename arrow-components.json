@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "scene": "arrow-components",
+  "source": "examples/arrow-components.svg",
+  "viewBox": [0, 0, 1400, 900],
+  "systems": {
+    "stroke": "Use one line, polyline, or path with marker-end; the terminal follows the endpoint tangent.",
+    "segment": "Use overlapping filled rect, polygon, or path geometry; the connector is part of the segment silhouette, not a marker."
+  },
+  "templates": [
+    {"id":"S01","name":"轴向直线","system":"stroke","geometry":"line","primitives":["line","marker"],"parameters":["from","to","stroke","strokeWidth","markerId"],"use":"流程、因果、同轴连接"},
+    {"id":"S02","name":"圆角流程折线","system":"stroke","geometry":"rounded-orthogonal","primitives":["path","marker"],"parameters":["points","cornerRadius","stroke","strokeWidth","markerId"],"use":"流程图、端口路由"},
+    {"id":"S03","name":"二次弧线","system":"stroke","geometry":"quadratic-bezier","primitives":["path","marker"],"parameters":["from","control","to","stroke","markerId"],"use":"单弓形关系、柔和映射"},
+    {"id":"S04","name":"三次弧线","system":"stroke","geometry":"cubic-bezier","primitives":["path","marker"],"parameters":["from","control1","control2","to","stroke","markerId"],"use":"独立控制入射与出射切线"},
+    {"id":"S05","name":"规整圆弧","system":"stroke","geometry":"elliptical-arc","primitives":["path","marker"],"parameters":["from","rx","ry","largeArc","sweep","to"],"use":"半圆、环绕、弧形流程"},
+    {"id":"S06","name":"分段环形箭头","system":"stroke","geometry":"segmented-loop","primitives":["path","marker"],"parameters":["cx","cy","radius","gapAngle","gapCenterAngle","direction","markerId"],"use":"循环、刷新、持续过程"},
+    {"id":"S07","name":"逆时针回转","system":"stroke","geometry":"return-arc","primitives":["path","marker"],"parameters":["from","radius","largeArc","sweep","to"],"use":"撤销、回退、逆向循环"},
+    {"id":"S08","name":"双弧刷新","system":"stroke","geometry":"split-ring","primitives":["path","marker"],"parameters":["cx","cy","radius","startDeg","endDeg","markerIds"],"use":"同步、刷新、双阶段循环"},
+    {"id":"P01","name":"经典 Powerline","system":"segment","geometry":"overlap-tip","primitives":["rect","polygon"],"parameters":["x","y","width","height","connectorWidth","fromColor","toColor"],"use":"终端提示符、状态段"},
+    {"id":"P02","name":"内凹接头","system":"segment","geometry":"notched-seam","primitives":["path","rect"],"parameters":["x","y","width","height","notchDepth","colors"],"use":"前后段咬合、层级切换"},
+    {"id":"P03","name":"Chevron 分隔","system":"segment","geometry":"contrast-chevron-band","primitives":["rect","path"],"parameters":["x","y","height","connectorWidth","bandWidth","separatorColor","colors"],"use":"步骤导航、面包屑"},
+    {"id":"P04","name":"斜切接缝","system":"segment","geometry":"slanted-overlap","primitives":["polygon"],"parameters":["x","y","width","height","slant","overlap","colors"],"use":"仪表条、速度感分段"},
+    {"id":"P05","name":"曲面接头","system":"segment","geometry":"curved-overlap","primitives":["rect","path","clipPath"],"parameters":["x","y","width","height","connectorWidth","cornerRadius"],"use":"柔和 UI 标签、状态栏分隔"},
+    {"id":"P06","name":"空心接头","system":"segment","geometry":"outline-chevron","primitives":["rect","polyline"],"parameters":["x","y","width","height","strokeWidth","connectorWidth"],"use":"低强调分隔、透明背景"},
+    {"id":"P07","name":"多段状态链","system":"segment","geometry":"multi-segment-row","primitives":["rect","path"],"parameters":["segments","height","connectorWidth","overlap"],"use":"分支、环境、Git 状态提示"},
+    {"id":"P08","name":"终止封口段","system":"segment","geometry":"terminal-cap","primitives":["path","circle"],"parameters":["x","y","width","height","capRadius","color"],"use":"状态链终点、独立徽章"}
+  ]
+}

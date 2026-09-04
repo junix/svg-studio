@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "scene": "icon-library",
+  "source": "examples/icon-library.svg",
+  "viewBox": [0, 0, 1400, 900],
+  "templates": [
+    {"id":"O01","name":"Home","style":"outline","construction":"rounded path + rect","semantic":"place","use":"首页、空间、起点"},
+    {"id":"O02","name":"Search","style":"outline","construction":"circle + tangent","semantic":"find","use":"搜索、检查、放大"},
+    {"id":"O03","name":"Heart","style":"outline","construction":"symmetric cubic path","semantic":"favorite","use":"喜欢、收藏、健康"},
+    {"id":"O04","name":"Sliders","style":"outline","construction":"lines + circle knobs","semantic":"adjust","use":"设置、筛选、调节"},
+    {"id":"O05","name":"Camera","style":"outline","construction":"rounded rect + lens","semantic":"capture","use":"相机、图像、拍摄"},
+    {"id":"O06","name":"Link","style":"outline","construction":"paired arc chains","semantic":"connect","use":"链接、关联、依赖"},
+    {"id":"F01","name":"Star","style":"filled","construction":"ten-point silhouette","semantic":"rating","use":"评分、精选、重要"},
+    {"id":"F02","name":"Bookmark","style":"filled","construction":"notched silhouette","semantic":"save","use":"书签、保存、稍后"},
+    {"id":"F03","name":"Bell","style":"filled","construction":"bell silhouette + clapper","semantic":"notify","use":"通知、提醒、订阅"},
+    {"id":"F04","name":"Shield","style":"filled-negative","construction":"shield fill + negative check","semantic":"secure","use":"安全、验证、保护"},
+    {"id":"F05","name":"Pin","style":"filled","construction":"compound teardrop","semantic":"location","use":"位置、地图、地点"},
+    {"id":"F06","name":"Play","style":"filled-negative","construction":"disc + negative triangle","semantic":"media","use":"播放、启动、预览"},
+    {"id":"D01","name":"Cloud upload","style":"duotone","construction":"tint mass + outline arrow","semantic":"upload","use":"上传、同步、云端"},
+    {"id":"D02","name":"Layers","style":"duotone","construction":"stacked diamonds","semantic":"layers","use":"图层、堆栈、层级"},
+    {"id":"D03","name":"Inbox","style":"duotone","construction":"filled tray + outline flap","semantic":"receive","use":"收件、归档、输入"},
+    {"id":"D04","name":"People","style":"duotone","construction":"overlapping heads + bodies","semantic":"group","use":"团队、成员、协作"},
+    {"id":"D05","name":"Calendar","style":"duotone","construction":"frame + colored header","semantic":"date","use":"日期、日程、计划"},
+    {"id":"D06","name":"Analytics","style":"duotone","construction":"soft panel + bars","semantic":"measure","use":"指标、分析、统计"},
+    {"id":"E01","name":"Spark","style":"gradient","construction":"symbol reuse + gradient","semantic":"magic","use":"AI、生成、增强"},
+    {"id":"E02","name":"Leaf","style":"organic","construction":"asymmetric bezier + vein","semantic":"nature","use":"自然、节能、生长"},
+    {"id":"E03","name":"Pixel chat","style":"pixel","construction":"integer-grid rectangles","semantic":"message","use":"消息、复古、开发者工具"},
+    {"id":"E04","name":"Iso cube","style":"isometric","construction":"three rhombus faces","semantic":"package","use":"模块、包、三维对象"},
+    {"id":"E05","name":"Cutout badge","style":"negative-space","construction":"mask-cut check","semantic":"verified","use":"认证、完成、可信"},
+    {"id":"E06","name":"Neon orbit","style":"neon","construction":"gradient ellipses + glow","semantic":"system","use":"网络、轨道、生态系统"}
+  ]
+}
