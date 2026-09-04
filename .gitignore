@@ -21,3 +21,6 @@ yarn-error.log*
 pnpm-debug.log*
 # Coverage
 coverage/
+!out/
+out/*
+!out/*-transparent.png

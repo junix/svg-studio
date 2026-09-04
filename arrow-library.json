@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "scene": "arrow-library",
+  "source": "examples/arrow-library.svg",
+  "viewBox": [0, 0, 1400, 900],
+  "templates": [
+    {"id":"A01","name":"安全上标","family":"端点","geometry":"straight","arrowhead":"filled-triangle","labelMode":"masked-above","use":"默认流程、因果关系"},
+    {"id":"A02","name":"断线穿字","family":"端点","geometry":"straight-split","arrowhead":"open-chevron","labelMode":"inline-knockout","use":"空间紧凑的流程图"},
+    {"id":"A03","name":"曲线随排","family":"端点","geometry":"quadratic-curve","arrowhead":"stealth","labelMode":"text-path","use":"柔和关系、映射"},
+    {"id":"A04","name":"双向交叉标","family":"端点","geometry":"straight","arrowhead":"double-ended","labelMode":"rotated-crossing","use":"双向同步、交换"},
+    {"id":"A05","name":"半箭头","family":"端点","geometry":"straight","arrowhead":"harpoon","labelMode":"below","use":"偏序、注入、单侧映射"},
+    {"id":"A06","name":"双线蕴含","family":"端点","geometry":"parallel-double","arrowhead":"latex","labelMode":"boxed-inline","use":"推导、蕴含、强因果"},
+    {"id":"B01","name":"正交折线","family":"路径","geometry":"orthogonal","arrowhead":"filled-triangle","labelMode":"side-vertical","use":"架构图跨层连接"},
+    {"id":"B02","name":"圆角折线","family":"路径","geometry":"rounded-orthogonal","arrowhead":"stealth","labelMode":"corner-callout","use":"产品流程与状态迁移"},
+    {"id":"B03","name":"贝塞尔弧","family":"路径","geometry":"cubic-bezier","arrowhead":"latex","labelMode":"text-path","use":"跳跃关系、远距连接"},
+    {"id":"B04","name":"S 形流线","family":"路径","geometry":"s-curve","arrowhead":"filled-triangle","labelMode":"text-path","use":"数据流、信号流"},
+    {"id":"B05","name":"回环箭头","family":"路径","geometry":"loopback","arrowhead":"open-chevron","labelMode":"masked-above","use":"重试、反馈、自循环"},
+    {"id":"B06","name":"跨线跳桥","family":"路径","geometry":"bridge-hop","arrowhead":"filled-triangle","labelMode":"masked-above","use":"不可避免的连线交叉"},
+    {"id":"C01","name":"异步虚线","family":"语义","geometry":"straight","arrowhead":"filled-triangle","labelMode":"capsule-above","use":"异步、可选、返回"},
+    {"id":"C02","name":"点线重复标","family":"语义","geometry":"straight","arrowhead":"barb","labelMode":"repeated-text-path","use":"采样、脉冲、周期事件"},
+    {"id":"C03","name":"波形箭头","family":"语义","geometry":"wave","arrowhead":"stealth","labelMode":"text-path","use":"信号、传播、能量"},
+    {"id":"C04","name":"尺寸标注","family":"语义","geometry":"dimension","arrowhead":"double-ended-open","labelMode":"inline-knockout","use":"距离、跨度、范围"},
+    {"id":"C05","name":"组合关系","family":"语义","geometry":"straight-with-node","arrowhead":"diamond-to-triangle","labelMode":"split-labels","use":"所有权、组成后输出"},
+    {"id":"C06","name":"渐变强调","family":"语义","geometry":"cubic-bezier","arrowhead":"filled-triangle","labelMode":"end-callout","use":"强度、进度、方向聚焦"}
+  ]
+}

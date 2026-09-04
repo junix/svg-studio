@@ -1,0 +1,243 @@
+<svg id="stage" xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="library-title library-desc">
+  <title id="library-title">SVG 线、箭头与文字标注素材库</title>
+  <desc id="library-desc">十八种由线、箭头端点和文字标注组成的可复用 SVG 模板，包含直线、曲线、正交线、回环、跳桥、虚线、波形与多种沿线文字。</desc>
+  <style>
+    :root { color-scheme: dark; }
+    text { font-family: "Avenir Next", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+    .eyebrow { fill: #6f91a9; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+    .heading { fill: #f2f8ff; font-size: 30px; font-weight: 700; letter-spacing: .01em; }
+    .subheading { fill: #91aabd; font-size: 13px; font-weight: 500; }
+    .readout { fill: #c9d9e7; font-size: 13px; font-weight: 600; }
+    .legend-pill { fill: #10233a; stroke: #2d4d68; stroke-width: 1; }
+    .legend-text { fill: #aac0d1; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+    .specimen { cursor: pointer; outline: none; }
+    .card { fill: #0f1d31; fill-opacity: .88; stroke: #29455f; stroke-width: 1; transition: stroke .15s ease, fill-opacity .15s ease; }
+    .specimen:hover > .card, .specimen:focus > .card, .specimen.is-active > .card { fill-opacity: .98; stroke: #58d6c8; stroke-width: 1.5; }
+    .card-id { fill: #58d6c8; font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+    .card-title { fill: #edf6ff; font-size: 15px; font-weight: 650; }
+    .card-meta { fill: #6f8ca3; font-size: 10px; font-weight: 700; letter-spacing: .10em; }
+    .arrow { fill: none; stroke: #58d6c8; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .blue { stroke: #7fa6ff; }
+    .gold { stroke: #ffd166; }
+    .coral { stroke: #ff718d; }
+    .purple { stroke: #b891ff; }
+    .muted { stroke: #59758c; }
+    .edge-label { fill: #e4eef8; font-size: 12.5px; font-weight: 650; letter-spacing: .02em; }
+    .edge-label-small { fill: #b7cad9; font-size: 11px; font-weight: 650; letter-spacing: .06em; }
+    .label-guide { fill: none; stroke: none; }
+    .mask { fill: #0f1d31; }
+    .chip { fill: #162b45; stroke: #3a607e; stroke-width: 1; }
+  </style>
+
+  <defs>
+    <marker id="al-filled-teal" viewBox="0 0 12 10" markerWidth="12" markerHeight="10" refX="10.5" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 1 11 5 1 9 3.5 5Z" fill="#58d6c8"/>
+    </marker>
+    <marker id="al-filled-coral" viewBox="0 0 12 10" markerWidth="12" markerHeight="10" refX="10.5" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 1 11 5 1 9 3.5 5Z" fill="#ff718d"/>
+    </marker>
+    <marker id="al-filled-gold" viewBox="0 0 12 10" markerWidth="12" markerHeight="10" refX="10.5" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 1 11 5 1 9 3.5 5Z" fill="#ffd166"/>
+    </marker>
+    <marker id="al-open-gold" viewBox="0 0 12 10" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 1 10 5 1 9" fill="none" stroke="#ffd166" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="al-open-teal" viewBox="0 0 12 10" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 1 10 5 1 9" fill="none" stroke="#58d6c8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="al-stealth-blue" viewBox="0 0 13 10" markerWidth="13" markerHeight="10" refX="11.5" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 1 12 5 1 9 4.2 5Z" fill="#7fa6ff"/>
+    </marker>
+    <marker id="al-stealth-teal" viewBox="0 0 13 10" markerWidth="13" markerHeight="10" refX="11.5" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 1 12 5 1 9 4.2 5Z" fill="#58d6c8"/>
+    </marker>
+    <marker id="al-latex-purple" viewBox="0 0 14 10" markerWidth="14" markerHeight="10" refX="12.5" refY="5" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 1C4.2 3.3 8.2 4.5 13 5 8.2 5.5 4.2 6.7 1 9L4 5Z" fill="#b891ff"/>
+    </marker>
+    <marker id="al-harpoon-coral" viewBox="0 0 13 10" markerWidth="13" markerHeight="10" refX="11.5" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M1 1 12 5H1" fill="none" stroke="#ff718d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="al-barb-gold" viewBox="0 0 13 10" markerWidth="13" markerHeight="10" refX="11.5" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M1 1 12 5 1 9" fill="none" stroke="#ffd166" stroke-width="1.5"/>
+      <path d="M4 5H12" stroke="#ffd166" stroke-width="1.5"/>
+    </marker>
+    <marker id="al-diamond-blue" viewBox="0 0 14 12" markerWidth="14" markerHeight="12" refX="2" refY="6" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M1 6 6 1 11 6 6 11Z" fill="#0f1d31" stroke="#7fa6ff" stroke-width="1.5"/>
+    </marker>
+    <linearGradient id="al-flow-gradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7fa6ff" stop-opacity=".25"/>
+      <stop offset=".45" stop-color="#b891ff" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#ff718d"/>
+    </linearGradient>
+    <filter id="al-soft-glow" x="-30%" y="-80%" width="160%" height="260%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <g aria-hidden="true">
+    <text class="eyebrow" x="42" y="34">SVG STUDIO / REFERENCE 13</text>
+    <text class="heading" x="42" y="72">线 · 箭头 · 文字标注素材库</text>
+    <text class="subheading" x="43" y="100">18 个可复制模板：端点、路径与语义组合。点击卡片可查看推荐用途。</text>
+    <rect class="legend-pill" x="930" y="28" width="114" height="28" rx="14"/>
+    <circle cx="949" cy="42" r="4" fill="#58d6c8"/><text class="legend-text" x="961" y="46">A / 端点</text>
+    <rect class="legend-pill" x="1054" y="28" width="114" height="28" rx="14"/>
+    <circle cx="1073" cy="42" r="4" fill="#7fa6ff"/><text class="legend-text" x="1085" y="46">B / 路径</text>
+    <rect class="legend-pill" x="1178" y="28" width="180" height="28" rx="14"/>
+    <circle cx="1197" cy="42" r="4" fill="#ff718d"/><text class="legend-text" x="1209" y="46">C / 语义与线型</text>
+    <text id="selected-readout" class="readout" x="1358" y="92" text-anchor="end">A01 · 默认流程 / 因果关系</text>
+  </g>
+
+  <g id="spec-A01" class="specimen is-active" transform="translate(42 132)" role="button" tabindex="0" aria-labelledby="title-A01 desc-A01" data-id="A01" data-label-mode="masked-above" data-use="默认流程 / 因果关系">
+    <title id="title-A01">A01 安全上标</title><desc id="desc-A01">实心三角直线箭头，文字在带背景遮罩的线上方。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">A01</text><text class="card-title" x="58" y="25">安全上标</text><text class="card-meta" x="410" y="24" text-anchor="end">FILLED / MASK</text>
+    <path class="arrow" d="M27 76H399" marker-end="url(#al-filled-teal)"/>
+    <rect class="mask" x="150" y="45" width="126" height="22" rx="4"/><text class="edge-label" x="213" y="60" text-anchor="middle">提交任务 / submit</text>
+  </g>
+
+  <g id="spec-A02" class="specimen" transform="translate(42 256)" role="button" tabindex="0" aria-labelledby="title-A02 desc-A02" data-id="A02" data-label-mode="inline-knockout" data-use="紧凑流程 / 线中标签">
+    <title id="title-A02">A02 断线穿字</title><desc id="desc-A02">空心箭头与分段直线，文字位于线的中间。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">A02</text><text class="card-title" x="58" y="25">断线穿字</text><text class="card-meta" x="410" y="24" text-anchor="end">OPEN / INLINE</text>
+    <path class="arrow gold" d="M27 75H143"/><path class="arrow gold" d="M286 75H399" marker-end="url(#al-open-gold)"/>
+    <text class="edge-label" x="214" y="79" text-anchor="middle">验证通过 / accepted</text>
+  </g>
+
+  <g id="spec-A03" class="specimen" transform="translate(42 380)" role="button" tabindex="0" aria-labelledby="title-A03 desc-A03" data-id="A03" data-label-mode="text-path" data-use="柔和关系 / 沿曲线排字">
+    <title id="title-A03">A03 曲线随排</title><desc id="desc-A03">Stealth 箭头沿二次曲线，文字通过 textPath 跟随曲线。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">A03</text><text class="card-title" x="58" y="25">曲线随排</text><text class="card-meta" x="410" y="24" text-anchor="end">STEALTH / TEXTPATH</text>
+    <path id="path-A03" class="arrow blue" d="M27 88Q214 35 399 88" marker-end="url(#al-stealth-blue)"/>
+    <path id="label-path-A03" class="label-guide" d="M27 88Q214 35 399 88" transform="translate(0 -14)"/>
+    <text class="edge-label"><textPath href="#label-path-A03" startOffset="50%" text-anchor="middle">沿路径同步 / sync</textPath></text>
+  </g>
+
+  <g id="spec-A04" class="specimen" transform="translate(42 504)" role="button" tabindex="0" aria-labelledby="title-A04 desc-A04" data-id="A04" data-label-mode="rotated-crossing" data-use="双向同步 / 有意让文字交叉">
+    <title id="title-A04">A04 双向交叉标</title><desc id="desc-A04">两端均为箭头，倾斜文字有意穿过线。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">A04</text><text class="card-title" x="58" y="25">双向交叉标</text><text class="card-meta" x="410" y="24" text-anchor="end">BIDIRECTION / CROSS</text>
+    <path class="arrow gold" d="M29 75H399" marker-start="url(#al-open-gold)" marker-end="url(#al-open-gold)"/>
+    <g transform="rotate(-13 214 75)"><rect class="mask" x="126" y="62" width="176" height="25" rx="5"/><text class="edge-label" x="214" y="79" text-anchor="middle">双向交换 ↔ exchange</text></g>
+  </g>
+
+  <g id="spec-A05" class="specimen" transform="translate(42 628)" role="button" tabindex="0" aria-labelledby="title-A05 desc-A05" data-id="A05" data-label-mode="below" data-use="偏序 / 单侧映射">
+    <title id="title-A05">A05 半箭头</title><desc id="desc-A05">Harpoon 半箭头，文字位于线的下方。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">A05</text><text class="card-title" x="58" y="25">半箭头</text><text class="card-meta" x="410" y="24" text-anchor="end">HARPOON / BELOW</text>
+    <path class="arrow coral" d="M27 67H399" marker-end="url(#al-harpoon-coral)"/>
+    <text class="edge-label-small" x="213" y="94" text-anchor="middle">injective / 单侧作用</text>
+  </g>
+
+  <g id="spec-A06" class="specimen" transform="translate(42 752)" role="button" tabindex="0" aria-labelledby="title-A06 desc-A06" data-id="A06" data-label-mode="boxed-inline" data-use="蕴含 / 强因果">
+    <title id="title-A06">A06 双线蕴含</title><desc id="desc-A06">两条平行细线与细长 LaTeX 风格箭头，中部使用盒装标签。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">A06</text><text class="card-title" x="58" y="25">双线蕴含</text><text class="card-meta" x="410" y="24" text-anchor="end">LATEX / DOUBLE</text>
+    <path class="arrow purple" d="M27 67H399" marker-end="url(#al-latex-purple)"/><path class="arrow purple" d="M27 81H399" marker-end="url(#al-latex-purple)"/>
+    <rect class="chip" x="170" y="57" width="88" height="34" rx="6"/><text class="edge-label" x="214" y="78" text-anchor="middle">therefore</text>
+  </g>
+
+  <g id="spec-B01" class="specimen" transform="translate(486 132)" role="button" tabindex="0" aria-labelledby="title-B01 desc-B01" data-id="B01" data-label-mode="side-vertical" data-use="跨层连接 / 长竖段侧标">
+    <title id="title-B01">B01 正交折线</title><desc id="desc-B01">直角折线路径，竖排效果由旋转文字实现并与竖段保持距离。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">B01</text><text class="card-title" x="58" y="25">正交折线</text><text class="card-meta" x="410" y="24" text-anchor="end">ORTHOGONAL / SIDE</text>
+    <path class="arrow" d="M27 88H173V52H399" marker-end="url(#al-filled-teal)"/>
+    <text class="edge-label-small" x="151" y="73" text-anchor="middle" transform="rotate(-90 151 73)">跨层 / layer</text>
+  </g>
+
+  <g id="spec-B02" class="specimen" transform="translate(486 256)" role="button" tabindex="0" aria-labelledby="title-B02 desc-B02" data-id="B02" data-label-mode="corner-callout" data-use="流程迁移 / 圆角转向">
+    <title id="title-B02">B02 圆角折线</title><desc id="desc-B02">带八像素圆角的正交路径，转角上方有 callout 标签。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">B02</text><text class="card-title" x="58" y="25">圆角折线</text><text class="card-meta" x="410" y="24" text-anchor="end">R=8 / CALLOUT</text>
+    <path class="arrow blue" d="M27 87H166Q174 87 174 79V61Q174 53 182 53H399" marker-end="url(#al-stealth-blue)"/>
+    <rect class="mask" x="184" y="27" width="110" height="18" rx="4"/><text class="edge-label-small" x="239" y="40" text-anchor="middle">状态迁移 / next</text>
+  </g>
+
+  <g id="spec-B03" class="specimen" transform="translate(486 380)" role="button" tabindex="0" aria-labelledby="title-B03 desc-B03" data-id="B03" data-label-mode="text-path" data-use="远距关系 / 高弧避让">
+    <title id="title-B03">B03 贝塞尔弧</title><desc id="desc-B03">细长 LaTeX 箭头跟随三次贝塞尔弧，文字沿弧排布。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">B03</text><text class="card-title" x="58" y="25">贝塞尔弧</text><text class="card-meta" x="410" y="24" text-anchor="end">CUBIC / TEXTPATH</text>
+    <path id="path-B03" class="arrow purple" d="M27 94C92 52 331 52 399 94" marker-end="url(#al-latex-purple)"/>
+    <path id="label-path-B03" class="label-guide" d="M27 94C92 52 331 52 399 94" transform="translate(0 -14)"/>
+    <text class="edge-label"><textPath href="#label-path-B03" startOffset="50%" text-anchor="middle">跨越依赖 / derives</textPath></text>
+  </g>
+
+  <g id="spec-B04" class="specimen" transform="translate(486 504)" role="button" tabindex="0" aria-labelledby="title-B04 desc-B04" data-id="B04" data-label-mode="text-path" data-use="数据流 / S 形缓动">
+    <title id="title-B04">B04 S 形流线</title><desc id="desc-B04">S 形贝塞尔路径与实心箭头，文字沿中段曲率排列。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">B04</text><text class="card-title" x="58" y="25">S 形流线</text><text class="card-meta" x="410" y="24" text-anchor="end">S-CURVE / FLOW</text>
+    <path id="path-B04" class="arrow" d="M27 88C105 35 145 35 214 69S324 105 399 51" marker-end="url(#al-filled-teal)"/>
+    <path id="label-path-B04" class="label-guide" d="M27 88C105 35 145 35 214 69S324 105 399 51" transform="translate(0 -14)"/>
+    <text class="edge-label-small"><textPath href="#label-path-B04" startOffset="48%" text-anchor="middle">stream / 数据流</textPath></text>
+  </g>
+
+  <g id="spec-B05" class="specimen" transform="translate(486 628)" role="button" tabindex="0" aria-labelledby="title-B05 desc-B05" data-id="B05" data-label-mode="masked-above" data-use="重试 / 反馈 / 自循环">
+    <title id="title-B05">B05 回环箭头</title><desc id="desc-B05">从右侧出发并回到右侧的回环路径，使用空心端点。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">B05</text><text class="card-title" x="58" y="25">回环箭头</text><text class="card-meta" x="410" y="24" text-anchor="end">LOOPBACK / RETRY</text>
+    <circle cx="84" cy="77" r="16" fill="#172b44" stroke="#58d6c8" stroke-width="1.5"/>
+    <path class="arrow" d="M101 80H310C370 80 370 54 310 54H110C91 54 84 60 84 64" marker-end="url(#al-open-teal)"/>
+    <rect class="mask" x="176" y="27" width="106" height="19" rx="4"/><text class="edge-label-small" x="229" y="41" text-anchor="middle">retry × 3 / 重试</text>
+  </g>
+
+  <g id="spec-B06" class="specimen" transform="translate(486 752)" role="button" tabindex="0" aria-labelledby="title-B06 desc-B06" data-id="B06" data-label-mode="masked-above" data-use="线交叉 / 次要线跳桥">
+    <title id="title-B06">B06 跨线跳桥</title><desc id="desc-B06">水平箭头在竖直次要连接线交叉处使用八像素半圆跳桥。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">B06</text><text class="card-title" x="58" y="25">跨线跳桥</text><text class="card-meta" x="410" y="24" text-anchor="end">HOP R=8 / CROSSING</text>
+    <path class="arrow muted" d="M214 40V100" stroke-width="1.5" stroke-dasharray="4 5"/>
+    <path class="arrow gold" d="M27 78H206a8 8 0 0 1 16 0H399" marker-end="url(#al-filled-gold)"/>
+    <rect class="mask" x="98" y="49" width="96" height="20" rx="4"/><text class="edge-label-small" x="146" y="63" text-anchor="middle">priority / 主通道</text>
+  </g>
+
+  <g id="spec-C01" class="specimen" transform="translate(930 132)" role="button" tabindex="0" aria-labelledby="title-C01 desc-C01" data-id="C01" data-label-mode="capsule-above" data-use="异步 / 可选 / 返回">
+    <title id="title-C01">C01 异步虚线</title><desc id="desc-C01">虚线箭头搭配独立胶囊状态标签。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">C01</text><text class="card-title" x="58" y="25">异步虚线</text><text class="card-meta" x="410" y="24" text-anchor="end">DASHED / CAPSULE</text>
+    <path class="arrow coral" d="M27 79H399" stroke-dasharray="9 7" marker-end="url(#al-filled-coral)"/>
+    <rect class="chip" x="164" y="43" width="100" height="24" rx="12"/><circle cx="180" cy="55" r="3" fill="#ff718d"/><text class="edge-label-small" x="219" y="59" text-anchor="middle">ASYNC / 异步</text>
+  </g>
+
+  <g id="spec-C02" class="specimen" transform="translate(930 256)" role="button" tabindex="0" aria-labelledby="title-C02 desc-C02" data-id="C02" data-label-mode="repeated-text-path" data-use="采样 / 周期 / 脉冲">
+    <title id="title-C02">C02 点线重复标</title><desc id="desc-C02">点线与 barb 箭头，重复文字沿直线路径排布。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">C02</text><text class="card-title" x="58" y="25">点线重复标</text><text class="card-meta" x="410" y="24" text-anchor="end">DOTTED / REPEAT</text>
+    <path id="path-C02" class="arrow gold" d="M27 81H399" stroke-width="2" stroke-dasharray="1 9" marker-end="url(#al-barb-gold)"/>
+    <path id="label-path-C02" class="label-guide" d="M27 62H399"/>
+    <text class="edge-label-small"><textPath href="#label-path-C02" startOffset="8%">采样 · sample · 采样 · sample ·</textPath></text>
+  </g>
+
+  <g id="spec-C03" class="specimen" transform="translate(930 380)" role="button" tabindex="0" aria-labelledby="title-C03 desc-C03" data-id="C03" data-label-mode="text-path" data-use="信号 / 波 / 能量传播">
+    <title id="title-C03">C03 波形箭头</title><desc id="desc-C03">正弦波路径与 stealth 箭头，文字沿波形中心段排布。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">C03</text><text class="card-title" x="58" y="25">波形箭头</text><text class="card-meta" x="410" y="24" text-anchor="end">WAVE / SIGNAL</text>
+    <path id="path-C03" class="arrow blue" d="M27 78C50 48 73 108 96 78S142 48 165 78 211 108 234 78 280 48 303 78 349 108 399 65" marker-end="url(#al-stealth-blue)"/>
+    <path id="label-path-C03" class="label-guide" d="M27 78C50 48 73 108 96 78S142 48 165 78 211 108 234 78 280 48 303 78 349 108 399 65" transform="translate(0 -16)"/>
+    <text class="edge-label-small"><textPath href="#label-path-C03" startOffset="52%" text-anchor="middle">signal / 信号传播</textPath></text>
+  </g>
+
+  <g id="spec-C04" class="specimen" transform="translate(930 504)" role="button" tabindex="0" aria-labelledby="title-C04 desc-C04" data-id="C04" data-label-mode="inline-knockout" data-use="尺寸 / 跨度 / 区间">
+    <title id="title-C04">C04 尺寸标注</title><desc id="desc-C04">带两端空心箭头和刻度的尺寸线，数值在中间断口中。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">C04</text><text class="card-title" x="58" y="25">尺寸标注</text><text class="card-meta" x="410" y="24" text-anchor="end">DIMENSION / RANGE</text>
+    <path class="arrow" d="M29 78H164" marker-start="url(#al-open-teal)"/><path class="arrow" d="M264 78H399" marker-end="url(#al-open-teal)"/>
+    <path class="arrow muted" d="M29 57V96M399 57V96" stroke-width="1.2"/><text class="edge-label" x="214" y="82" text-anchor="middle">42 px ± 2</text>
+  </g>
+
+  <g id="spec-C05" class="specimen" transform="translate(930 628)" role="button" tabindex="0" aria-labelledby="title-C05 desc-C05" data-id="C05" data-label-mode="split-labels" data-use="组合 / 所有权 / 输出">
+    <title id="title-C05">C05 组合关系</title><desc id="desc-C05">空心菱形起点、中间节点和实心终点组成一条语义连接。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">C05</text><text class="card-title" x="58" y="25">组合关系</text><text class="card-meta" x="410" y="24" text-anchor="end">DIAMOND / NODE</text>
+    <path class="arrow blue" d="M29 76H399" marker-start="url(#al-diamond-blue)" marker-end="url(#al-stealth-blue)"/>
+    <circle cx="230" cy="76" r="9" fill="#0f1d31" stroke="#7fa6ff" stroke-width="2"/><circle cx="230" cy="76" r="3" fill="#7fa6ff"/>
+    <rect class="mask" x="77" y="46" width="80" height="20" rx="4"/><text class="edge-label-small" x="117" y="60" text-anchor="middle">owns / 拥有</text>
+    <rect class="mask" x="286" y="83" width="78" height="18" rx="4"/><text class="edge-label-small" x="325" y="96" text-anchor="middle">emits / 输出</text>
+  </g>
+
+  <g id="spec-C06" class="specimen" transform="translate(930 752)" role="button" tabindex="0" aria-labelledby="title-C06 desc-C06" data-id="C06" data-label-mode="end-callout" data-use="强度 / 进度 / 方向聚焦">
+    <title id="title-C06">C06 渐变强调</title><desc id="desc-C06">由蓝紫渐变到珊瑚色的加粗曲线，末端带 callout。</desc>
+    <rect class="card" width="428" height="112" rx="16"/>
+    <text class="card-id" x="18" y="25">C06</text><text class="card-title" x="58" y="25">渐变强调</text><text class="card-meta" x="410" y="24" text-anchor="end">GRADIENT / FOCUS</text>
+    <path d="M27 88C135 83 230 44 399 70" fill="none" stroke="url(#al-flow-gradient)" stroke-width="5" stroke-linecap="round" marker-end="url(#al-filled-coral)" filter="url(#al-soft-glow)"/>
+    <path d="M324 46 348 62" fill="none" stroke="#ff718d" stroke-width="1.2"/><rect class="chip" x="276" y="31" width="92" height="24" rx="6"/><text class="edge-label-small" x="322" y="47" text-anchor="middle">FOCUS / 聚焦</text>
+  </g>
+</svg>

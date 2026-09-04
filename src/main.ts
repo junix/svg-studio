@@ -1,12 +1,14 @@
 import paper from 'paper';
 import rough from 'roughjs/bundled/rough.esm.js';
+import { mountArrowLibrary } from './arrow-library';
 import './style.css';
 
 declare global { interface Window { __VIS_READY__?: boolean; __INTERACTION_COUNT__?: number } }
 
 const W = 1400, H = 900;
 const scene = new URLSearchParams(location.search).get('scene') ?? 'botanical';
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `<canvas id="stage" width="${W}" height="${H}" aria-label="${scene}"></canvas>`;
+const app = document.querySelector<HTMLDivElement>('#app')!;
+app.innerHTML = `<canvas id="stage" width="${W}" height="${H}" aria-label="${scene}"></canvas>`;
 const canvas = document.querySelector<HTMLCanvasElement>('#stage')!;
 paper.setup(canvas);
 paper.project.clear();
@@ -175,9 +177,14 @@ function typeSystem() {
 }
 
 const renderers:Record<string,()=>void>={botanical,metro,orbits,topology,'isometric-city':isometricCity,'wave-lab':waveLab,'contour-map':contourMap,circuit,timeline,molecule,loom,'type-system':typeSystem};
-(renderers[scene]??botanical)();
-paper.view.update();
-window.__INTERACTION_COUNT__ = 0;
-canvas.addEventListener('pointermove', () => { window.__INTERACTION_COUNT__ = (window.__INTERACTION_COUNT__ ?? 0)+1; canvas.style.filter='saturate(1.04)'; });
-canvas.addEventListener('pointerdown', () => { window.__INTERACTION_COUNT__ = (window.__INTERACTION_COUNT__ ?? 0)+1; });
-window.__VIS_READY__ = true;
+
+if (scene === 'arrow-library') {
+  mountArrowLibrary(app);
+} else {
+  (renderers[scene]??botanical)();
+  paper.view.update();
+  window.__INTERACTION_COUNT__ = 0;
+  canvas.addEventListener('pointermove', () => { window.__INTERACTION_COUNT__ = (window.__INTERACTION_COUNT__ ?? 0)+1; canvas.style.filter='saturate(1.04)'; });
+  canvas.addEventListener('pointerdown', () => { window.__INTERACTION_COUNT__ = (window.__INTERACTION_COUNT__ ?? 0)+1; });
+  window.__VIS_READY__ = true;
+}

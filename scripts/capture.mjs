@@ -1,13 +1,27 @@
 import { spawn } from 'node:child_process';
 import { mkdir, readFile } from 'node:fs/promises';
+import { createServer } from 'node:net';
 import { chromium } from 'playwright-core';
 import { PNG } from 'pngjs';
 
 const catalog = JSON.parse(await readFile(new URL('../catalog.json', import.meta.url), 'utf8'));
-if (!Array.isArray(catalog) || catalog.length < 12) throw new Error('reference library requires at least 12 cataloged scenes');
+if (!Array.isArray(catalog) || catalog.length < 13) throw new Error('reference library requires at least 13 cataloged scenes');
+const arrowLibrary = JSON.parse(await readFile(new URL('../arrow-library.json', import.meta.url), 'utf8'));
+if (!Array.isArray(arrowLibrary.templates) || arrowLibrary.templates.length !== 18) throw new Error('arrow library requires exactly 18 indexed templates');
+const indexedArrowIds = arrowLibrary.templates.map(item => item.id);
+if (new Set(indexedArrowIds).size !== indexedArrowIds.length) throw new Error('arrow library template ids must be unique');
 const scenes = JSON.parse(process.env.SCENES ?? JSON.stringify(catalog.map(item => item.id)));
-const port = Number(process.env.PORT ?? 4173);
-const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port)], {stdio:'pipe'});
+const findAvailablePort = () => new Promise((resolve, reject) => {
+  const probe = createServer();
+  probe.once('error', reject);
+  probe.listen(0, '127.0.0.1', () => {
+    const address = probe.address();
+    if (!address || typeof address === 'string') return reject(new Error('could not allocate a local test port'));
+    probe.close(error => error ? reject(error) : resolve(address.port));
+  });
+});
+const port = process.env.PORT ? Number(process.env.PORT) : await findAvailablePort();
+const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port),'--strictPort'], {stdio:'pipe'});
 const stop = () => server.kill('SIGTERM');
 process.on('exit', stop);
 await new Promise((resolve, reject) => {
@@ -31,12 +45,49 @@ try {
     await page.goto(`http://127.0.0.1:${port}/?scene=${scene}&export=1`, {waitUntil:'networkidle'});
     await page.waitForFunction(() => window.__VIS_READY__ === true, null, {timeout:15000});
     const stage = page.locator('#stage');
+    if (scene === 'arrow-library') {
+      const structure = await page.evaluate(() => {
+        const stage = document.querySelector('#stage');
+        const specimens = [...document.querySelectorAll('.specimen')];
+        return {
+          nativeSvg: stage instanceof SVGSVGElement,
+          ids: specimens.map(item => item.getAttribute('data-id')),
+          labelModes: new Set(specimens.map(item => item.getAttribute('data-label-mode'))).size,
+          textPaths: document.querySelectorAll('textPath').length,
+          markers: document.querySelectorAll('marker').length,
+          markerReferences: document.querySelectorAll('[marker-start], [marker-end]').length,
+          brokenReferences: [...document.querySelectorAll('[marker-start], [marker-end], textPath')].flatMap(item => {
+            const values = [item.getAttribute('marker-start'), item.getAttribute('marker-end'), item.getAttribute('href')].filter(Boolean);
+            return values.filter(value => {
+              const id = value.startsWith('url(#') && value.endsWith(')') ? value.slice(5, -1) : value.startsWith('#') ? value.slice(1) : null;
+              return id && !document.getElementById(id);
+            });
+          }),
+          titledSpecimens: specimens.filter(item => item.querySelector(':scope > title') && item.querySelector(':scope > desc')).length,
+          apiIds: window.__ARROW_LIBRARY__?.ids ?? [],
+          selected: window.__ARROW_LIBRARY__?.selected,
+          templateAvailable: Boolean(window.__ARROW_LIBRARY__?.getTemplate('B02')),
+        };
+      });
+      const expectedIds = JSON.stringify(indexedArrowIds);
+      if (!structure.nativeSvg || JSON.stringify(structure.ids) !== expectedIds || JSON.stringify(structure.apiIds) !== expectedIds) throw new Error(`arrow-library: SVG/JSON id mismatch ${JSON.stringify(structure)}`);
+      if (structure.labelModes < 8 || structure.textPaths < 5 || structure.markers < 10 || structure.markerReferences < 18 || structure.brokenReferences.length || structure.titledSpecimens !== 18 || structure.selected !== 'A01' || !structure.templateAvailable) throw new Error(`arrow-library: incomplete native SVG structure ${JSON.stringify(structure)}`);
+      console.log(`arrow-library: specimens=${structure.ids.length}, labelModes=${structure.labelModes}, textPaths=${structure.textPaths}, markers=${structure.markers}`);
+    }
     await stage.screenshot({path:`out/${scene}-transparent.png`, omitBackground:true});
     const before = await page.evaluate(() => window.__INTERACTION_COUNT__ ?? 0);
     const box = await stage.boundingBox();
     if (!box) throw new Error(`${scene}: stage has no layout box`);
     await page.mouse.move(box.x + box.width * .48, box.y + box.height * .52);
     await page.mouse.move(box.x + box.width * .54, box.y + box.height * .46);
+    if (scene === 'arrow-library') {
+      await page.locator('#spec-C06').click();
+      const clicked = await page.evaluate(() => window.__ARROW_LIBRARY__?.selected);
+      await page.locator('#spec-B02').focus();
+      await page.keyboard.press('Enter');
+      const keyed = await page.evaluate(() => window.__ARROW_LIBRARY__?.selected);
+      if (clicked !== 'C06' || keyed !== 'B02') throw new Error(`arrow-library: selection contract failed (click=${clicked}, keyboard=${keyed})`);
+    }
     const after = await page.evaluate(() => window.__INTERACTION_COUNT__ ?? 0);
     if (after <= before) throw new Error(`${scene}: interaction contract did not fire`);
     if (errors.length) throw new Error(`${scene}: browser errors: ${errors.join(' | ')}`);

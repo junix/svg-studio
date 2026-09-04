@@ -10,5 +10,6 @@
   {"id":"timeline","use":"narrative","family":"narrative","question":"How can a mission timeline expose parallel work and dependencies?","complexity":"advanced","tags":["timeline","lanes","milestones"]},
   {"id":"molecule","use":"scientific illustration","family":"scientific illustration","question":"How can bonding geometry and functional groups be read at a glance?","complexity":"advanced","tags":["molecule","graph","chemistry"]},
   {"id":"loom","use":"generative vector","family":"generative vector","question":"How can crossing ribbons reveal a repeatable weaving grammar?","complexity":"advanced","tags":["ribbons","pattern","masking"]},
-  {"id":"type-system","use":"editorial graphic","family":"editorial graphic","question":"How can a modular typographic scale become a reusable poster system?","complexity":"advanced","tags":["typography","grid","poster"]}
+  {"id":"type-system","use":"editorial graphic","family":"editorial graphic","question":"How can a modular typographic scale become a reusable poster system?","complexity":"advanced","tags":["typography","grid","poster"]},
+  {"id":"arrow-library","use":"diagram reference library","family":"annotated connectors","question":"How can agents reliably draw varied SVG lines, arrowheads, and labels as one connected system?","complexity":"advanced","tags":["svg","arrow","connector","textPath","annotation","latex"]}
 ]
