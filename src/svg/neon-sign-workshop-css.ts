@@ -92,7 +92,8 @@ export const PLATE_SHAPES = {
   arrow: 'polygon(0% 12%, 78% 12%, 78% 0%, 100% 50%, 78% 100%, 50% 88%, 0% 88%, 4% 50%, 0% 12%)',
 };
 
-const PUDDLE_MASKS = 'radial-gradient(circle at 38% 50%, #000 0 42%, transparent 43%), radial-gradient(circle at 62% 50%, #000 0 42%, transparent 43%)';
+/* two hard-edged discs (r = 40% of the farthest-corner ray ≈ 54px, centres 57px apart) so the lens is smaller than each crescent */
+const PUDDLE_MASKS = 'radial-gradient(circle at 34% 50%, #000 0 40%, transparent 41%), radial-gradient(circle at 66% 50%, #000 0 40%, transparent 41%)';
 
 export function stageCss(): string {
   return `
@@ -134,8 +135,8 @@ ${neonFontFaces()}
 #stage .card-6{clip-path:inset(4px)}
 @supports (clip-path:rect(0 auto auto 0)){#stage .card-6{clip-path:rect(4px auto auto 4px)}}
 /* css:filter-chaining + css:filter-functions-on-svg — url() filter mixed with functions; order matters */
-#stage .chain-a{filter:url(#ns-f-tint) drop-shadow(6px 8px 4px #001f2e) blur(.4px)}
-#stage .chain-b{filter:drop-shadow(6px 8px 4px #001f2e) url(#ns-f-tint)}
+#stage .chain-a{filter:url(#ns-f-tint) drop-shadow(6px 8px 4px #00060c) blur(.4px)}
+#stage .chain-b{filter:drop-shadow(6px 8px 4px #00060c) url(#ns-f-tint)}
 /* css:clip-path-geometry-box — one tube path, three reference boxes */
 #stage .jig-fill{clip-path:inset(10%) fill-box}
 #stage .jig-stroke{clip-path:inset(10%) stroke-box}

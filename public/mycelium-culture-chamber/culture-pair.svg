@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- mycelium-culture-chamber companion: a standalone XML SVG document (concept:standalone-svg-document).
+     Referenced twice from the record card: via <image href> (scripts blocked, only dishes + labels render —
+     concept:script-blocked-in-img) and via <object type="image/svg+xml"> (the CDATA script below runs and grows
+     two colonies). The script contains `<` and `&&`, so it MUST sit in a CDATA section (concept:script-cdata). -->
+<svg xmlns="http://www.w3.org/2000/svg" width="106" height="40" viewBox="0 0 106 40" role="img" aria-label="culture pair">
+  <title>culture pair</title>
+  <defs>
+    <clipPath id="clip-a"><circle cx="19" cy="20" r="13"/></clipPath>
+    <clipPath id="clip-b"><circle cx="53" cy="20" r="13"/></clipPath>
+    <radialGradient id="agar"><stop offset="0" stop-color="#ece2bd"/><stop offset="1" stop-color="#cdb98a"/></radialGradient>
+  </defs>
+  <rect width="106" height="40" fill="#22302e" rx="3"/>
+  <circle cx="19" cy="20" r="15" fill="#ffffff" fill-opacity="0.12" stroke="#cfd8d4" stroke-opacity="0.5"/>
+  <circle cx="19" cy="20" r="13" fill="url(#agar)"/>
+  <g id="grow-a" clip-path="url(#clip-a)" data-cx="19" data-cy="20" data-seed="31"/>
+  <circle cx="53" cy="20" r="15" fill="#ffffff" fill-opacity="0.12" stroke="#cfd8d4" stroke-opacity="0.5"/>
+  <circle cx="53" cy="20" r="13" fill="url(#agar)"/>
+  <g id="grow-b" clip-path="url(#clip-b)" data-cx="53" data-cy="20" data-seed="47"/>
+  <g font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#e8efe6">
+    <text x="72" y="13">A-03</text>
+    <text x="72" y="25">B-07</text>
+    <text x="72" y="37" fill="#a9bfb3">03-14</text>
+  </g>
+  <script type="application/ecmascript"><![CDATA[
+    (function () {
+      var SVG_NS = 'http://www.w3.org/2000/svg';
+      function mulberry32(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+      function grow(host) {
+        var cx = +host.getAttribute('data-cx'), cy = +host.getAttribute('data-cy'), rng = mulberry32(+host.getAttribute('data-seed'));
+        var d = [], tips = [], i, g;
+        for (i = 0; i < 3 && tips.length < 8; i++) tips.push({ x: cx, y: cy, ang: i * 2.1 + rng() * 0.6 });
+        function F(tip, len) { var ex = tip.x + Math.cos(tip.ang) * len, ey = tip.y + Math.sin(tip.ang) * len; d.push('M' + tip.x.toFixed(1) + ' ' + tip.y.toFixed(1) + 'L' + ex.toFixed(1) + ' ' + ey.toFixed(1)); tip.x = ex; tip.y = ey; }
+        for (g = 0; g < 5; g++) {
+          var p = 0.75 - 0.08 * g, len = 3.2 * Math.pow(0.9, g), next = [];
+          for (i = 0; i < tips.length; i++) {
+            var tip = tips[i]; F(tip, len);
+            for (var b = 0; b < 2; b++) if (rng() < p) { var br = { x: tip.x, y: tip.y, ang: tip.ang + (b ? -1 : 1) * (0.35 + rng() * 0.3) }; F(br, len); next.push(br); }
+            tip.ang += (rng() - 0.5) * 0.5; F(tip, len); next.push(tip);
+          }
+          tips = next;
+        }
+        var path = document.createElementNS(SVG_NS, 'path');
+        path.setAttribute('d', d.join('')); path.setAttribute('fill', 'none'); path.setAttribute('stroke', '#f2f7ef');
+        path.setAttribute('stroke-width', '0.55'); path.setAttribute('stroke-opacity', '0.8'); path.setAttribute('stroke-linecap', 'round');
+        host.appendChild(path);
+      }
+      grow(document.getElementById('grow-a')); grow(document.getElementById('grow-b'));
+    })();
+  ]]></script>
+</svg>

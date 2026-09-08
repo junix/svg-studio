@@ -76,7 +76,7 @@ function buildDefs(): SVGDefsElement {
     <filter id="ns-f-classic" ${region}>
       <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
       <feOffset in="blur" dx="6" dy="8" result="shifted"/>
-      <feFlood flood-color="#001f2e" flood-opacity=".95" result="ink"/>
+      <feFlood flood-color="#00060c" flood-opacity=".95" result="ink"/>
       <feComposite in="ink" in2="shifted" operator="in" result="shadow"/>
       <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
@@ -91,7 +91,7 @@ function buildDefs(): SVGDefsElement {
     </filter>
     <!-- card 5 · el:feDropShadow — one primitive, parameters identical to card 3 for pixel comparison -->
     <filter id="ns-f-drop" ${region}>
-      <feDropShadow dx="6" dy="8" stdDeviation="4" flood-color="#001f2e" flood-opacity=".95"/>
+      <feDropShadow dx="6" dy="8" stdDeviation="4" flood-color="#00060c" flood-opacity=".95"/>
     </filter>
     <!-- card 6 · tint used inside a CSS filter chain -->
     <filter id="ns-f-tint" color-interpolation-filters="sRGB">
@@ -129,7 +129,7 @@ function buildDefs(): SVGDefsElement {
 
     <radialGradient id="ns-g-spill" cx=".5" cy=".5" r=".55"><stop offset="0" stop-color="#ff2f9d" stop-opacity=".28"/><stop offset=".55" stop-color="#8ff6ff" stop-opacity=".1"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
     <linearGradient id="ns-g-asphalt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1a25"/><stop offset="1" stop-color="#050d14"/></linearGradient>
-    <linearGradient id="ns-g-wet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2d6f8e"/><stop offset=".5" stop-color="#173e55"/><stop offset="1" stop-color="#4b2a5e"/></linearGradient>
+    <linearGradient id="ns-g-wet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4aa3c8"/><stop offset=".5" stop-color="#25668a"/><stop offset="1" stop-color="#6a4488"/></linearGradient>
     <linearGradient id="ns-g-far" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1b3a4c"/><stop offset=".5" stop-color="#2a5068"/><stop offset="1" stop-color="#1b3a4c"/></linearGradient>
     <linearGradient id="ns-g-patch" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8ff6ff"/><stop offset="1" stop-color="#ff2f9d"/></linearGradient>
     <linearGradient id="ns-g-rain" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ff0ff"/><stop offset="1" stop-color="#2b7aa0"/></linearGradient>
@@ -201,23 +201,27 @@ function benchBase(): SVGGElement {
 }
 
 /** Jig: three copies of the tube clipped with inset(10%) against fill-box / stroke-box / view-box.
- *  Each copy sits directly inside its own nested <svg> and is scaled by the viewBox, not by a transform,
- *  so `view-box` really is that 400×458 viewBox and the printed clip numbers are in tube units. */
+ *  Each copy sits directly (no transform) inside its own nested <svg viewBox="0 0 320 350">: Chromium resolves
+ *  `view-box` as (0,0,viewport-size) in the element's local user space — it ignores the viewBox origin and any
+ *  ancestor transform — so the tube must live at the viewport origin for the printed numbers to be the truth.
+ *  A ghost of the unclipped tube and a dashed outline of the computed clip rectangle are drawn in every cell. */
 function jigPanel(): SVGGElement {
   const g = el('g', { id: 'ns-jig' });
-  const cellW = 96, cellH = 104, cellY = 130;
-  const VB = { x: -60, y: -146.5, w: 400, h: 433 }; // 400/433 ≈ 96/104, tube centred, 10% inset (40 × 43.3) clears the stroke box
+  const cellW = 96, cellH = 104, cellY = 130, pad = 6;
+  const VB = { x: 0, y: 0, w: 320, h: 350 }; // 320/350 ≈ 84/92 (cell minus padding); the tube spans 0..280 × 0..140 inside it
   const cells: Array<[string, string, { x: number; y: number; w: number; h: number }]> = [
     ['jig-fill', 'fill-box', TUBE_FILL_BOX], ['jig-stroke', 'stroke-box', TUBE_STROKE_BOX], ['jig-view', 'view-box', VB]];
   cells.forEach(([cls, name, box], i) => {
     const cx = 1066 + i * 104;
-    const cell = el('svg', { x: cx, y: cellY, width: cellW, height: cellH, viewBox: `${VB.x} ${VB.y} ${VB.w} ${VB.h}` });
-    cell.append(el('rect', { x: VB.x + 2, y: VB.y + 2, width: VB.w - 4, height: VB.h - 4, rx: 16, fill: '#0b1620', stroke: '#2a4758', 'stroke-width': 4 }));
+    g.append(el('rect', { x: cx + .5, y: cellY + .5, width: cellW - 1, height: cellH - 1, rx: 4, fill: '#0b1620', stroke: '#2a4758' }));
+    const cell = el('svg', { x: cx + pad, y: cellY + pad, width: cellW - 2 * pad, height: cellH - 2 * pad, viewBox: `${VB.x} ${VB.y} ${VB.w} ${VB.h}` });
     // ghost of the unclipped tube so the eye can read what each reference box removed
     cell.append(tube({ stroke: '#ffd166', 'stroke-opacity': .16 }));
     cell.append(tube({ class: cls, stroke: '#ffd166' }));
-    g.append(cell);
+    // the clip rectangle this reference box + inset(10%) produces, in tube units
     const ix = box.w * .1, iy = box.h * .1;
+    cell.append(el('rect', { x: fmt(box.x + ix, 1), y: fmt(box.y + iy, 1), width: fmt(box.w - 2 * ix, 1), height: fmt(box.h - 2 * iy, 1), fill: 'none', stroke: '#8ff6ff', 'stroke-width': 2.5, 'stroke-dasharray': '8 6', 'stroke-opacity': .8 }));
+    g.append(cell);
     g.append(label(cx + 2, 245, name, { 'font-weight': 700 }));
     g.append(mono(cx + 2, 256, `box ${fmt(box.w, 1)}×${fmt(box.h, 1)} u`));
     g.append(mono(cx + 2, 267, `inset ${fmt(ix, 1)} ${fmt(iy, 1)} u`, { fill: DIM }));
@@ -272,7 +276,7 @@ function cardsBand(): SVGGElement {
   specs.forEach((spec, i) => {
     const x = cardX(i), cx = x + CARD_W / 2, cy = CARD_Y + 76;
     const card = el('g', { class: `card ${spec.cls}`, 'data-card': i + 1 });
-    card.append(el('rect', { x, y: CARD_Y, width: CARD_W, height: CARD_FACE_H, fill: '#0c1a26', 'fill-opacity': .94 }));
+    card.append(el('rect', { x, y: CARD_Y, width: CARD_W, height: CARD_FACE_H, fill: '#132532', 'fill-opacity': .95 }));
     if (spec.build) spec.build(card, cx, cy);
     else card.append(glyph(cx, cy, { filter: `url(#${spec.filter})` }));
     band.append(card);

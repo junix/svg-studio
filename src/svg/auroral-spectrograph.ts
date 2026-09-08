@@ -23,6 +23,8 @@ const barHeight = (nm: number) => 6 + 62 * intensity(nm);
 const f = (n: number, d = 2) => n.toFixed(d).replace(/\.?0+$/, '') || '0';
 
 const label = (x: number, y: number, str: string, attrs: Attrs = {}) => el('text', { x, y, 'font-size': 11, fill: '#9fb3c8', ...attrs }, str);
+/** Dark halo for text drawn over the curtains (stroke painted first, fill on top). */
+const HALO: Attrs = { stroke: '#060b14', 'stroke-width': 3, 'stroke-linejoin': 'round', 'paint-order': 'stroke' };
 
 // ---------------------------------------------------------------------------------------------------------
 // Curtain geometry: the fold x(t) = x0 + A·sin(2πk t + φ) sampled exactly as 3 Hermite cubics per edge.
@@ -154,7 +156,7 @@ function buildSky(bands: Band[]): SVGGElement {
   const rnd = mulberry32(0xa0a0);
   for (const b of bands) {
     // pv:fill=url() — every curtain body is painted by its own href-only gradient
-    curtains.append(el('path', { class: `curtain fam-${b.fam}`, d: bandPath(b), fill: `url(#curtain-${b.i})`, 'fill-opacity': b.fam === 'B' ? 0.9 : 0.72 }));
+    curtains.append(el('path', { class: `curtain fam-${b.fam}`, d: bandPath(b), fill: `url(#curtain-${b.i})`, 'fill-opacity': b.fam === 'B' ? 0.8 : 0.6 }));
     if (b.fam === 'Z') curtains.append(el('path', { d: bandPath(b), fill: 'none', stroke: '#ff5f7e', 'stroke-opacity': 0.55, 'stroke-width': 1, 'stroke-dasharray': '4 4' }));
     // concept:gradient-on-stroke — open crest path stroked with the horizontal href ramp
     crests.append(el('path', { d: crestPath(b), stroke: 'url(#crestRamp)', 'stroke-width': f(3 + 2 * rnd(), 1) }));
@@ -164,7 +166,7 @@ function buildSky(bands: Band[]): SVGGElement {
   // Band 37 note (rotated along the band): zero-length vector → last stop → #ff2f6d @ opacity 0 → nothing is painted.
   const z = bands[36];
   const nx = z.x0 + z.w / 2 + 10, ny = 300;
-  sky.append(el('text', { x: nx, y: ny, 'font-size': 11, fill: '#ff8fa6', 'font-family': FONT_CJK, transform: `rotate(-90 ${nx} ${ny})`, 'text-anchor': 'middle' },
+  sky.append(el('text', { x: nx, y: ny, 'font-size': 11, fill: '#ff8fa6', 'font-family': FONT_CJK, transform: `rotate(-90 ${nx} ${ny})`, 'text-anchor': 'middle', ...HALO },
     '零色散：光栅失调 · x1=x2 y1=y2 → 末 stop (opacity 0)'));
 
   // Isolated thick crest (构造要点 5): objectBoundingBox excludes the stroke, so the round caps beyond the geometry
@@ -174,7 +176,7 @@ function buildSky(bands: Band[]): SVGGElement {
   sky.append(el('path', { id: 'crest-demo', d: wave, fill: 'none', stroke: 'url(#crestDemo)', 'stroke-width': 14, 'stroke-linecap': 'round' }));
   sky.append(el('path', { d: 'M70 446 L300 446', fill: 'none', stroke: '#ffffff', 'stroke-opacity': 0.35, 'stroke-width': 0.8, 'stroke-dasharray': '2 3' }));
   sky.append(el('path', { d: 'M310 446 L326 436', fill: 'none', stroke: '#9fb3c8', 'stroke-width': 0.8 }));
-  sky.append(label(330, 434, 'stroke-width 14 · bbox 不含描边 → 两端圆帽为首末 stop 的 pad 平台', { 'font-family': FONT_CJK }));
+  sky.append(label(330, 434, 'stroke-width 14 · bbox 不含描边 → 两端圆帽 = 首末 stop 的 pad 平台', { 'font-family': FONT_CJK, fill: '#dbe7f3', ...HALO }));
   return sky;
 }
 
@@ -213,8 +215,7 @@ function buildSpectrum(defs: SVGDefsElement): SVGGElement {
   // sweep highlight clipped to the bar envelope
   g.append(el('rect', { x: SPEC_X0, y: SPEC_TOP - 2, width: SPEC_X1 - SPEC_X0, height: SPEC_BASE - SPEC_TOP + 2, fill: 'url(#sweep)', 'clip-path': 'url(#specClip)' }));
   g.append(twin);
-  g.append(label(SPEC_X1 - 4, 594, 'objectBoundingBox twin ↑', { 'text-anchor': 'end', 'font-family': FONT_SANS, x: 1240 }));
-
+  
   // Wavelength labels (构造要点 15): gradient text, one built from two tspans (bbox = whole <text>), leaders stroked with the same ramp.
   const lines: Array<[number, string, string | null]> = [[427.8, '427.8', null], [557.7, '557.7', null], [630.0, '630', '.0']];
   for (const [nm, main, tail] of lines) {
@@ -225,6 +226,7 @@ function buildSpectrum(defs: SVGDefsElement): SVGGElement {
     g.append(t);
   }
   g.append(label(SPEC_X0, 597, 'λ / nm', { fill: '#7f93aa' }));
+  g.append(label(250, 597, '上行 64 片共用 userSpaceOnUse 连续色散 · 下行 objectBoundingBox 孪生条各跑整个色阶', { fill: '#7f93aa', 'font-family': FONT_CJK }));
 
   // Filter slots (构造要点 11): concept:paint-server-fallback — `#slot-missing` exists but is an empty <g>, not a paint
   // server, so the reference is invalid: slot A falls back to #f2a154, slot B (no fallback) paints nothing.
@@ -232,7 +234,7 @@ function buildSpectrum(defs: SVGDefsElement): SVGGElement {
   const slot = (x: number, fill: string, id: string) => el('rect', { id, x, y: 584, width: 26, height: 26, rx: 3, fill, stroke: '#5b6b82', 'stroke-width': 1, 'stroke-dasharray': '3 3' });
   g.append(slot(1268, 'url(#slot-missing) #f2a154', 'slotA'), slot(1310, 'url(#slot-missing)', 'slotB'));
   g.append(label(1281, 622, '备用色', { 'text-anchor': 'middle', 'font-family': FONT_CJK }), label(1323, 622, '空载', { 'text-anchor': 'middle', 'font-family': FONT_CJK }));
-  g.append(label(1262, 598, 'fill="url(#slot-missing) …"', { 'text-anchor': 'end', 'font-family': FONT_MONO, fill: '#7f93aa' }));
+  g.append(label(1336, 608, 'url(#slot-missing) #f2a154 | none', { 'text-anchor': 'end', 'font-family': FONT_MONO, fill: '#7f93aa', 'font-size': 10.5 }));
   return g;
 }
 
@@ -246,6 +248,9 @@ function wireInteraction(stage: SVGSVGElement, readout: SVGTextElement): void {
   const gloss = stage.querySelector<SVGRadialGradientElement>('#calGloss')!;
   const base = stops.map(s => s.offset.baseVal);
   let engaged = false;
+  // A paused timeline still applies animVal (and endElement() does not resample a paused clock), so while the pointer
+  // is engaged the master's <animate> nodes are detached — baseVal is then what renders — and re-attached on leave.
+  const parked = animates.map(a => ({ node: a, parent: a.parentNode as Element }));
   const setLength = (len: SVGAnimatedLength, v: number) => len.baseVal.newValueSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_NUMBER, v);
   const stagePoint = (e: PointerEvent) => {
     const m = stage.getScreenCTM();
@@ -254,11 +259,9 @@ function wireInteraction(stage: SVGSVGElement, readout: SVGTextElement): void {
   };
   stage.addEventListener('pointermove', e => {
     if (!engaged) {
-      // A paused timeline still applies animVal, so end the master animations too — then baseVal is what renders.
       engaged = true;
       stage.pauseAnimations();
-      for (const a of animates) a.endElement();
-      stage.setCurrentTime(stage.getCurrentTime());
+      for (const { node } of parked) node.remove();
     }
     const p = stagePoint(e);
     const u = Math.max(-1, Math.min(1, (p.x / 1400) * 2 - 1));
@@ -277,7 +280,7 @@ function wireInteraction(stage: SVGSVGElement, readout: SVGTextElement): void {
     stops.forEach((s, i) => { s.offset.baseVal = base[i]; });
     setLength(gloss.fx, 0.34); setLength(gloss.fy, 0.30);
     readout.textContent = 'Δλ +0.00 · f=(0.34,0.30)';
-    for (const a of animates) a.beginElement();
+    for (const { node, parent } of parked) parent.append(node);
     if (!isExport()) stage.unpauseAnimations();
   });
 }
@@ -325,13 +328,13 @@ export async function render(stage: SVGSVGElement): Promise<void> {
   stage.append(label(90, 142, '极光分光台 · 1 stop master · 44 curtains · 96 wedges · 0 bitmaps', { 'font-size': 13, fill: '#dbe7f3', 'font-family': FONT_CJK, stroke: '#060b14', 'stroke-width': 3, 'paint-order': 'stroke' }));
   const readout = el('text', { id: 'readout', x: 1330, y: 72, 'font-size': 12, 'font-family': FONT_MONO, fill: '#dbe7f3', 'text-anchor': 'end' }, 'Δλ +0.00 · f=(0.34,0.30)');
   stage.append(readout);
-  stage.append(label(1330, 88, 'A 继承母版 · B reflect · C rotate(θ) · D pad · Z 零长', { 'text-anchor': 'end', 'font-family': FONT_CJK, fill: '#7f93aa' }));
+  stage.append(label(1330, 88, 'A 继承母版 · B reflect · C rotate(θ) · D pad · Z 零长', { 'text-anchor': 'end', 'font-family': FONT_CJK, fill: '#9fb3c8', ...HALO }));
 
   stage.append(buildSpectrum(defs));
   stage.append(panelTitle(72, 616, '光栅标定卡 · VECTOR / SPREAD / OFFSET'), card);
   stage.append(panelTitle(456, 616, '透过率与赋色 · STOP-OPACITY / STOP-COLOR'), trans);
   stage.append(panelTitle(720, 616, '标定球阵 · fx fy fr cx cy'), spheres);
-  stage.append(panelTitle(1022, 616, '角向色轮 · 96 × href'), wheel);
+  stage.append(panelTitle(1016, 616, '角向色轮 · 96×href'), wheel);
 
   mark(stage,
     'concept:paint-server-fallback', 'concept:conic-gradient-emulation', 'concept:gradient-on-stroke', 'concept:gradient-on-text',

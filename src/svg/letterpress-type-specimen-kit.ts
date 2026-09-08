@@ -65,9 +65,9 @@ export interface Report {
 export const txt = (x: number, y: number, content: string, attrs: Attrs = {}): SVGTextElement =>
   el('text', { x, y, ...attrs }, content);
 /** Small Chinese/Latin caption (class .lab → CJK 11px, note colour). */
-export const lab = (x: number, y: number, s: string, attrs: Attrs = {}): SVGTextElement => txt(x, y, s, { class: 'lab', ...attrs });
+export const lab = (x: number, y: number, s: string, attrs: Attrs = {}): SVGTextElement => txt(x, y, s, { class: 'lab', 'font-size': 11, fill: NOTE, ...attrs });
 /** Tabular readout (class .num → mono + tabular-nums). */
-export const mono = (x: number, y: number, s: string, attrs: Attrs = {}): SVGTextElement => txt(x, y, s, { class: 'num', ...attrs });
+export const mono = (x: number, y: number, s: string, attrs: Attrs = {}): SVGTextElement => txt(x, y, s, { class: 'num', 'font-size': 10.5, fill: INK, ...attrs });
 /** Specimen sample in the embedded face; class `probe` makes it hit-testable by the pointer cursor. */
 export const spec = (x: number, y: number, s: string, size: number, attrs: Attrs = {}): SVGTextElement =>
   txt(x, y, s, { class: 'spec probe', 'font-size': size, fill: INK, ...attrs });
@@ -129,7 +129,7 @@ export function plateHeader(L: Layers, R: Report, id: string, color: string, x: 
     color: opts.currentColor ? color : undefined,
   }, flood, el('feMerge', {}, el('feMergeNode', { in: 'plate' }), el('feMergeNode', { in: 'SourceGraphic' })));
   L.defs.append(filter);
-  const t = txt(x, y, s, { class: 'head', filter: `url(#plate-${id})`, 'data-plate': id });
+  const t = txt(x, y, s, { class: 'head', 'font-size': 12, 'font-weight': 700, fill: INK, filter: `url(#plate-${id})`, 'data-plate': id });
   L.rows.append(t);
   R.headers.push(t);
   // css:flood-color-transition — hovering the label swaps the custom property; `.plate{transition:flood-color .4s}` tweens it.

@@ -2,8 +2,8 @@
 // comparison, and the leading/whitespace body block. Every printed number is measured from the live DOM.
 import { el, fmt, type Attrs } from './lib';
 import {
-  INK, RED, INDIGO, GREEN, PURPLE, HAIR, NOTE, SPEC, CJK, MONO, f2, f1,
-  type Layers, type Report, txt, lab, mono, spec, hline, vtick, box, preserveSpace,
+  INK, RED, INDIGO, GREEN, PURPLE, HAIR, NOTE, f2, f1,
+  type Layers, type Report, lab, mono, spec, hline, vtick, preserveSpace,
   ctl, anchorTicks, stamp, plateHeader, inkMetrics, pixelDiff,
 } from './letterpress-type-specimen-kit';
 
@@ -212,6 +212,7 @@ function layoutOtColumn(L: Layers, R: Report, rows: OtRow[], x0: number, x1: num
       R.probes.push(t);
       return t;
     });
+    row.after?.(texts);
     const [a, b] = row.pair ?? [0, 1];
     const widths = texts.map(ctl);
     const delta = widths[b] - widths[a];
@@ -239,9 +240,7 @@ function layoutOtColumn(L: Layers, R: Report, rows: OtRow[], x0: number, x1: num
       if (row.strike) R.facts.push({ ok: false, text: `kerning="0"（SVG 1.1）Δ ${f2(delta)}，像素差 ${px} → 已划掉` });
       else R.facts.push({ ok: null, text: `${row.label}：宽度 Δ 0，像素差 ${px}` });
     }));
-    row.after?.(texts);
   });
-  rows.forEach(row => { if (row.after && row.label !== 'kerning="0"' && row.label !== 'onum / lnum') { /* after() already ran when Δ ≠ 0 */ } });
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -292,6 +291,3 @@ export function buildBody(L: Layers, R: Report): void {
   R.facts.push({ ok: twinsOk, text: `空白孪生 "A␣␣␣␣␣B"：pre ${f2(measured[0])} / 折叠 ${f2(measured[1])} / xml:space ${f2(measured[2])}` });
 }
 
-// Re-exports used by the main module for typing the column helpers.
-export type { OtRow };
-export { box, txt, lab, CJK, MONO, SPEC, INK };

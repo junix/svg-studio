@@ -32,12 +32,10 @@ function cardArcFlags(): SVGGElement {
     card.append(el('line', { x1: 74, x2: 88, y1: 30 + i * 13, y2: 30 + i * 13, stroke: colours[i], 'stroke-width': 3 }));
     card.append(label(92, 34 + i * 13, `laf sf = ${f}`, { mono: true }));
   });
-  label(74, 82, '两个候选椭圆的四段弧', { fill: C.dim });
-  card.append(label(74, 82, '两个候选椭圆的四段弧', { fill: C.dim }));
   // compact flags: `a20 20 0 1124 0` reads as flags 1 1 then dx 24 — no separators needed after a flag
   card.append(el('path', { d: 'M164 58a20 20 0 1124 0', fill: 'none', stroke: C.orange, 'stroke-width': 1.5 }));
-  card.append(label(176, 84, '1124→1 1 24', { mono: true, fill: C.orange, anchor: 'middle' }));
-  card.append(dline('A44 30 0 ▢▢ 60 0 · a20 20 0 1124 0'));
+  card.append(label(176, 84, '1124 = 1 1 24', { mono: true, fill: C.orange, anchor: 'middle' }));
+  card.append(dline('A44 30 0 ▢ ▢ 60 0  两椭圆四弧'));
   return card;
 }
 
@@ -104,7 +102,7 @@ function cardImplicit(): SVGGElement {
   card.append(el('circle', { cx: 136, cy: 62, r: 4, fill: 'none', stroke: C.yellow, 'stroke-width': 1.2 }));
   card.append(el('rect', { x: 157.5, y: 23.5, width: 5, height: 5, fill: C.yellow }));
   card.append(label(165, 78, 'S 无前驱', { anchor: 'middle', fill: C.dim }));
-  card.append(dline('M10 10 50 50 90 10 · M…S160 26 194 62'));
+  card.append(dline('M10 10 50 50 90 10 | M S 无前驱'));
   return card;
 }
 
@@ -115,7 +113,7 @@ function cardPathLength(): SVGGElement {
   const long = el('path', { id: 'plen-long', d: 'M0 16C30 -20 90 50 180 16', fill: 'none', stroke: C.cyan, 'stroke-width': 3, pathLength: 100, 'stroke-dasharray': '12.5', transform: 'translate(12 54)' });
   card.append(short, long);
   card.append(label(84, 32, 'pathLength.baseVal =', { mono: true, fill: C.dim }));
-  card.append(label(84, 46, `${short.pathLength.baseVal} · 12.5 ⇒ 4 dashes`, { mono: true, fill: C.dim }));
+  card.append(label(84, 46, `${short.pathLength.baseVal} · dash 12.5 ⇒ 4 段`, { mono: true, fill: C.dim }));
   card.append(dline('pathLength=100 dasharray=12.5'));
   return card;
 }
@@ -125,7 +123,7 @@ function cardFillRule(ctx: CardContext): SVGGElement {
   const card = g({ id: 'card-fill-rule' }, cardFrame(), title('⑦ fill-rule'));
   const star = 'M50 0L79 90L2 35L98 35L21 90Z';
   const ring = 'M50 6L92 36L76 86L24 86L8 36Z M50 30L26 46L34 74L66 74L74 46Z'; // inner pentagon wound the other way
-  const items: [string, string, string][] = [['nonzero', star, 'nonzero 实心'], ['evenodd', star, 'evenodd 空洞'], ['nonzero', ring, '反向内环 → 孔']];
+  const items: [string, string, string][] = [['nonzero', star, 'nonzero'], ['evenodd', star, 'evenodd'], ['nonzero', ring, '反向内环']];
   items.forEach(([rule, d, text], i) => {
     card.append(el('path', { d, 'fill-rule': rule, fill: C.yellow, 'fill-opacity': .85, stroke: C.white, 'stroke-width': 1.5, transform: `translate(${10 + i * 66} 24) scale(.4)` }));
     card.append(label(30 + i * 66, 78, text, { anchor: 'middle', fill: C.dim }));
@@ -136,27 +134,27 @@ function cardFillRule(ctx: CardContext): SVGGElement {
   const txt = label(142, 14.5, 'hull-shell: nonzero ⇄', { anchor: 'middle', fill: C.white, size: 11 });
   btn.append(face, txt);
   btn.addEventListener('pointerdown', ev => { ev.stopPropagation(); txt.textContent = `hull-shell: ${ctx.toggleHullRule()} ⇄`; });
-  card.append(btn, dline('自交五角星 ×2 · 反向内环 ×1'));
+  card.append(btn, dline('自交五角星：实心 / 空洞 · 反向内环 → 孔'));
   return card;
 }
 
-/** ⑧ concept:empty-d-not-rendered (live); the two invalid strings are shown as annotated text only because
- *  Blink reports path-data parse errors to the console and the capture gate forbids console errors. */
+/** ⑧ error tolerance, all three rendered LIVE: concept:empty-d-not-rendered (d=""), concept:path-must-start-with-moveto
+ *  (d starting with L renders nothing) and concept:path-error-partial-render (unknown command → drawn up to the error).
+ *  Blink logs the two parse errors to the console; the scene declares them in #stage[data-expected-errors]. */
 function cardErrors(): SVGGElement {
-  const card = g({ id: 'card-errors' }, cardFrame(), title('⑧ 错误容忍'));
-  const rows: [string, string, string, boolean][] = [
-    ['d=""', '什么也不画（无 stroke 无 marker）', C.pink, true],
-    ['d="L10 10 90 90"', '不以 M 开头 → 整条不渲染', C.dim, false],
-    ['d="M10 10L90 90 X…"', '非法命令处截断，只画前半段', C.dim, false],
+  const card = g({ id: 'card-errors' }, cardFrame(), title('⑧ 错误容忍 · 三条真实渲染'));
+  const rows: [string, string, string, string][] = [
+    ['path-empty', '', 'd=""', '空串 → 什么也不画'],
+    ['path-no-moveto', 'L2 12 30 2', 'd="L2 12 30 2"', '不以 M 开头 → 整条不渲染'],
+    ['path-partial', 'M2 12L16 2 X30 2', 'd="M2 12L16 2 X30 2"', 'X 非法 → 只画到 (16,2) 为止'],
   ];
-  rows.forEach(([code, note, colour, live], i) => {
-    const y = 30 + i * 20;
-    card.append(el('rect', { x: 8, y: y - 9, width: 40, height: 14, fill: 'none', stroke: C.faint, 'stroke-width': .5, 'stroke-dasharray': '2 2' }));
-    if (live) card.append(el('path', { id: 'empty-d', d: '', stroke: C.pink, 'stroke-width': 6, fill: 'none', transform: `translate(8 ${y - 9})` }));
-    else card.append(el('path', { d: i === 1 ? 'M12 -2L20 2M12 2L20 -2' : 'M12 0L26 0', stroke: colour, 'stroke-width': 1, fill: 'none', opacity: .5, transform: `translate(8 ${y - 2})` }));
-    card.append(label(54, y - 5, code, { mono: true, fill: colour }), label(54, y + 6, note, { fill: C.dim, size: 11 }));
+  rows.forEach(([id, d, code, note], i) => {
+    const y = 34 + i * 25;
+    card.append(el('rect', { x: 8, y: y - 12, width: 32, height: 16, fill: 'none', stroke: C.faint, 'stroke-width': .5, 'stroke-dasharray': '2 2' }));
+    card.append(el('path', { id, d, stroke: C.pink, 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round', transform: `translate(9 ${y - 11})` }));
+    card.append(label(46, y - 5, code, { mono: true, fill: C.text }));
+    card.append(label(46, y + 6, note, { fill: C.dim }));
   });
-  card.append(label(8, 93, '※ 非法 d 不入 DOM（Blink 会记 console error）', { fill: C.faint, size: 11 }));
   return card;
 }
 
@@ -183,7 +181,7 @@ function cardApi(ctx: CardContext): SVGGElement {
   card.append(label(8, 36, 'pathSegList', { mono: true, fill: C.dim, style: 'text-decoration:line-through' }));
   card.append(label(96, 36, `in prototype: ${detect.pathSegList}`, { mono: true, fill: C.faint }));
   const stamp = g({ transform: 'rotate(-6 150 28)' });
-  stamp.append(el('rect', { x: 104, y: 20, width: 96, height: 15, rx: 2, fill: 'none', stroke: C.red, 'stroke-width': 1 }));
+  stamp.append(el('rect', { x: 100, y: 20, width: 104, height: 15, rx: 2, fill: 'none', stroke: C.red, 'stroke-width': 1 }));
   stamp.append(label(152, 31.5, '已从所有引擎移除', { anchor: 'middle', fill: C.red, size: 11, weight: 700 }));
   card.append(stamp);
   card.append(label(8, 58, 'getPathData()', { mono: true, fill: C.dim }));
@@ -191,7 +189,7 @@ function cardApi(ctx: CardContext): SVGGElement {
   card.append(label(8, 76, 'CSS d: path()', { mono: true, fill: C.dim }));
   card.append(label(96, 76, detect.cssD ? '✓ native + transition' : 'attribute fallback', { fill: detect.cssD ? C.green : C.orange, id: 'css-d-status' }));
   card.append(label(8, 93, 'CSS r/width', { mono: true, fill: C.dim }));
-  card.append(label(96, 93, detect.cssGeom ? '✓ geometry properties' : 'attr + rAF 补间', { fill: detect.cssGeom ? C.green : C.orange }));
+  card.append(label(96, 93, detect.cssGeom ? '✓ CSS r / width 生效' : 'attr + rAF 补间', { fill: detect.cssGeom ? C.green : C.orange }));
   return card;
 }
 

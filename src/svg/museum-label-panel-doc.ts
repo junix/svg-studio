@@ -109,7 +109,7 @@ function orderPolylines(): string {
   const accPts = PARTS.map(p => { const [x, y] = center(p); return `${x + 6},${y}`; }).join(' ');
   return `<polyline class="order-paint" points="${paintPts}"/><polyline class="order-acc" points="${accPts}"/>`;
 }
-const XRF_PTS: [number, number][] = [[580, 548], [604.5, 541], [629, 531], [653.5, 494], [678, 522], [702.5, 542], [727, 512], [751.5, 545], [776, 549]];
+const XRF_PTS: [number, number][] = [[580, 540], [604.5, 533], [629, 523], [653.5, 486], [678, 514], [702.5, 534], [727, 504], [751.5, 537], [776, 541]];
 
 // ---------------------------------------------------------------------------------------------------------------------
 // Identity CSS. Each media block is mirrored by a `:root[data-identity="…"]` selector so the host can show all five
@@ -118,7 +118,9 @@ const XRF_PTS: [number, number][] = [[580, 548], [604.5, 541], [629, 531], [653.
 type Rule = [string, string];
 function identityBlock(query: string, id: Identity, rules: Rule[]): string {
   const body = rules.map(([sel, decl]) => `${sel}{${decl}}`).join('\n  ');
-  const mirrored = rules.map(([sel, decl]) => `${sel === ':root' ? `:root[data-identity="${id}"]` : `:root[data-identity="${id}"] ${sel}`}{${decl}}`).join('\n');
+  // Every selector of a comma list gets the mirror prefix (a bare `.label …` would hide the element unconditionally).
+  const prefix = (sel: string): string => sel.trim() === ':root' ? `:root[data-identity="${id}"]` : `:root[data-identity="${id}"] ${sel.trim()}`;
+  const mirrored = rules.map(([sel, decl]) => `${sel.split(',').map(prefix).join(',')}{${decl}}`).join('\n');
   return `/* ${IDENTITY_NAMES[id]} — ${query} (mirror: :root[data-identity="${id}"]) */\n@media ${query}{\n  ${body}\n}\n${mirrored}\n`;
 }
 const DARK: Rule[] = [[':root', '--paper:#1d1a16;--ink:#ece2cc;--rule:#a89373;--accent:#e5936c;--hair:#3a332a;--plate:#2a251f;--cell:#2b2620;--cell-ink:#ece2cc;--tag:#5a4a33;--tag-ink:#f2e8d2']];
@@ -250,7 +252,7 @@ function styleSheet(): string {
 .label .live{display:flex;align-items:center;gap:8px;height:30px;padding:0 8px;box-sizing:border-box;background:var(--ink);color:var(--paper);font:12px var(--font-mono);white-space:nowrap;overflow:hidden}
 .label .live .chip{background:var(--accent);color:#fff;padding:0 6px;border-radius:2px;font-weight:700;font-size:11px;forced-color-adjust:none}
 .label .live p{margin:0}
-.label .tag{box-sizing:border-box;width:120px;height:92px;padding:6px 8px 4px;background:var(--tag);color:var(--tag-ink);border:1px solid rgba(0,0,0,.25);border-radius:3px;box-shadow:1px 2px 3px rgba(0,0,0,.25);font:11px/1.3 var(--font-cjk)}
+.label .tag{box-sizing:border-box;width:120px;height:80px;padding:6px 8px 4px;background:var(--tag);color:var(--tag-ink);border:1px solid rgba(0,0,0,.25);border-radius:3px;box-shadow:1px 2px 3px rgba(0,0,0,.25);font:11px/1.3 var(--font-cjk)}
 .label .tag .hole{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--paper);border:1px solid rgba(0,0,0,.35);vertical-align:-1px;margin-right:4px}
 .label .tag .row{display:flex;gap:4px;align-items:flex-start;margin-top:3px}
 .label .tag iframe{border:1px solid rgba(0,0,0,.3);background:#fff;flex:none}
@@ -371,6 +373,9 @@ export const SCRIPT_BODY = `
   /* MathML metric sanity check: if the fraction did not lay out, show the hand-drawn SVG fraction instead */
   var frac = $('mfrac'), fallback = $('.math-fallback');
   if (frac && fallback && frac.getBoundingClientRect().height < 8) { fallback.style.display = 'block'; $('math').style.display = 'none'; }
+  /* external https <image> (external-link chip): when blocked, hide Chrome's broken-image glyph so the seal placeholder shows */
+  var ext = $('.seal image');
+  if (ext) ext.addEventListener('error', function () { ext.setAttribute('visibility', 'hidden'); root.setAttribute('data-external', 'blocked'); });
   placeCursor();
   announce();
 `;
@@ -506,7 +511,7 @@ export function buildLabelDocument(): string {
 <g class="math-fallback" aria-hidden="true"><text x="420" y="510" font-size="14">²⁰⁷Pb / ²⁰⁶Pb = 0.861 ± √(σ²/n)</text></g>
 <g class="xrf" role="group" aria-label="XRF 谱线">
   <text x="580" y="466">XRF · counts vs keV</text>
-  <line class="axis" x1="580" y1="556" x2="776" y2="556"/>
+  <line class="axis" x1="580" y1="548" x2="776" y2="548"/>
   <polyline points="${xrf}"/>
   <circle class="pick" cx="${px}" cy="${py}" r="4"/>
   <text x="${px + 8}" y="${py - 6}">Pb Lβ · 第 4 点</text>
@@ -526,7 +531,7 @@ export function buildLabelDocument(): string {
 <foreignObject id="fo-live" x="24" y="620" width="752" height="30" role="status" aria-live="polite">
   <div xmlns="http://www.w3.org/1999/xhtml" class="html live" lang="zh-Hans"><span class="chip">LIVE</span><p id="live-text">播报待命 · 脚本未运行时保持此文本</p></div>
 </foreignObject>
-<foreignObject id="fo-tag" x="24" y="60" width="120" height="92" transform="rotate(-6.5 84 106) skewX(-4)">
+<foreignObject id="fo-tag" x="26" y="488" width="120" height="80" transform="rotate(-5 86 528) skewX(-4)">
   <div xmlns="http://www.w3.org/1999/xhtml" class="html tag" lang="zh-Hans">
     <div><span class="hole"></span><b>暂挂 · 待入库</b> 库房 B-12</div>
     <div class="row">

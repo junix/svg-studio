@@ -66,27 +66,28 @@ function windowBisector(): SVGGElement {
 /** W2 — same points string on a <polygon> and a <polyline>: the closing segment changes the start marker's angle. */
 function windowClosed(stage: SVGSVGElement): SVGGElement {
   const g = windowFrame(1032, 197, 328, 145, 'w2', 'W2 · 闭合方向 — 同一份 points 交给 polygon 与 polyline');
-  const PTS = '0,64 30,6 110,6 130,64';                       // identical attribute string on both hosts (DOM-comparable)
+  const PTS = '0,56 26,6 96,6 112,56';                        // identical attribute string on both hosts (DOM-comparable)
   const pts = PTS.split(' ').map(s => s.split(',').map(Number));
   const first = dirDeg(pts[0][0], pts[0][1], pts[1][0], pts[1][1]);             // first segment direction
   const closing = dirDeg(pts[3][0], pts[3][1], pts[0][0], pts[0][1]);           // closing segment (last → first)
   const polyAngle = bisector(closing, first);
   const common = { points: PTS, fill: CW, 'fill-opacity': .22, stroke: CW, 'stroke-width': 3, 'marker-start': 'url(#mk-start-w2)', 'marker-mid': 'url(#mk-dot)' };
-  const left = el('g', { transform: 'translate(1052,232)' });
+  const left = el('g', { transform: 'translate(1050,234)' });
   left.append(el('polygon', { id: 'w2-polygon', ...common }));
-  left.append(arc(0, 64, 26, first, polyAngle, ORANGE));
-  left.append(tag(-6, 96, `polygon · start ${fmt(polyAngle, 1)}°`, { 'font-size': 11, fill: ORANGE, id: 'w2-polygon-angle', 'data-angle': fmt(polyAngle, 2) }));
-  const right = el('g', { transform: 'translate(1206,232)' });
+  left.append(arc(0, 56, 24, first, polyAngle, ORANGE));
+  left.append(tag(-4, 74, `polygon start ${fmt(polyAngle, 1)}°`, { 'font-size': 11, fill: ORANGE, id: 'w2-polygon-angle', 'data-angle': fmt(polyAngle, 2) }));
+  const right = el('g', { transform: 'translate(1184,234)' });
   // polyline: fill still closes the area implicitly (concept:polyline-fill-implicit-close) but the stroke stays open
   right.append(el('polyline', { id: 'w2-polyline', ...common, 'marker-end': 'url(#mk-arrow-plain)' }));
-  right.append(arc(0, 64, 26, first, 0, ORANGE));
-  right.append(tag(-6, 96, `polyline · start ${fmt(first, 1)}°`, { 'font-size': 11, fill: ORANGE, id: 'w2-polyline-angle', 'data-angle': fmt(first, 2) }));
+  right.append(arc(0, 56, 24, first, 0, ORANGE));
+  right.append(tag(-4, 74, `polyline start ${fmt(first, 1)}°`, { 'font-size': 11, fill: ORANGE, id: 'w2-polyline-angle', 'data-angle': fmt(first, 2) }));
   g.append(left, right);
-  g.append(label(1046, 320, `起点箭头：polygon 在闭合段(${fmt(closing)}°)与首段(${fmt(first)}°)之间；polyline 只朝首段。fill 都隐式闭合，描边只有 polygon 封口。`, { 'font-size': 11, fill: INK }));
-  // odd coordinate count: the dangling "1348" is dropped → only the three complete pairs render (a triangle)
-  const odd = el('polygon', { id: 'w2-odd', points: '1296,318 1340,318 1318,296 1348', fill: ORANGE, 'fill-opacity': .35, stroke: ORANGE, 'stroke-width': 1.5 });
-  g.append(odd);
-  g.append(label(1298, 334, 'points 奇数个坐标 → 丢尾', { 'font-size': 11, fill: DIM }));
+  g.append(label(1044, 324, `polygon 起点落在闭合段(${fmt(closing, 0)}°)与首段(${fmt(first, 0)}°)之间 = ${fmt(polyAngle, 0)}°`, { 'font-size': 11, fill: INK }));
+  g.append(label(1044, 337, `polyline 起点只朝首段(${fmt(first, 0)}°) · fill 均隐式闭合，仅 polygon 封口`, { 'font-size': 11, fill: INK }));
+  // odd coordinate count: the dangling "1360" is dropped → only the three complete pairs render (a triangle)
+  g.append(el('polygon', { id: 'w2-odd', points: '1308,262 1350,262 1329,240 1360', fill: ORANGE, 'fill-opacity': .35, stroke: ORANGE, 'stroke-width': 1.5 }));
+  g.append(label(1304, 280, 'points 奇数坐标', { 'font-size': 11, fill: DIM }));
+  g.append(label(1304, 293, '→ 丢尾坐标', { 'font-size': 11, fill: DIM }));
   // Chromium reports the truncated list on the console; declare the exact substring so the capture tolerates only that.
   const expected = new Set((stage.dataset.expectedErrors ?? '').split(' | ').filter(Boolean));
   expected.add('attribute points: Expected');
@@ -99,62 +100,60 @@ function windowNonScaling(): SVGGElement {
   const g = windowFrame(1032, 354, 328, 145, 'w3', 'W3 · 非缩放描边 — 发丝线配巨大箭头');
   // left: scale(3) group; stroke-width 2 → 2px on screen (non-scaling), arrow = markerWidth 6 × stroke-width 2 × CTM 3 = 36px
   const zoom = el('g', { id: 'w3-zoom', transform: 'translate(1058,384) scale(3)' });
-  zoom.append(el('polyline', { id: 'w3-zoomed', points: '0,0 32,0 32,28', fill: 'none', stroke: ORANGE, 'stroke-width': 2, 'vector-effect': 'non-scaling-stroke',
+  zoom.append(el('polyline', { id: 'w3-zoomed', points: '0,0 32,0 32,26', fill: 'none', stroke: ORANGE, 'stroke-width': 2, 'vector-effect': 'non-scaling-stroke',
     'marker-start': 'url(#mk-ref-us)', 'marker-mid': 'url(#mk-arrow-plain)', 'marker-end': 'url(#mk-arrow-plain)' }));
   g.append(zoom);
-  g.append(label(1046, 484, 'scale(3) + non-scaling-stroke：描边仍 2px，箭头 ×3', { 'font-size': 11, fill: DIM }));
+  g.append(label(1046, 480, 'scale(3) + non-scaling-stroke', { 'font-size': 11, fill: DIM }));
+  g.append(label(1046, 493, '描边仍 2px · 箭头 ×3 = 36px', { 'font-size': 11, fill: DIM }));
   // right: unscaled twin with the same on-screen footprint (coordinates pre-multiplied by 3); same markers, no zoom
   const twin = el('g', { id: 'w3-twin', transform: 'translate(1216,384)' });
-  twin.append(el('polyline', { id: 'w3-plain', points: '0,0 96,0 96,84', fill: 'none', stroke: ORANGE, 'stroke-width': 2,
+  twin.append(el('polyline', { id: 'w3-plain', points: '0,0 96,0 96,78', fill: 'none', stroke: ORANGE, 'stroke-width': 2,
     'marker-start': 'url(#mk-ref-us)', 'marker-mid': 'url(#mk-arrow-plain)', 'marker-end': 'url(#mk-arrow-plain)' }));
   g.append(twin);
-  g.append(label(1216, 484, '孪生件未缩放：同款箭头 12px · 起点 8px 基准方块', { 'font-size': 11, fill: DIM }));
-  // equal-length baselines under both for measurement
-  for (const x of [1058, 1216]) g.append(el('line', { x1: x, y1: 472, x2: x + 96, y2: 472, stroke: DIM, 'stroke-width': 1, 'marker-start': 'url(#mk-dim)', 'marker-end': 'url(#mk-dim)' }));
+  g.append(label(1216, 480, '未缩放孪生件 · 足迹同 96×78', { 'font-size': 11, fill: DIM }));
+  g.append(label(1216, 493, '箭头 12px · 8px 基准方块', { 'font-size': 11, fill: DIM }));
   return g;
 }
 
 /** W4 — refX / markerWidth+viewBox / preserveAspectRatio rows plus the four orient spellings. */
 function windowGeometry(): SVGGElement {
-  const g = windowFrame(1032, 511, 328, 145, 'w4', 'W4 · 几何三联 — refX · markerWidth/viewBox · preserveAspectRatio');
-  const row = (y: number, name: string) => g.append(tag(1044, y + 4, name, { 'font-size': 11, fill: DIM }));
-  const stub = (x: number, y: number, len: number, marker: string, sw = 5, extra: Record<string, string | number> = {}) =>
-    g.append(el('line', { x1: x, y1: y, x2: x + len, y2: y, stroke: INK, 'stroke-width': sw, 'marker-end': marker, ...extra }));
+  const g = windowFrame(1032, 511, 328, 145, 'w4', 'W4 · 几何三联 — refX · markerWidth · pAR · orient');
+  const cols = [1046, 1150, 1254];
+  const stub = (x: number, y: number, marker: string, sw = 3) =>
+    g.append(el('line', { x1: x, y1: y, x2: x + 40, y2: y, stroke: INK, 'stroke-width': sw, 'marker-end': marker }));
   const cap = (x: number, y: number, s: string, attrs: Record<string, string | number> = {}) => g.append(label(x, y, s, { 'font-size': 11, fill: DIM, ...attrs }));
 
   // row 1: refX=0 (arrow body overshoots the vertex) vs refX=92 (tip presses on the vertex) vs refX="center" probe
-  const y1 = 546;
-  row(y1, 'refX');
-  stub(1090, y1, 40, 'url(#mk-ref0)'); cap(1090, y1 + 18, 'refX=0 过冲');
-  stub(1178, y1, 40, 'url(#mk-arrow-plain)'); cap(1178, y1 + 18, 'refX=92 箭尖压点');
-  stub(1270, y1, 40, 'url(#mk-refc)'); cap(1270, y1 + 18, 'refX="center"', { id: 'w4-refc-cap' });
-  for (const x of [1130, 1218, 1310]) g.append(el('line', { x1: x, y1: y1 - 9, x2: x, y2: y1 + 9, stroke: ORANGE, 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
+  const y1 = 544;
+  stub(cols[0], y1, 'url(#mk-ref0)'); cap(cols[0], y1 + 15, 'refX=0 过冲');
+  stub(cols[1], y1, 'url(#mk-arrow-plain)'); cap(cols[1], y1 + 15, 'refX=92 箭尖压点');
+  stub(cols[2], y1, 'url(#mk-refc)'); cap(cols[2], y1 + 15, 'refX="center"', { id: 'w4-refc-cap' });
+  for (const x of cols) g.append(el('line', { x1: x + 40, y1: y1 - 8, x2: x + 40, y2: y1 + 8, stroke: ORANGE, 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
 
   // row 2: same content under markerWidth/markerHeight 3 vs 8 (viewBox scales it), and a copy without viewBox (content clipped)
-  const y2 = 588;
-  row(y2, 'markerWidth');
-  stub(1090, y2, 40, 'url(#mk-w3)'); cap(1090, y2 + 18, 'markerWidth=3');
-  stub(1178, y2, 40, 'url(#mk-w8)'); cap(1178, y2 + 18, 'markerWidth=8');
-  stub(1270, y2, 40, 'url(#mk-novb)'); cap(1270, y2 + 18, '无 viewBox → 被视口裁掉');
+  const y2 = 576;
+  stub(cols[0], y2, 'url(#mk-w3)'); cap(cols[0], y2 + 15, 'markerWidth=3');
+  stub(cols[1], y2, 'url(#mk-w8)'); cap(cols[1], y2 + 15, 'markerWidth=8');
+  stub(cols[2], y2, 'url(#mk-novb)'); cap(cols[2], y2 + 15, '无 viewBox → 裁掉');
 
   // row 3: square viewBox inside a 2:1 marker box — xMinYMid meet / xMaxYMid meet / none
-  const y3 = 626;
-  row(y3, 'pAR 2:1');
-  stub(1090, y3, 40, 'url(#mk-par-l)', 6); cap(1090, y3 + 18, 'xMinYMid meet 左贴');
-  stub(1178, y3, 40, 'url(#mk-par-r)', 6); cap(1178, y3 + 18, 'xMaxYMid meet 右贴');
-  stub(1270, y3, 40, 'url(#mk-par-n)', 6); cap(1270, y3 + 18, 'none 拉伸');
-  for (const x of [1130, 1218, 1310]) g.append(el('rect', { x: x - 24, y: y3 - 12, width: 48, height: 24, fill: 'none', stroke: ORANGE, 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
+  const y3 = 608;
+  stub(cols[0], y3, 'url(#mk-par-l)', 5); cap(cols[0], y3 + 23, 'xMinYMid meet 左贴');
+  stub(cols[1], y3, 'url(#mk-par-r)', 5); cap(cols[1], y3 + 23, 'xMaxYMid meet 右贴');
+  stub(cols[2], y3, 'url(#mk-par-n)', 5); cap(cols[2], y3 + 23, 'none 拉伸');
+  for (const x of cols) g.append(el('rect', { x: x + 20, y: y3 - 10, width: 40, height: 20, fill: 'none', stroke: ORANGE, 'stroke-width': 1, 'stroke-dasharray': '2 2' }));
 
-  // orient spellings (SVG 2: number / deg / rad / grad) on a curvy path — every arrow keeps the same fixed angle
-  const yo = 566;
-  const orientHosts = el('g', { id: 'w4-orient', fill: 'none', stroke: CW, 'stroke-width': 3 });
-  const ids = ['mk-o1', 'mk-o2', 'mk-o3', 'mk-o4'];
-  ids.forEach((id, i) => {
-    const x = 1044 + i * 76;
-    orientHosts.append(el('path', { d: `M${x},${yo + 8} q10,-12 20,0`, 'marker-end': `url(#${id})`, 'data-marker': id }));
+  // row 4: orient spellings (SVG 2: number / deg / rad / grad) on tiny curves — every arrow keeps the same fixed angle;
+  // runProbes() writes the measured orientAngle.baseVal.value into each caption
+  const yo = 650;
+  const orientHosts = el('g', { id: 'w4-orient', fill: 'none', stroke: CW, 'stroke-width': 2 });
+  const xs = [1044, 1106, 1180, 1278];   // spaced for the caption widths ("0.785rad→45°" is the widest)
+  ['mk-o1', 'mk-o2', 'mk-o3', 'mk-o4'].forEach((id, i) => {
+    const x = xs[i];
+    orientHosts.append(el('path', { d: `M${x},${yo} q6,-8 12,0`, 'marker-end': `url(#${id})`, 'data-marker': id }));
+    g.append(label(x + 18, yo + 3, '', { id: `${id}-cap`, 'font-size': 11, fill: INK }));
   });
   g.append(orientHosts);
-  g.append(tag(1044, yo + 24, '', { id: 'w4-orient-readout', 'font-size': 11, fill: INK }));
   return g;
 }
 

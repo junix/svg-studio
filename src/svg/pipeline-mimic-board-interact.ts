@@ -81,17 +81,16 @@ export async function runProbes(stage: SVGSVGElement): Promise<void> {
   refc.setAttribute('refX', 'center');
   const centreOk = Math.abs(refc.refX.baseVal.value - 50) < 0.5;
   if (!centreOk) refc.setAttribute('refX', '50');
-  setText(stage, 'w4-refc-cap', centreOk ? 'refX="center" ✓ 原生' : 'refX="center" ✗ → 回退 50');
+  setText(stage, 'w4-refc-cap', centreOk ? 'refX=center ✓ 原生' : 'refX=center ✗ → 50');
 
   // ⑤ orient spellings: 45 / 45deg / 0.7854rad / 50grad — the measured orientAngle.baseVal.value becomes content
-  const spellings: Array<[string, string]> = [['mk-o1', '45'], ['mk-o2', '45deg'], ['mk-o3', '0.7854rad'], ['mk-o4', '50grad']];
-  const measured = spellings.map(([id, value]) => {
+  const spellings: Array<[string, string]> = [['mk-o1', '45'], ['mk-o2', '45deg'], ['mk-o3', '0.785rad'], ['mk-o4', '50grad']];
+  for (const [id, value] of spellings) {
     const m = marker(stage, id);
     m.setAttribute('orient', value);
     const angle = m.orientType.baseVal === SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE ? m.orientAngle.baseVal.value : NaN;
-    return `${value}→${Number.isFinite(angle) ? fmt(angle, 1) + '°' : '失效'}`;
-  });
-  setText(stage, 'w4-orient-readout', `orient 四种写法实测 orientAngle.baseVal.value: ${measured.join('  ')}`);
+    setText(stage, `${id}-cap`, `${value}→${Number.isFinite(angle) ? fmt(angle, 1) + '°' : '失效'}`);
+  }
 
   // ⑥ getBBox({markers:true}) — engines ignore SVGBoundingBoxOptions.markers, so fold markerWidth × stroke-width in by hand
   const dimH = stage.querySelector<SVGLineElement>('#dim-h')!;
@@ -105,7 +104,7 @@ export async function runProbes(stage: SVGSVGElement): Promise<void> {
   const manual = { width: geo.width + mw, height: Math.max(geo.height, mh) };
   const honoured = withMarkers && (withMarkers.width > geo.width + 0.5 || withMarkers.height > geo.height + 0.5);
   setText(stage, 'bbox-readout',
-    `dim-h 几何 bbox ${fmt(geo.width)}×${fmt(geo.height)} · getBBox({markers:true}) ${honoured ? `${fmt(withMarkers!.width)}×${fmt(withMarkers!.height)} ✓` : '被忽略'} · 手工折算含标记 ${fmt(manual.width)}×${fmt(manual.height)} (markerWidth ${fmt(mw)} × markerHeight ${fmt(mh)})`);
+    `dim-h 几何 bbox ${fmt(geo.width)}×${fmt(geo.height)} · getBBox({markers:true}) ${honoured ? `${fmt(withMarkers!.width)}×${fmt(withMarkers!.height)} ✓` : '被忽略'} · 手工含标记 ${fmt(manual.width)}×${fmt(manual.height)} (+${fmt(mw)}×${fmt(mh)})`);
 
   // ⑦ SVGMarkerElement DOM readout for #mk-hatch (orientType / refX / markerUnits / viewBox)
   writeDiag(stage, notes.join(' · '));
@@ -118,10 +117,9 @@ function writeDiag(stage: SVGSVGElement, prefix?: string): void {
   const vb = h.viewBox.baseVal;
   const orient = h.orientType.baseVal === SVGMarkerElement.SVG_MARKER_ORIENT_AUTO ? 'AUTO' : h.orientType.baseVal === SVGMarkerElement.SVG_MARKER_ORIENT_ANGLE ? `ANGLE ${fmt(h.orientAngle.baseVal.value)}°` : 'UNKNOWN';
   const units = h.markerUnits.baseVal === SVGMarkerElement.SVG_MARKERUNITS_USERSPACEONUSE ? 'userSpaceOnUse' : 'strokeWidth';
-  const line = `#mk-hatch orientType=${orient} · refX.baseVal=${fmt(h.refX.baseVal.value)} · markerUnits=${units}(${h.markerUnits.baseVal}) · viewBox=${fmt(vb.x)} ${fmt(vb.y)} ${fmt(vb.width)} ${fmt(vb.height)}`;
-  const node = stage.querySelector('#diag');
-  if (node) node.textContent = prefix ? `${prefix} · ${line}` : line;
-  if (prefix) stage.dataset.probes = prefix;
+  setText(stage, 'diag', `#mk-hatch orientType=${orient} · refX.baseVal.value=${fmt(h.refX.baseVal.value)}`);
+  setText(stage, 'diag-2', `markerUnits.baseVal=${h.markerUnits.baseVal} (${units}) · viewBox.baseVal=${fmt(vb.x)} ${fmt(vb.y)} ${fmt(vb.width)} ${fmt(vb.height)}`);
+  if (prefix) { setText(stage, 'diag-probes', `探测: ${prefix}`); stage.dataset.probes = prefix; }
 }
 
 /** Host geometry as segments in user space (path hosts are sampled with getPointAtLength). */
@@ -210,7 +208,7 @@ export function wireInteraction(stage: SVGSVGElement): void {
     cursor.refX.baseVal.value = -hit.alongFirst;
     const [x1, y1, x2, y2] = hit.seg;
     const dn = live.dataset.dn ?? '?', medium = live.dataset.medium ?? '';
-    if (readout) readout.textContent = `${medium} DN${dn} · 流向 ${compass(x2 - x1, y2 - y1)} · 命中 <${live.localName}#${live.id}> · 游标 refX=${fmt(cursor.refX.baseVal.value)} · 距指针 ${fmt(hit.dist, 1)} px`;
+    if (readout) readout.textContent = `${medium} DN${dn} · 流向 ${compass(x2 - x1, y2 - y1)} · 命中 <${live.localName}#${live.id}> · 游标 refX=${fmt(cursor.refX.baseVal.value)}`;
   });
   stage.addEventListener('pointerleave', clearLive);
   // markers are not hit-testable: the event target is always the host shape (concept:marker-pointer-events)

@@ -7,7 +7,7 @@ export const SRC_W = 320;
 export const SRC_H = 200;
 
 /** Bench geometry shared with the halftone screen bitmap so both dot lattices coincide. */
-export const SCREEN_ORIGIN = { x: 596, y: 520 };
+export const SCREEN_ORIGIN = { x: 596, y: 528 };
 export const SCREEN_CELL = 8;
 export const SCREEN_ANGLE = 45;
 
@@ -18,9 +18,10 @@ const canvas2d = (w: number, h: number): [HTMLCanvasElement, CanvasRenderingCont
 };
 
 /**
- * The original artwork: an orange on blue cloth with press-test patches — C/M/Y/K solids (they
- * become the 100% areas of each separation film), R/G/B, 18% grey and a skin ramp. Dark content is
- * kept small so the skeleton black (K only below L≈0.26) leaves the sRGB round trip nearly exact.
+ * The original artwork: an orange on blue cloth with press-test patches — C/M/Y/K solids 84×84 (they
+ * become the 100% areas of each separation film and stay ≥40×40 at the films' 0.48 scale), R/G/B,
+ * 18% and 50% neutral greys, a paper-white chip and a skin ramp. Dark content is kept small so the
+ * skeleton black (K only for L < 0.375) leaves the sRGB round trip nearly exact.
  */
 export function makeSourceImage(): string {
   const [c, ctx] = canvas2d(SRC_W, SRC_H);
@@ -30,41 +31,41 @@ export function makeSourceImage(): string {
   // woven cloth: alternating warp/weft hairlines with seeded jitter
   for (let y = 0; y < SRC_H; y += 2) {
     ctx.fillStyle = `rgba(255,255,255,${(0.03 + rnd() * 0.05).toFixed(3)})`;
-    ctx.fillRect(0, y, SRC_W, 1);
+    ctx.fillRect(0, y, 150, 1);
   }
-  for (let x = 0; x < SRC_W; x += 3) {
+  for (let x = 0; x < 150; x += 3) {
     ctx.fillStyle = `rgba(20,30,60,${(0.02 + rnd() * 0.05).toFixed(3)})`;
     ctx.fillRect(x, 0, 1, SRC_H);
   }
   // cast shadow (the only large dark area → skeleton black picks it up)
   ctx.fillStyle = '#2c3b5c';
-  ctx.beginPath(); ctx.ellipse(112, 150, 50, 9, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(86, 142, 48, 8, 0, 0, Math.PI * 2); ctx.fill();
   // the orange
-  const g = ctx.createRadialGradient(82, 76, 6, 98, 92, 60);
+  const g = ctx.createRadialGradient(64, 72, 6, 78, 88, 58);
   g.addColorStop(0, '#ffc86e'); g.addColorStop(0.35, '#f7952e'); g.addColorStop(0.8, '#e0701a'); g.addColorStop(1, '#c65e12');
   ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(98, 92, 56, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(78, 88, 54, 0, Math.PI * 2); ctx.fill();
   // peel dimples
   for (let i = 0; i < 260; i++) {
-    const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 52;
+    const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 50;
     ctx.fillStyle = `rgba(150,70,10,${(0.08 + rnd() * 0.12).toFixed(3)})`;
-    ctx.beginPath(); ctx.arc(98 + Math.cos(a) * r, 92 + Math.sin(a) * r, 0.9, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(78 + Math.cos(a) * r, 88 + Math.sin(a) * r, 0.9, 0, Math.PI * 2); ctx.fill();
   }
   // stem + leaf
   ctx.fillStyle = '#4d7a35';
-  ctx.fillRect(96, 32, 5, 9);
-  ctx.beginPath(); ctx.ellipse(112, 40, 16, 6, -0.5, 0, Math.PI * 2); ctx.fill();
-  // press-test patches: C M / Y K (60×60 → ≥40×40 solid on the 0.7-scaled films), then R G B grey
-  const solid: Array<[string, number, number, number]> = [
-    ['#00ffff', 186, 12, 60], ['#ff00ff', 252, 12, 60], ['#ffff00', 186, 78, 60], ['#000000', 252, 78, 60],
-    ['#ff0000', 186, 144, 26], ['#00ff00', 216, 144, 26], ['#0000ff', 246, 144, 26], ['#777777', 276, 144, 36],
+  ctx.fillRect(76, 30, 5, 9);
+  ctx.beginPath(); ctx.ellipse(92, 38, 16, 6, -0.5, 0, Math.PI * 2); ctx.fill();
+  // press-test patches: C M / Y K solids (84×84 each, flush), then R G B / 18% / 50% chips
+  const solid: Array<[string, number, number, number, number]> = [
+    ['#00ffff', 152, 0, 84, 84], ['#ff00ff', 236, 0, 84, 84], ['#ffff00', 152, 84, 84, 84], ['#000000', 236, 84, 84, 84],
+    ['#ff0000', 152, 172, 30, 28], ['#00ff00', 184, 172, 30, 28], ['#0000ff', 216, 172, 30, 28], ['#767676', 248, 172, 30, 28], ['#bcbcbc', 280, 172, 40, 28],
   ];
-  for (const [fill, x, y, s] of solid) { ctx.fillStyle = fill; ctx.fillRect(x, y, s, s); }
+  for (const [fill, x, y, w, h] of solid) { ctx.fillStyle = fill; ctx.fillRect(x, y, w, h); }
   // skin ramp
-  const skin = ctx.createLinearGradient(14, 0, 170, 0);
+  const skin = ctx.createLinearGradient(8, 0, 148, 0);
   skin.addColorStop(0, '#f9dcc4'); skin.addColorStop(1, '#b8794f');
-  ctx.fillStyle = skin; ctx.fillRect(14, 172, 156, 16);
-  ctx.fillStyle = '#f4f1ea'; ctx.fillRect(14, 12, 40, 12); // paper-white reference chip
+  ctx.fillStyle = skin; ctx.fillRect(8, 176, 140, 16);
+  ctx.fillStyle = '#f4f1ea'; ctx.fillRect(8, 8, 40, 12); // paper-white reference chip
   return c.toDataURL('image/png');
 }
 
@@ -148,6 +149,13 @@ export function scanRow(img: ImageData, y: number): number[] {
     out.push(Math.round(l * a + 255 * (1 - a)));
   }
   return out;
+}
+
+/** Paint an ImageData into a canvas and return it as a PNG data URI (for the pixel-zoom `<image>`s). */
+export function imageDataToDataUrl(img: ImageData): string {
+  const [c, ctx] = canvas2d(img.width, img.height);
+  ctx.putImageData(img, 0, 0);
+  return c.toDataURL('image/png');
 }
 
 export interface RunStats { edgeWidth: number; pitch: number; runs: number; inkFraction: number }

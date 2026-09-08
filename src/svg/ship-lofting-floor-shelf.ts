@@ -25,7 +25,7 @@ export function buildTitleBand(stage: SVGSVGElement): void {
     ladder.append(el('line', { x1: 1040, y1: y, x2: 1110, y2: y, stroke: w === 0 ? C.red : C.cyan, 'stroke-width': w }));
     ladder.append(label(1000, y + 4, name, { mono: w !== 0, fill: w === 0 ? C.red : C.dim }));
   });
-  ladder.append(label(1000, 30, 'stroke-width 梯', { fill: C.faint }));
+  ladder.append(label(992, 62, 'stroke-width 梯', { fill: C.faint, anchor: 'end' }));
   // straddle: the same 60×34 rect twice — 12px stroke (half inside, half outside) under a 0.5px geometry guide
   ladder.append(el('rect', { x: 1170, y: 41, width: 60, height: 34, fill: 'none', stroke: C.cyan, 'stroke-opacity': .45, 'stroke-width': 12 }));
   ladder.append(el('rect', { x: 1170, y: 41, width: 60, height: 34, fill: 'none', stroke: C.white, 'stroke-width': .5 }));
@@ -104,7 +104,7 @@ export function buildShelf(stage: SVGSVGElement, detect: Detect): Shelf {
     caps.append(el('line', { x1: 552, y1: y, x2: 600, y2: y, stroke: [C.pink, C.green, C.cyan][i], 'stroke-opacity': .8, 'stroke-width': 14, 'stroke-linecap': cap }));
     caps.append(label(612, y + 4, cap, { mono: true, fill: C.dim }));
   });
-  caps.append(label(540, 836, 'round / square 各伸出 7', { fill: C.faint }));
+  caps.append(label(540, 836, 'round/square 伸出 7', { fill: C.faint }));
   caps.append(label(540, 850, 'butt 与 1px 导线齐平', { fill: C.faint }));
   shelf.append(caps);
   // join template (pr:stroke-linejoin, pv:stroke-linejoin=round / bevel; miter-clip & arcs are Firefox-only)
@@ -116,7 +116,7 @@ export function buildShelf(stage: SVGSVGElement, detect: Detect): Shelf {
     joins.append(el('path', { d: 'M0 14 L12 0 L24 14 L36 0', fill: 'none', stroke: i < 3 ? C.cyan : C.orange, 'stroke-opacity': .85, 'stroke-width': 8, 'stroke-linejoin': join, transform: `translate(663 ${y})` }));
     joins.append(label(708, y + 11, i < 3 ? join : `${join}*`, { mono: true, fill: i < 3 ? C.dim : C.orange }));
   });
-  joins.append(label(655, 866, '* Firefox only → 此处回退 miter', { fill: C.faint }));
+  joins.append(label(655, 866, '* Firefox only → miter', { fill: C.faint }));
   shelf.append(joins);
   // miterlimit template (pr:stroke-miterlimit): 20° chevrons, miter ratio 1/sin(10°) ≈ 5.76 → only limit 10 spikes
   const miter = g({ id: 'miter-board' });

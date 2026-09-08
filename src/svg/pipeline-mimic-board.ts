@@ -80,14 +80,14 @@ function defsMarkup(): string {
 
   <!-- #mk-arrow: the one arrowhead. fill=context-stroke → solid tip in the host's stroke paint; strokeWidth units;
        orient=auto-start-reverse makes the start copy point backwards, so one definition reads as reversible flow. -->
-  <marker id="mk-arrow" viewBox="0 0 100 100" refX="92" refY="50" markerUnits="strokeWidth" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+  <marker id="mk-arrow" viewBox="0 0 100 100" refX="92" refY="50" markerUnits="strokeWidth" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
     <path d="${ARROW}" fill="context-stroke"/>
   </marker>
   <!-- traditional fallback: a second definition rotated 180° around the anchor (concept:marker-reverse-arrow-fallback) -->
-  <marker id="mk-arrow-rev" viewBox="0 0 100 100" refX="8" refY="50" markerUnits="strokeWidth" markerWidth="6" markerHeight="6" orient="auto">
+  <marker id="mk-arrow-rev" viewBox="0 0 100 100" refX="8" refY="50" markerUnits="strokeWidth" markerWidth="4" markerHeight="4" orient="auto">
     <path d="${ARROW}" fill="context-stroke" transform="rotate(180 50 50)"/>
   </marker>
-  <marker id="mk-arrow-hi" viewBox="0 0 100 100" refX="92" refY="50" markerUnits="strokeWidth" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <marker id="mk-arrow-hi" viewBox="0 0 100 100" refX="92" refY="50" markerUnits="strokeWidth" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
     <path d="${ARROW}" fill="#ffd166" stroke="#1c1a18" stroke-width="4"/>
   </marker>
   <marker id="mk-arrow-plain" viewBox="0 0 100 100" refX="92" refY="50" markerUnits="strokeWidth" markerWidth="6" markerHeight="6" orient="auto">
@@ -99,14 +99,14 @@ function defsMarkup(): string {
 
   <!-- #mk-valve: butterfly valve — outline stroke=context-stroke, interior fill=context-fill (hollow on fill=none pipes,
        solid on filled hosts); strokeWidth units so DN300 valves are big and DN50 valves small. -->
-  <marker id="mk-valve" viewBox="0 0 100 100" refX="50" refY="50" markerUnits="strokeWidth" markerWidth="6" markerHeight="6" orient="auto">
+  <marker id="mk-valve" viewBox="0 0 100 100" refX="50" refY="50" markerUnits="strokeWidth" markerWidth="5" markerHeight="5" orient="auto">
     ${valveBody('context-fill', 'context-stroke')}
   </marker>
-  <marker id="mk-valve-hi" viewBox="0 0 100 100" refX="50" refY="50" markerUnits="strokeWidth" markerWidth="6" markerHeight="6" orient="auto">
+  <marker id="mk-valve-hi" viewBox="0 0 100 100" refX="50" refY="50" markerUnits="strokeWidth" markerWidth="5" markerHeight="5" orient="auto">
     ${valveBody('#5a4210', '#ffd166')}
   </marker>
   <!-- dynamic twin of marker:none — SMIL drives markerWidth 6 → 0, a zero viewport disables the marker entirely -->
-  <marker id="mk-valve-off" viewBox="0 0 100 100" refX="50" refY="50" markerUnits="strokeWidth" markerWidth="6" markerHeight="6" orient="auto">
+  <marker id="mk-valve-off" viewBox="0 0 100 100" refX="50" refY="50" markerUnits="strokeWidth" markerWidth="5" markerHeight="5" orient="auto">
     ${valveBody('context-fill', 'context-stroke')}
     <animate attributeName="markerWidth" values="6;0;0;6" keyTimes="0;.3;.7;1" dur="6s" repeatCount="indefinite"/>
   </marker>
@@ -136,12 +136,12 @@ function defsMarkup(): string {
     <rect x="20" y="0" width="60" height="100" fill="url(#p-hatch)"/>
   </marker>
   <!-- #mk-head: main-flow arrow with its own radialGradient; SMIL toggles orient between a fixed angle and auto -->
-  <marker id="mk-head" viewBox="0 0 100 100" refX="94" refY="50" markerUnits="strokeWidth" markerWidth="8" markerHeight="8" orient="auto">
+  <marker id="mk-head" viewBox="0 0 100 100" refX="94" refY="50" markerUnits="strokeWidth" markerWidth="5" markerHeight="5" orient="auto">
     <path d="M4 8 L94 50 L4 92 L28 50 Z" fill="url(#g-head)" stroke="#3b2a1f" stroke-width="3"/>
     <animate attributeName="orient" values="auto;0;auto;auto" keyTimes="0;.5;.75;1" calcMode="discrete" dur="6s" repeatCount="indefinite"/>
   </marker>
   <!-- #mk-noz: nozzle symbol whose inner polyline carries its own marker-end (concept:nested-markers) -->
-  <marker id="mk-noz" viewBox="0 0 100 100" refX="50" refY="50" markerUnits="strokeWidth" markerWidth="5" markerHeight="5" orient="auto">
+  <marker id="mk-noz" viewBox="0 0 100 100" refX="50" refY="50" markerUnits="strokeWidth" markerWidth="4" markerHeight="4" orient="auto">
     <rect x="0" y="16" width="14" height="68" fill="context-stroke"/>
     <polyline id="mk-noz-stem" points="14,50 62,50" fill="none" stroke="context-stroke" stroke-width="10" marker-end="url(#mk-noz-tip)"/>
   </marker>
@@ -192,8 +192,7 @@ function defsMarkup(): string {
 function buildMainBoard(): SVGGElement {
   const g = el('g', { id: 'main-board' });
   g.append(plate(24, 24, 976, 636));
-  g.append(label(40, 52, 'UNIT 300 · 车间调度模拟盘', { 'font-size': 16, 'font-weight': 700 }));
-  g.append(label(40, 70, 'polyline / line / polygon 拉通管线 · 阀、箭头、仪表圈、量程撇全部由 <marker> 在顶点生成', { 'font-size': 11, fill: DIM }));
+  g.append(label(40, 52, 'UNIT 300 · 车间调度模拟盘 — 阀、箭头、仪表圈、量程撇全部由 <marker> 在顶点生成', { 'font-size': 15, 'font-weight': 700 }));
 
   // ── equipment polygons with real fill → weld-dot markers pick the fill via context-fill (.equip{marker:url(#mk-weld)})
   g.append(el('polygon', { id: 'tank', class: 'equip', points: '72,140 192,140 192,318 132,340 72,318', fill: '#4a545c', stroke: 'var(--panel)', 'stroke-width': 2 }));
@@ -213,18 +212,18 @@ function buildMainBoard(): SVGGElement {
     'marker-start': 'url(#mk-noz)', 'marker-mid': 'url(#mk-valve)', 'marker-end': 'url(#mk-arrow)', 'data-dn': '300', 'data-medium': '蒸汽' }));
   // insulation hatch track: stroke=none host, only markers show (concept:marker-without-stroke)
   g.append(el('polyline', { id: 'insulation', points: '130,80 160,80 190,80 220,80 250,80 280,80 310,80 340,80 370,80 400,80', fill: 'none', stroke: 'none', 'stroke-width': 4, 'marker-mid': 'url(#mk-hatch)' }));
-  g.append(label(210, 120, 'DN300 蒸汽总管 · stroke=url(#g-steam) · 上方保温撇 #mk-hatch（宿主 stroke=none）', { 'font-size': 11, fill: DIM }));
+  g.append(label(312, 140, 'DN300 蒸汽总管 · stroke=url(#g-steam) · 上方保温撇 #mk-hatch（宿主 stroke=none）', { 'font-size': 11, fill: DIM }));
   // curved inlet: orient=auto follows the Bézier tangent (concept:marker-curve-tangent)
   g.append(el('path', { id: 'st-inlet', class: 'pipe dn300', d: 'M420,150 C420,195 435,210 470,210', fill: 'none', stroke: 'var(--steam)', 'stroke-width': 9, 'marker-end': 'url(#mk-arrow)', 'data-dn': '300', 'data-medium': '蒸汽' }));
   // steam main 2: nozzle start, corner valve, gradient head (#mk-head) at the end
   g.append(el('polyline', { id: 'st2', class: 'pipe dn300', points: '650,210 940,210 940,470', fill: 'none', stroke: 'var(--steam)', 'stroke-width': 9,
     'marker-start': 'url(#mk-noz)', 'marker-mid': 'url(#mk-valve)', 'marker-end': 'url(#mk-head)', 'data-dn': '300', 'data-medium': '蒸汽' }));
-  g.append(label(795, 198, 'DN300 → 冷凝器 · 折点即阀位 · 末端 #mk-head 渐变箭头', { 'text-anchor': 'middle', 'font-size': 11, fill: DIM }));
+  g.append(label(664, 228, 'DN300 → 冷凝器 · 折点即阀位 · 末端 #mk-head', { 'font-size': 11, fill: DIM }));
 
   // ── return branch: ONE marker (#mk-arrow) at both ends, auto-start-reverse flips the start copy → reversible flow
   g.append(el('polyline', { id: 'return', class: 'pipe dn100', points: '560,290 560,360 300,360 300,132 150,132', fill: 'none', stroke: 'var(--cond)', 'stroke-width': 4,
     'marker-start': 'url(#mk-arrow)', 'marker-mid': 'url(#mk-valve)', 'marker-end': 'url(#mk-arrow)', 'data-dn': '100', 'data-medium': '回流' }));
-  g.append(label(430, 350, '回流 DN100 · 两端同一 #mk-arrow · orient=auto-start-reverse → 可逆流', { 'text-anchor': 'middle', 'font-size': 11, fill: DIM }));
+  g.append(label(430, 344, '回流 DN100 · 两端同一 #mk-arrow (auto-start-reverse) → 可逆流', { 'text-anchor': 'middle', 'font-size': 11, fill: DIM }));
   // bypass: traditional two-definition fallback (#mk-arrow-rev rotated 180°)
   g.append(el('polyline', { id: 'bypass', class: 'pipe dn100', points: '600,290 600,400 390,400', fill: 'none', stroke: 'var(--cond)', 'stroke-width': 4,
     'marker-start': 'url(#mk-arrow-rev)', 'marker-end': 'url(#mk-arrow)', 'data-dn': '100', 'data-medium': '旁通' }));
@@ -243,7 +242,8 @@ function buildMainBoard(): SVGGElement {
   g.append(label(522, 596, '同一阀符 · 默认顺序 → 阀符压描边', { 'font-size': 11, fill: DIM }));
 
   // ── cooling-water branches (DN50, stroke-width 3 → small valves) — el:line and el:polyline
-  g.append(el('polyline', { id: 'cw-e01', class: 'pipe dn50', points: '700,250 650,250', fill: 'none', stroke: 'var(--cw)', 'stroke-width': 3, 'marker-end': 'url(#mk-arrow)', 'data-dn': '50', 'data-medium': '冷却水' }));
+  // DN50 branch into E-01: the SAME #mk-valve as the DN300 mains, now 15px and grey-blue through context-stroke
+  g.append(el('polyline', { id: 'cw-e01', class: 'pipe dn50', points: '700,250 674,250 650,250', fill: 'none', stroke: 'var(--cw)', 'stroke-width': 3, 'marker-mid': 'url(#mk-valve)', 'marker-end': 'url(#mk-arrow)', 'data-dn': '50', 'data-medium': '冷却水' }));
   // gauge run: the range cursor #mk-cursor rides marker-start and slides along via animated refX
   g.append(el('polyline', { id: 'cw-gauge', class: 'pipe dn50', points: '716,486 596,486', fill: 'none', stroke: 'var(--cw)', 'stroke-width': 3,
     'marker-start': 'url(#mk-cursor)', 'marker-end': 'url(#mk-arrow)', 'data-dn': '50', 'data-medium': '冷却水' }));
@@ -272,21 +272,21 @@ function buildMainBoard(): SVGGElement {
   g.append(skid);
   g.append(label(240, 522, '泵撬 P-01/P-02 · g[transform="skewX(-12)"] → 阀符与箭头随管线一起切变', { 'text-anchor': 'middle', 'font-size': 11, fill: DIM }));
   // cooling-tower platform under skewY(-8): horizontal edges tilt, verticals stay upright (contrast)
-  const ct = el('g', { id: 'ct-platform', transform: 'translate(700,540) skewY(-8)' });
+  const ct = el('g', { id: 'ct-platform', transform: 'translate(700,556) skewY(-8)' });
   ct.append(el('rect', { x: 0, y: 0, width: 200, height: 56, rx: 3, fill: '#2b3035', stroke: 'var(--panel)', 'stroke-width': 1.5 }));
   for (const cx of [36, 100, 164]) {
     ct.append(el('circle', { cx, cy: 28, r: 15, fill: 'none', stroke: 'var(--cw)', 'stroke-width': 2 }));
     ct.append(el('path', { d: `M${cx - 10} ${28 - 4} L${cx + 10} ${28 + 4} M${cx - 10} ${28 + 4} L${cx + 10} ${28 - 4}`, stroke: 'var(--cw)', 'stroke-width': 1.5 }));
   }
   g.append(ct);
-  g.append(label(800, 612, 'CT-01 冷却塔平台 · skewY(-8) 对照：横边倾斜、竖边保持竖直', { 'text-anchor': 'middle', 'font-size': 11, fill: DIM }));
+  g.append(label(800, 630, 'CT-01 冷却塔平台 · skewY(-8) 对照：横边倾斜、竖边保持竖直', { 'text-anchor': 'middle', 'font-size': 11, fill: DIM }));
 
   // ── SMIL-animated path: the end arrow re-orients to the animated tangent (concept:marker-follows-animated-path)
-  const flex = el('path', { id: 'p-flex', class: 'pipe dn50', d: 'M40,560 C70,520 110,600 150,560', fill: 'none', stroke: 'var(--cw)', 'stroke-width': 3,
+  const flex = el('path', { id: 'p-flex', class: 'pipe dn50', d: 'M36,500 C60,464 94,536 118,500', fill: 'none', stroke: 'var(--cw)', 'stroke-width': 3,
     'marker-start': 'url(#mk-dot)', 'marker-end': 'url(#mk-arrow)', 'data-dn': '50', 'data-medium': '软管' });
-  flex.append(fragment(`<animate attributeName="d" values="M40,560 C70,520 110,600 150,560;M40,560 C70,600 110,520 150,560;M40,560 C70,520 110,600 150,560" dur="5s" repeatCount="indefinite"/>`));
+  flex.append(fragment(`<animate attributeName="d" values="M36,500 C60,464 94,536 118,500;M36,500 C60,536 94,464 118,500;M36,500 C60,464 94,536 118,500" dur="5s" repeatCount="indefinite"/>`));
   g.append(flex);
-  g.append(label(40, 616, 'SMIL 动画 d → 箭头随路径切线', { 'font-size': 11, fill: DIM }));
+  g.append(label(36, 548, 'SMIL 动画 d → 箭头随切线', { 'font-size': 11, fill: DIM }));
 
   // ── alarm line: host colour is green, but the marker glyph is red — marker content resolves currentColor from the marker
   const alarmHost = el('g', { id: 'alarm-host', color: '#3ad17c' });
@@ -296,22 +296,25 @@ function buildMainBoard(): SVGGElement {
 
   // ── signal lines: dashed strokes, bubble inherited from #instr-group{marker-mid}; group font-size is NOT inherited by the marker text
   const instr = el('g', { id: 'instr-group', fill: 'none', stroke: 'var(--panel)', 'stroke-width': 1.5, 'stroke-dasharray': '6 4', 'font-size': 24 });
-  instr.append(el('polyline', { points: '265,96 265,58 320,58' }));
+  instr.append(el('polyline', { points: '300,96 300,58 350,58' }));
   instr.append(el('polyline', { points: '780,210 780,168 830,168' }));
   instr.append(el('polyline', { points: '656,486 656,528 610,528' }));
   g.append(instr);
-  for (const [x, y, name, anchor] of [[326, 62, 'FIC-101', 'start'], [836, 172, 'FIC-201', 'start'], [604, 532, 'FIC-301', 'end']] as const)
+  for (const [x, y, name, anchor] of [[356, 62, 'FIC-101', 'start'], [836, 172, 'FIC-201', 'start'], [604, 532, 'FIC-301', 'end']] as const)
     g.append(tag(x, y, name, { 'font-size': 11, 'text-anchor': anchor }));
 
   // ── panel buttons (setOrientToAuto / setOrientToAngle on #mk-hatch) and readout lines
-  for (const [id, x, txt] of [['btn-auto', 736, '#mk-hatch → setOrientToAuto()'], ['btn-45', 866, '#mk-hatch → setOrientToAngle(45°)']] as const) {
+  for (const [id, x, txt] of [['btn-auto', 690, 'setOrientToAuto()'], ['btn-45', 840, 'setOrientToAngle(45°)']] as const) {
     const b = el('g', { id, class: 'btn', role: 'button', tabindex: 0, transform: `translate(${x},36)` });
-    b.append(el('rect', { x: 0, y: 0, width: 120, height: 24, rx: 4 }));
-    b.append(el('text', { x: 60, y: 16, 'text-anchor': 'middle', 'font-family': TAG_FONT, 'font-size': 11, fill: INK, 'pointer-events': 'none' }, txt.length > 24 ? txt.replace('#mk-hatch → ', '') : txt));
+    b.append(el('rect', { x: 0, y: 0, width: 144, height: 24, rx: 4 }));
+    b.append(el('text', { x: 72, y: 16, 'text-anchor': 'middle', 'font-family': TAG_FONT, 'font-size': 11, fill: INK, 'pointer-events': 'none' }, txt));
     g.append(b);
   }
-  g.append(tag(40, 636, '', { id: 'diag', 'font-size': 11, fill: DIM }));
-  g.append(label(40, 652, '指针停在管段上 → 整线换高亮标记，量程游标滑到指针处并报出 DN 与流向', { id: 'readout', 'font-size': 12, fill: 'var(--hi)' }));
+  g.append(label(984, 76, '↑ 按钮改写 #mk-hatch 的 orient，诊断行回读 DOM 属性', { 'text-anchor': 'end', 'font-size': 11, fill: DIM }));
+  g.append(tag(40, 604, '', { id: 'diag-probes', 'font-size': 11, fill: DIM }));
+  g.append(tag(40, 618, '', { id: 'diag', 'font-size': 11, fill: DIM }));
+  g.append(tag(40, 632, '', { id: 'diag-2', 'font-size': 11, fill: DIM }));
+  g.append(label(40, 653, '指针停在管段上 → 整线换高亮标记，量程游标滑到指针处并报出 DN 与流向', { id: 'readout', 'font-size': 12, fill: 'var(--hi)' }));
   return g;
 }
 
@@ -347,8 +350,8 @@ export async function render(stage: SVGSVGElement): Promise<void> {
     'concept:marker-follows-animated-path', 'concept:marker-pointer-events', 'concept:marker-property-inheritance',
     'concept:marker-reverse-arrow-fallback', 'concept:marker-style-isolation', 'concept:marker-subpath-vertices', 'concept:marker-text-content',
     'concept:marker-without-stroke', 'concept:marker-zero-length-direction', 'concept:nested-markers', 'css:marker-properties',
-    'css:active', 'concept:hover-state-transition', 'concept:points-odd-coordinate-count', 'concept:markers-on-basic-shapes',
-    'css:font-face-data-uri');
+    'css:active', 'concept:hover-state-transition', 'concept:points-odd-coordinate-count', 'concept:points-parse-error-partial-render',
+    'concept:markers-on-basic-shapes', 'av:marker.refX=center', 'css:font-face-data-uri');
 
   // Export still: cursor mid-run on its segment, valve discs half open (45°), #mk-head back on orient=auto.
   if (isExport()) freezeAt(stage, 2.4);
