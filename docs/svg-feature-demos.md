@@ -1,59 +1,55 @@
 # svg-studio · 原生 SVG 特性演示计划
 
-> 生成日期 2026-09-07。本计划列出 16 个高复杂度原生 SVG 演示，共同覆盖 519 项核心 SVG 特性（可在 2026 年浏览器中呈现）。完整特性清单共 1365 项：核心 519 项，细节 846 项（随其父特性一并被演示）；其中 140 项已废弃或未实现，列入排除附录。
-> 机器可读版本见 `docs/svg-feature-demos.json`；特性键（如 `el:feTurbulence`、`av:marker.orient=auto-start-reverse`）在两个文件中一致。文中键名后的 ˚ 表示细节层特性。
+> 生成日期 2026-09-08。16 个演示，519 个核心特性键，538 次演示分配；完整清单 1365 项，其中 140 项未实现或已废弃。
+> 本文件由 `npm run plan` 从 `docs/svg-feature-demos.json` 生成。计划分配覆盖不等于跨浏览器支持；DOM 声明不等于行为和像素验收。当前验证范围见 [验收记录](svg-feature-audit.md)。
 
 ## 0. 背景与契约
 
-- 现状：`src/main.ts` 中的 12 个场景用 Paper.js 绘制到 `<canvas>`，无法体现滤镜、SMIL、`textPath`、遮罩等原生 SVG 能力。本计划的演示全部是原生 SVG（手写 SVG 或 TypeScript 生成 SVG DOM）。
-- 舞台契约沿用现有仓库：1400×900 透明背景；headless Chromium 截图并校验透明像素、可见像素与彩色像素阈值；网络被阻断，因此字体与图片必须以 data URI 内嵌；动画演示必须有有意义的静帧；`#stage` 上需要 pointer 交互钩子。
-- 注意：`scripts/capture.mjs` 写死了 macOS 的 Chrome 路径，在 Linux 上运行前需改为 Playwright 自带 Chromium 或通过环境变量指定可执行文件。
-- 每个演示回答一个设计问题，字段与 `catalog.json` 对齐（`id`、`use`、`family`、`question`、`complexity`、`tags`），可直接并入目录。
-- 特性分两层：**核心**特性必须被某个演示刻意、可见地展示；**细节**特性（同一属性的枚举值、镜像属性的 DOM 接口、正确用法的必然结果等）挂在父特性之下，父特性被展示即视为覆盖，演示也可显式引用。
+- `src/svg/<id>.ts` 导出 `render(stage)`，由 `src/main.ts` 挂载到 1400×900 透明 SVG。
+- 内嵌字体与图像；独立 SVG 试片从本地同源加载；捕获阶段阻断外网。
+- `window.__VIS_READY__` 为就绪契约；pointer 计数用于交互检查；SMIL/CSS 动画在导出模式冻结。
+- `CHROME_PATH` 可覆盖浏览器路径；macOS 自动选已安装的 Chrome，其余使用 Playwright Chromium。
+- `npm test` 检查计划完整性、类型、构建产物、DOM 特性、场景行为和 RGBA。`SCENES=<id> npm run render` 验证单个场景。
 
 ## 1. 演示总览
 
-| # | id | 标题 | 家族 | 主打 | 核心特性 | 特性总数 | 领域数 | 复杂度 |
-|---|---|---|---|---|---|---|---|---|
-| 1 | `celestial-astrolabe-cabinet` | 铜盘星图柜 | astronomical instrument | 7 | 42 | 60 | 5 | expert |
-| 2 | `museum-label-panel` | 博物馆展签面板 | museum curation / archives | 8 | 43 | 81 | 5 | expert |
-| 3 | `ship-lofting-floor` | 船体放样间 | naval architecture | 6 | 40 | 73 | 5 | expert |
-| 4 | `guilloche-intaglio-plate` | 玫瑰线雕版 | security printing | 6 | 31 | 55 | 4 | expert |
-| 5 | `auroral-spectrograph` | 极光分光台 | atmospheric optics / spectroscopy | 6 | 28 | 40 | 4 | expert |
-| 6 | `jacquard-loom-draft` | 提花纹版房 | weaving / textile drafting | 7 | 26 | 46 | 6 | expert |
-| 7 | `stele-rubbing-hall` | 碑林拓片厅 | epigraphic typography | 7 | 29 | 56 | 6 | expert |
-| 8 | `letterpress-type-specimen` | 铅字样本册 | typography | 7 | 37 | 68 | 8 | expert |
-| 9 | `pipeline-mimic-board` | 管网模拟盘 | plant instrumentation | 7 | 40 | 83 | 6 | expert |
-| 10 | `four-colour-press-check` | 四色套印检版台 | printing | 6 | 29 | 91 | 7 | expert |
-| 11 | `forge-metallography-bench` | 锻件金相台 | scientific instrument | 7 | 28 | 57 | 4 | expert |
-| 12 | `mycelium-culture-chamber` | 菌种培养舱 | procedural texture | 7 | 26 | 42 | 8 | expert |
-| 13 | `neon-sign-workshop` | 霓虹招牌工坊 | filter compositing | 7 | 37 | 63 | 7 | expert |
-| 14 | `escapement-chronometer` | 擒纵天文钟 | watchmaking / horology | 6 | 33 | 70 | 5 | expert |
-| 15 | `core-sample-stratigraphy` | 岩芯地层揭示台 | geology / core logging | 7 | 34 | 71 | 4 | expert |
-| 16 | `seismic-drum-console` | 地震记录鼓控制台 | instrument console | 7 | 35 | 52 | 5 | expert |
+| # | id | 标题 | 家族 | 核心特性 | 特性总数 | 复杂度 |
+|---|---|---|---|---|---|---|
+| 1 | `celestial-astrolabe-cabinet` | 铜盘星图柜 | astronomical instrument | 42 | 60 | expert |
+| 2 | `museum-label-panel` | 博物馆展签面板 | museum curation / archives | 43 | 81 | expert |
+| 3 | `ship-lofting-floor` | 船体放样间 | naval architecture | 40 | 73 | expert |
+| 4 | `guilloche-intaglio-plate` | 玫瑰线雕版 | security printing | 31 | 55 | expert |
+| 5 | `auroral-spectrograph` | 极光分光台 | atmospheric optics / spectroscopy | 28 | 40 | expert |
+| 6 | `jacquard-loom-draft` | 提花纹版房 | weaving / textile drafting | 26 | 46 | expert |
+| 7 | `stele-rubbing-hall` | 碑林拓片厅 | epigraphic typography | 29 | 56 | expert |
+| 8 | `letterpress-type-specimen` | 铅字样本册 | typography | 37 | 68 | expert |
+| 9 | `pipeline-mimic-board` | 管网模拟盘 | plant instrumentation | 40 | 83 | expert |
+| 10 | `four-colour-press-check` | 四色套印检版台 | printing | 29 | 91 | expert |
+| 11 | `forge-metallography-bench` | 锻件金相台 | scientific instrument | 28 | 57 | expert |
+| 12 | `mycelium-culture-chamber` | 菌种培养舱 | procedural texture | 26 | 42 | expert |
+| 13 | `neon-sign-workshop` | 霓虹招牌工坊 | filter compositing | 37 | 63 | expert |
+| 14 | `escapement-chronometer` | 擒纵天文钟 | watchmaking / horology | 33 | 70 | expert |
+| 15 | `core-sample-stratigraphy` | 岩芯地层揭示台 | geology / core logging | 34 | 71 | expert |
+| 16 | `seismic-drum-console` | 地震记录鼓控制台 | instrument console | 35 | 52 | expert |
 
 ## 2. 覆盖矩阵（领域 × 演示）
 
-单元格为该演示用到的该领域核心特性数；★ 表示其中含主打特性。最后一列是该领域核心可呈现特性的已覆盖数 / 总数。
-
-| 领域 | D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8 | D9 | D10 | D11 | D12 | D13 | D14 | D15 | D16 | 覆盖/总数 |
+| 领域 | D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8 | D9 | D10 | D11 | D12 | D13 | D14 | D15 | D16 | 核心分配 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 文档结构与复用 | ★33 | 6 | · | · | · | · | 3 | 3 | · | · | · | 3 | · | · | · | 2 | 50/50 |
-| 嵌入、外来内容与语义 | 2 | ★22 | · | · | · | 6 | · | 2 | · | · | · | 1 | 2 | 1 | · | · | 34/34 |
-| 基本图形与路径语法 | · | · | ★27 | 3 | · | 2 | · | 1 | 4 | 1 | · | · | · | · | · | · | 38/38 |
-| 填充、描边与合成属性 | · | · | 4 | ★13 | 2 | · | · | 1 | ★4 | 1 | · | · | ★2 | 2 | · | 3 | 32/32 |
-| 渐变与图案 | · | · | · | · | ★22 | ★13 | · | · | 1 | 3 | · | 1 | · | · | · | · | 38/38 |
-| 文本与排版 | · | 1 | · | · | 1 | · | ★22 | ★18 | · | · | · | · | 1 | · | · | · | 40/40 |
-| 裁剪与遮罩 | · | · | · | · | · | · | ★2 | · | · | · | · | 2 | ★13 | · | ★25 | · | 40/40 |
-| 标记 (marker) | · | · | · | · | · | · | · | · | ★28 | · | · | · | · | · | · | · | 28/28 |
-| 滤镜：区域、连线、合成与颜色原语 | · | · | · | · | · | ★3 | · | 5 | · | ★19 | 1 | 2 | ★13 | · | 2 | · | 42/42 |
-| 滤镜：卷积、形态学、噪声、置换与光照 | · | · | · | · | · | ★1 | · | · | · | ★2 | ★23 | ★14 | ★5 | · | · | · | 45/45 |
-| SMIL 动画 | 3 | · | 1 | · | 3 | · | 1 | · | · | · | 1 | ★3 | ★1 | ★29 | 2 | · | 44/44 |
-| CSS 动画、CSS 变换与脚本 API | · | 3 | 3 | 6 | · | · | · | ★6 | · | 1 | · | · | · | · | · | ★17 | 31/31 |
-| 变换与坐标系 | 2 | · | ★5 | ★9 | · | 1 | · | 1 | 2 | 2 | · | · | · | 1 | · | ★9 | 30/30 |
-| 交互与无障碍 | ★2 | ★11 | · | · | · | · | 1 | · | 1 | · | 3 | · | · | · | 5 | ★4 | 27/27 |
-
-编号对照：D1 = `celestial-astrolabe-cabinet`；D2 = `museum-label-panel`；D3 = `ship-lofting-floor`；D4 = `guilloche-intaglio-plate`；D5 = `auroral-spectrograph`；D6 = `jacquard-loom-draft`；D7 = `stele-rubbing-hall`；D8 = `letterpress-type-specimen`；D9 = `pipeline-mimic-board`；D10 = `four-colour-press-check`；D11 = `forge-metallography-bench`；D12 = `mycelium-culture-chamber`；D13 = `neon-sign-workshop`；D14 = `escapement-chronometer`；D15 = `core-sample-stratigraphy`；D16 = `seismic-drum-console`
+| 文档结构与复用 | 33 | 6 | · | · | · | · | 3 | 3 | · | · | · | 3 | · | · | · | 2 | 50/50 |
+| 嵌入、外来内容与语义 | 2 | 22 | · | · | · | 6 | · | 2 | · | · | · | 1 | 2 | 1 | · | · | 34/34 |
+| 基本图形与路径语法 | · | · | 27 | 3 | · | 2 | · | 1 | 4 | 1 | · | · | · | · | · | · | 38/38 |
+| 填充、描边与合成属性 | · | · | 4 | 13 | 2 | · | · | 1 | 4 | 1 | · | · | 2 | 2 | · | 3 | 32/32 |
+| 渐变与图案 | · | · | · | · | 22 | 13 | · | · | 1 | 3 | · | 1 | · | · | · | · | 38/38 |
+| 文本与排版 | · | 1 | · | · | 1 | · | 22 | 18 | · | · | · | · | 1 | · | · | · | 40/40 |
+| 裁剪与遮罩 | · | · | · | · | · | · | 2 | · | · | · | · | 2 | 13 | · | 25 | · | 40/40 |
+| 标记 (marker) | · | · | · | · | · | · | · | · | 28 | · | · | · | · | · | · | · | 28/28 |
+| 滤镜：区域、连线、合成与颜色原语 | · | · | · | · | · | 3 | · | 5 | · | 19 | 1 | 2 | 13 | · | 2 | · | 42/42 |
+| 滤镜：卷积、形态学、噪声、置换与光照 | · | · | · | · | · | 1 | · | · | · | 2 | 23 | 14 | 5 | · | · | · | 45/45 |
+| SMIL 动画 | 3 | · | 1 | · | 3 | · | 1 | · | · | · | 1 | 3 | 1 | 29 | 2 | · | 44/44 |
+| CSS 动画、CSS 变换与脚本 API | · | 3 | 3 | 6 | · | · | · | 6 | · | 1 | · | · | · | · | · | 17 | 31/31 |
+| 变换与坐标系 | 2 | · | 5 | 9 | · | 1 | · | 1 | 2 | 2 | · | · | · | 1 | · | 9 | 30/30 |
+| 交互与无障碍 | 2 | 11 | · | · | · | · | 1 | · | 1 | · | 3 | · | · | · | 5 | 4 | 27/27 |
 
 ## 3. 演示详情
 
@@ -67,21 +63,17 @@
 
 **主打特性**
 
-- `el:symbol` — symbol reusable template（全平台）：An icon defined once as a symbol and instantiated several times with use at different sizes.
-- `concept:sprite-sheet` — Symbol sprite sheet（全平台）：A hidden svg of symbols at the top of the page feeds dozens of inline icons via use href="#name".
-- `concept:use-of-use` — Nested use-of-use instancing（全平台）：A use pointing at a g that itself contains uses produces a composite of repeated sub-parts.
-- `el:view` — view predefined viewport（全平台）：Linking to file.svg#detail shows only the region defined by that view element.
-- `concept:svgview-viewbox` — svgView(viewBox(...)) fragment sprite crop（全平台）：Several img tags with different #svgView(viewBox(...)) fragments show distinct icons cut from one sprite file.
-- `concept:use-css-custom-properties-passthrough` — CSS custom properties passed into use instance（全平台）：A symbol with fill=var(--accent) changes colour per use where --accent is set in style.
-- `concept:use-shadow-event-retargeting` — Event retargeting: events inside <use> instances report the <use> as target（全平台）：Clicking parts of a <use> instance always logs the <use> id, never the inner shape id.
+- `el:symbol` — symbol reusable template
+- `concept:sprite-sheet` — Symbol sprite sheet
+- `concept:use-of-use` — Nested use-of-use instancing
+- `el:view` — view predefined viewport
+- `concept:svgview-viewbox` — svgView(viewBox(...)) fragment sprite crop
+- `concept:use-css-custom-properties-passthrough` — CSS custom properties passed into use instance
+- `concept:use-shadow-event-retargeting` — Event retargeting: events inside <use> instances report the <use> as target
 
-**辅助特性**（53 项，按领域）
+**辅助特性**
 
-- 文档结构与复用：`el:svg`、`concept:nested-svg`、`at:svg.viewBox`、`at:svg.preserveAspectRatio`、`av:svg.preserveAspectRatio=none`、`av:svg.preserveAspectRatio=xMidYMid-slice`、`concept:nested-viewport-clipping`、`pv:overflow=visible`、`at:svg.transform`、`el:g`、`concept:painting-order-document`、`el:defs`、`at:symbol.viewBox`、`at:symbol.refX`、`el:use`、`at:use.href`、`at:use.x`、`at:use.width`、`concept:use-external-fragment`、`concept:use-shadow-tree-styling`、`concept:use-inherited-fill-override`、`concept:use-currentcolor-passthrough`、`concept:fragment-identifier-viewid`、`concept:svgview-fragment-identifier`、`el:a`、`at:a.href`、`at:g.id`、`concept:symbol-not-rendered-directly`˚、`concept:use-symbol-default-100pct-size`˚、`at:use.xlink:href`˚、`concept:use-shadow-tree`˚、`api:SVGUseElement.instanceRoot`˚、`api:SVGElement.viewportElement`˚、`api:SVGSVGElement.getElementById`˚、`concept:g-property-inheritance`˚、`concept:defs-anywhere`˚、`at:svg.x`˚、`at:view.viewBox`˚、`at:a.target`˚、`concept:viewbox-pan`˚、`concept:list-syntax-whitespace-tolerance`˚
-- 嵌入、外来内容与语义：`concept:use-inheritance`、`concept:use-shadow-tree-selector-isolation`˚、`av:a.target=_blank`˚、`concept:standalone-svg-document`
-- SMIL 动画：`concept:animate-viewbox`、`concept:animate-use-href`、`concept:animate-in-use-shadow-tree`
-- 变换与坐标系：`pv:transform=rotate-cx-cy`、`concept:y-down-clockwise-angles`
-- 交互与无障碍：`css:target`、`concept:fragment-link-to-view`˚、`css:hover-inside-use`˚
+`el:svg`、`concept:nested-svg`、`at:svg.viewBox`、`at:svg.preserveAspectRatio`、`av:svg.preserveAspectRatio=none`、`av:svg.preserveAspectRatio=xMidYMid-slice`、`concept:nested-viewport-clipping`、`pv:overflow=visible`、`at:svg.transform`、`el:g`、`concept:painting-order-document`、`el:defs`、`at:symbol.viewBox`、`at:symbol.refX`、`el:use`、`at:use.href`、`at:use.x`、`at:use.width`、`concept:use-external-fragment`、`concept:use-shadow-tree-styling`、`concept:use-inherited-fill-override`、`concept:use-currentcolor-passthrough`、`concept:use-inheritance`、`concept:fragment-identifier-viewid`、`concept:svgview-fragment-identifier`、`el:a`、`at:a.href`、`at:g.id`、`concept:animate-viewbox`、`concept:animate-use-href`、`concept:animate-in-use-shadow-tree`、`pv:transform=rotate-cx-cy`、`concept:y-down-clockwise-angles`、`css:target`、`concept:symbol-not-rendered-directly`、`concept:use-symbol-default-100pct-size`、`at:use.xlink:href`、`concept:use-shadow-tree`、`concept:use-shadow-tree-selector-isolation`、`api:SVGUseElement.instanceRoot`、`api:SVGElement.viewportElement`、`api:SVGSVGElement.getElementById`、`concept:g-property-inheritance`、`concept:defs-anywhere`、`at:svg.x`、`at:view.viewBox`、`concept:fragment-link-to-view`、`at:a.target`、`av:a.target=_blank`、`css:hover-inside-use`、`concept:viewbox-pan`、`concept:list-syntax-whitespace-tolerance`、`concept:standalone-svg-document`
 
 **构造要点**
 
@@ -104,16 +96,24 @@
 
 **验收要点**
 
-- [ ] DOM：document.querySelectorAll('symbol').length === 9；#stage 内 use 元素 ≥ 1700；defs 之外直接书写的 circle|ellipse|polygon 星点数为 0——整份星表没有一颗星被重画。
-- [ ] DOM：对 #zone-19 的 <a> 派发 click 后，#dial-window.viewBox.baseVal.x/y 变为 zone-19 矩形的起点，而 #stage.querySelectorAll('*').length 与点击前完全相同（换幅不重绘）。
-- [ ] DOM：在一颗已知星的中心派发 pointermove，event.target.nodeName === 'use' 且 id 以 s- 开头；同时 getComputedStyle(document.querySelector('#gl-k .star-core')).fill 不是 rgb(255, 0, 0)，证明 use .star-core 规则够不到影子树，而写在母版子节点上的 #gl-var .pulse-ring 规则在全部变星实例上生效。
-- [ ] PNG：24 个图签窗中心区域采样，同一枚 #gl-g 母版呈现 24 种不同色相（相邻格色相差 ≥ 12°、最大差 ≥ 180°）；而验色条里三个 fill 不同的 #gl-m 格，其朱砂芯像素 RGB 三格一致（各通道差 ≤ 4）。
-- [ ] PNG + DOM：location.hash === '#zone-07'，被 :target 命中的那格铜牌高亮（其底板亮度较邻格高 ≥ 25%），且门腰凹槽里恰好一张取景卡的计算 opacity 为 1、其余 23 张为 0。
-- [ ] PNG：校样条八格中，none 那格的圆形星晕被压扁成椭圆（水平/垂直直径比 ≥ 1.25），三格 slice 内容铺满且左右被裁，三格 meet 在上下留出铜色空档，xMinYMin 与 xMaxYMax 的空档落在相反侧。
-- [ ] PNG：溢版校样 B 格的彗尾像素越过其视口矩形右边界至少 12px，A 格在同一边界被整齐截断；层序校样中带 style="z-index:99" 的铜签被后画的那枚压住。
-- [ ] PNG + 像素统计：铭牌四行与 SVGVIEW: / EXTERNAL USE: 两行状态字样可读且非空；全图完全透明像素 ≥ 8%、alpha>20 的可见像素 ≥ 3.5%、彩色像素 ≥ 2500。
+1. DOM：document.querySelectorAll('symbol').length === 9；#stage 内 use 元素 ≥ 1700；defs 之外直接书写的 circle|ellipse|polygon 星点数为 0——整份星表没有一颗星被重画。
+2. DOM：对 #zone-19 的 <a> 派发 click 后，#dial-window.viewBox.baseVal.x/y 变为 zone-19 矩形的起点，而 #stage.querySelectorAll('*').length 与点击前完全相同（换幅不重绘）。
+3. DOM：在一颗已知星的中心派发 pointermove，event.target.nodeName === 'use' 且 id 以 s- 开头；同时 getComputedStyle(document.querySelector('#gl-k .star-core')).fill 不是 rgb(255, 0, 0)，证明 use .star-core 规则够不到影子树，而写在母版子节点上的 #gl-var .pulse-ring 规则在全部变星实例上生效。
+4. PNG：24 个图签窗中心区域采样，同一枚 #gl-g 母版呈现 24 种不同色相（相邻格色相差 ≥ 12°、最大差 ≥ 180°）；而验色条里三个 fill 不同的 #gl-m 格，其朱砂芯像素 RGB 三格一致（各通道差 ≤ 4）。
+5. PNG + DOM：location.hash === '#zone-07'，被 :target 命中的那格铜牌高亮（其底板亮度较邻格高 ≥ 25%），且门腰凹槽里恰好一张取景卡的计算 opacity 为 1、其余 23 张为 0。
+6. PNG：校样条八格中，none 那格的圆形星晕被压扁成椭圆（水平/垂直直径比 ≥ 1.25），三格 slice 内容铺满且左右被裁，三格 meet 在上下留出铜色空档，xMinYMin 与 xMaxYMax 的空档落在相反侧。
+7. PNG：溢版校样 B 格的彗尾像素越过其视口矩形右边界至少 12px，A 格在同一边界被整齐截断；层序校样中带 style="z-index:99" 的铜签被后画的那枚压住。
+8. PNG + 像素统计：铭牌四行与 SVGVIEW: / EXTERNAL USE: 两行状态字样可读且非空；全图完全透明像素 ≥ 8%、alpha>20 的可见像素 ≥ 3.5%、彩色像素 ≥ 2500。
 
-**浏览器注意**　2026 年三家引擎的实际缺口与本场景的兜底：(1) at:symbol.refX/refY —— Chrome 与 Firefox 兑现，Safari 至今忽略，星点会整体偏到坐标交点的右下方半个 use 框；载入时用一枚探针 use 比较 getBoundingClientRect() 的中心与期望值，失配就一次性把全部 use 的 x/y 各减去 width/2 与 height/2（约 1700 次属性写，一帧内完成），验色条末格因此在 Safari 上退化为两格同心。(2) at:svg.transform —— Safari 只忽略最外层 svg 上的 transform；本场景的 rotate 只加在嵌套的 #door 上，三家均正常，最外层 #stage 不带 transform。(3) SMIL —— Safari 对 use 影子树内部的动画同步不可靠（变星可能只有部分实例跳动），故每枚变星母版另画一圈静态双环，静帧与无动画时身份仍可读；<animate attributeName=\"href\"> 在 Chrome/Firefox 有效，Safari 仍只认 xlink:href，脚本在 beginElement() 后比较 nova-slot.instanceRoot 是否更换，未更换则退回定时改写属性；viewBox 的 SMIL 插值三家都支持，Safari 起步略有跳变，仅影响「巡天」过程、不影响静帧。(4) 片段标识符 —— Chromium 与 Firefox 支持 <image> 上的 #svgView(viewBox(...)) 与具名 #viewId，Safari 支持不完整；用 probe.svg 的红/绿半幅做画布采样探针（同源 SVG 绘入 canvas 不污染），失败即揭开预置的 inline 镜像并把铜牌刻成 SVGVIEW: FALLBACK，取景卡内容不变、只是换了成像途径。(5) use 的外部文件引用三家都支持，但要求同源且不可 file://；plates/atlas-plates.svg 与 plates/probe.svg 由采集用的本地 dev server 同源提供，是本场景仅有的两处非 data: 请求，其余字体与素材全部 data-URI 内嵌；引用失败时 getBBox().width === 0 触发换用内嵌 #gl-neb 并刻 EXTERNAL USE: FALLBACK。(6) 嵌套 svg 的 overflow —— 现代三家都认 CSS overflow:visible，为兼容旧 Safari 同时写 presentation attribute overflow=\"visible\"。(7) 内联 SVG 的文档片段（#viewId、svgView()）对宿主 HTML 无效，这正是取景卡必须引用独立 SVG 文档的原因；:target 在三家里都能匹配 SVG 元素，Safari 早期不滚动但匹配无碍，本场景无滚动条。(8) 字体 —— 刻字全为拉丁字母与数字，@font-face 用 data-URI woff2 子集，fallback 到 serif/monospace，不依赖任何 CJK 字体。
+**实现复审**
+
+- 当前 Chrome 152 忽略 symbol 的 refX/refY 绘制锚点；入口通过 getBBox 探针识别并平移 use 修正。保留原生属性供比较。
+- instanceRoot 在当前引擎未暴露，铭牌明确显示 NOT EXPOSED；嵌套 use 的事件可能重定向到外层 use，不能承诺总是 s-*。
+- 星图数据为 1675 颗；九枚母版、24 图签、hash 切换和片段探针有浏览器检查。
+
+**浏览器注意**
+
+- 2026 年三家引擎的实际缺口与本场景的兜底：(1) at:symbol.refX/refY —— Chrome 与 Firefox 兑现，Safari 至今忽略，星点会整体偏到坐标交点的右下方半个 use 框；载入时用一枚探针 use 比较 getBoundingClientRect() 的中心与期望值，失配就一次性把全部 use 的 x/y 各减去 width/2 与 height/2（约 1700 次属性写，一帧内完成），验色条末格因此在 Safari 上退化为两格同心。(2) at:svg.transform —— Safari 只忽略最外层 svg 上的 transform；本场景的 rotate 只加在嵌套的 #door 上，三家均正常，最外层 #stage 不带 transform。(3) SMIL —— Safari 对 use 影子树内部的动画同步不可靠（变星可能只有部分实例跳动），故每枚变星母版另画一圈静态双环，静帧与无动画时身份仍可读；<animate attributeName=\"href\"> 在 Chrome/Firefox 有效，Safari 仍只认 xlink:href，脚本在 beginElement() 后比较 nova-slot.instanceRoot 是否更换，未更换则退回定时改写属性；viewBox 的 SMIL 插值三家都支持，Safari 起步略有跳变，仅影响「巡天」过程、不影响静帧。(4) 片段标识符 —— Chromium 与 Firefox 支持 <image> 上的 #svgView(viewBox(...)) 与具名 #viewId，Safari 支持不完整；用 probe.svg 的红/绿半幅做画布采样探针（同源 SVG 绘入 canvas 不污染），失败即揭开预置的 inline 镜像并把铜牌刻成 SVGVIEW: FALLBACK，取景卡内容不变、只是换了成像途径。(5) use 的外部文件引用三家都支持，但要求同源且不可 file://；plates/atlas-plates.svg 与 plates/probe.svg 由采集用的本地 dev server 同源提供，是本场景仅有的两处非 data: 请求，其余字体与素材全部 data-URI 内嵌；引用失败时 getBBox().width === 0 触发换用内嵌 #gl-neb 并刻 EXTERNAL USE: FALLBACK。(6) 嵌套 svg 的 overflow —— 现代三家都认 CSS overflow:visible，为兼容旧 Safari 同时写 presentation attribute overflow=\"visible\"。(7) 内联 SVG 的文档片段（#viewId、svgView()）对宿主 HTML 无效，这正是取景卡必须引用独立 SVG 文档的原因；:target 在三家里都能匹配 SVG 元素，Safari 早期不滚动但匹配无碍，本场景无滚动条。(8) 字体 —— 刻字全为拉丁字母与数字，@font-face 用 data-URI woff2 子集，fallback 到 serif/monospace，不依赖任何 CJK 字体。
 
 ### 3.2 `museum-label-panel` — 博物馆展签面板
 
@@ -125,22 +125,18 @@
 
 **主打特性**
 
-- `el:foreignObject` — foreignObject element（全平台）：A styled HTML block (bordered div with a heading) positioned by x/y inside the SVG among circles and paths.
-- `concept:foreignobject-html-text-wrapping` — Flowing, wrapping HTML text via foreignObject（全平台）：A paragraph auto-wraps to multiple lines within the foreignObject width, unlike SVG text which runs off in one line.
-- `concept:foreignobject-form-controls` — Interactive HTML form controls inside SVG（全平台）：Working input, checkbox, select and button embedded in the drawing; typing/clicking updates a nearby SVG text via script.
-- `concept:standalone-svg-document` — Standalone SVG XML document（全平台）：File opened directly in a tab: XML declaration, xmlns on root, root svg is :root; document fills the viewport per width/height/viewBox.
-- `css:media-print` — @media print inside SVG（全平台）：Print preview shows a black-and-white version with hidden interactive controls while the screen version stays coloured.
-- `css:media-width-in-standalone-svg` — @media (width) responsive SVG in img/object（全平台）：Same logo file in three img widths shows full wordmark, abbreviated, and icon-only variants.
-- `concept:aria-live` — aria-live region announcing SVG state changes（全平台）：Hovering data points updates a visually rendered live region text 'Point 3: 42' that assistive tech announces.
-- `concept:role-button-keyboard` — role=button + tabindex + Enter/Space handling on shapes (aria-pressed)（全平台）：Toggle switch drawn in SVG flips with the Space key, aria-pressed updates, focus ring visible.
+- `el:foreignObject` — foreignObject element
+- `concept:foreignobject-html-text-wrapping` — Flowing, wrapping HTML text via foreignObject
+- `concept:foreignobject-form-controls` — Interactive HTML form controls inside SVG
+- `concept:standalone-svg-document` — Standalone SVG XML document
+- `css:media-print` — @media print inside SVG
+- `css:media-width-in-standalone-svg` — @media (width) responsive SVG in img/object
+- `concept:aria-live` — aria-live region announcing SVG state changes
+- `concept:role-button-keyboard` — role=button + tabindex + Enter/Space handling on shapes (aria-pressed)
 
-**辅助特性**（73 项，按领域）
+**辅助特性**
 
-- 文档结构与复用：`at:svg.width`、`concept:svg-auto-sizing`、`el:metadata`、`el:title`、`el:desc`、`at:svg.xmlns`、`concept:title-placement-first-child`˚、`at:svg.xmlns:xlink`˚
-- 嵌入、外来内容与语义：`concept:intrinsic-sizing-of-embedded-svg`、`concept:foreignobject-css-grid-flex`、`concept:foreignobject-mathml`、`concept:foreignobject-video`、`concept:foreignobject-transform`、`concept:foreignobject-filter-clip-mask`、`concept:svg-as-img-restrictions`、`concept:svg-as-object-embed-iframe`、`av:svg.role=img`、`at:svg.aria-label`、`at:g.aria-hidden`、`concept:tabindex-focusable-svg-elements`、`css:custom-properties`、`css:prefers-color-scheme`、`css:forced-colors`、`pv:fill=currentcolor`、`concept:metadata-rdf-dublin-core`˚、`concept:foreign-namespace-attributes-ignored`˚、`at:svg.aria-describedby`˚、`at:svg.aria-labelledby`˚、`at:foreignObject.x`˚、`at:foreignObject.width`˚、`concept:foreignobject-overflow-clipping`˚、`concept:foreignobject-viewbox-scaling`˚、`concept:foreignobject-xmlns-requirement`˚、`concept:foreignobject-canvas-rasterization`˚、`el:canvas`˚、`el:iframe`˚、`av:svg.role=graphics-document`˚、`av:g.role=list`˚、`av:g.role=group`˚、`concept:svg-text-accessibility-and-find`˚、`concept:var-in-presentation-attribute`˚、`css:root-selector-scope`˚、`css:supports-rule`˚、`css:light-dark-function`˚、`css:prefers-contrast`˚、`css:container-queries`˚、`api:HTMLObjectElement.contentDocument`˚、`concept:xml-entities-and-cdata`˚、`concept:xml-well-formedness-errors`˚
-- 文本与排版：`api:SVGTextContentElement.getComputedTextLength`
-- CSS 动画、CSS 变换与脚本 API：`concept:svg-script-security-context`、`concept:svg-to-canvas-rasterization`、`css:property-registered-animation`˚、`css:presentation-attribute-specificity`、`concept:animation-in-img-context`˚、`concept:cross-document-svg-scripting`˚
-- 交互与无障碍：`api:SVGElement.focus`、`concept:keyboard-events`、`at:svg.tabindex`、`css:focus`、`css:focus-visible`、`css:has`、`css:checked-sibling-toggle`、`concept:role-group`、`concept:screen-reader-reading-order`、`concept:custom-tooltip`˚、`concept:role-graphics-document`˚、`concept:html-controls-via-foreignObject`˚、`css:system-colors`˚、`css:outline`˚、`css:focus-within`˚、`concept:tabindex-focus-order`˚、`concept:focus-events`˚
+`at:svg.width`、`concept:svg-auto-sizing`、`el:metadata`、`el:title`、`el:desc`、`at:svg.xmlns`、`concept:intrinsic-sizing-of-embedded-svg`、`concept:foreignobject-css-grid-flex`、`concept:foreignobject-mathml`、`concept:foreignobject-video`、`concept:foreignobject-transform`、`concept:foreignobject-filter-clip-mask`、`concept:svg-as-img-restrictions`、`concept:svg-as-object-embed-iframe`、`av:svg.role=img`、`at:svg.aria-label`、`at:g.aria-hidden`、`concept:tabindex-focusable-svg-elements`、`css:custom-properties`、`css:prefers-color-scheme`、`css:forced-colors`、`pv:fill=currentcolor`、`concept:svg-script-security-context`、`concept:svg-to-canvas-rasterization`、`api:SVGElement.focus`、`concept:keyboard-events`、`at:svg.tabindex`、`css:focus`、`css:focus-visible`、`css:has`、`css:checked-sibling-toggle`、`concept:role-group`、`concept:screen-reader-reading-order`、`concept:metadata-rdf-dublin-core`、`concept:foreign-namespace-attributes-ignored`、`concept:title-placement-first-child`、`concept:custom-tooltip`、`at:svg.aria-describedby`、`at:svg.aria-labelledby`、`at:svg.xmlns:xlink`、`at:foreignObject.x`、`at:foreignObject.width`、`concept:foreignobject-overflow-clipping`、`concept:foreignobject-viewbox-scaling`、`concept:foreignobject-xmlns-requirement`、`concept:foreignobject-canvas-rasterization`、`el:canvas`、`el:iframe`、`av:svg.role=graphics-document`、`av:g.role=list`、`av:g.role=group`、`concept:role-graphics-document`、`concept:svg-text-accessibility-and-find`、`concept:html-controls-via-foreignObject`、`concept:var-in-presentation-attribute`、`css:root-selector-scope`、`css:supports-rule`、`css:property-registered-animation`、`css:light-dark-function`、`css:system-colors`、`css:prefers-contrast`、`css:container-queries`、`css:outline`、`css:focus-within`、`css:presentation-attribute-specificity`、`api:HTMLObjectElement.contentDocument`、`api:SVGTextContentElement.getComputedTextLength`、`concept:tabindex-focus-order`、`concept:focus-events`、`concept:xml-entities-and-cdata`、`concept:xml-well-formedness-errors`、`concept:animation-in-img-context`、`concept:cross-document-svg-scripting`
 
 **构造要点**
 
@@ -163,16 +159,22 @@
 
 **验收要点**
 
-- [ ] PNG 中 #fo-desc 的正文至少 4 行且全部落在 x=320–776 内；DOM 中同一句的对照 <text> 的 getComputedTextLength() > 456 且被 clipPath 裁于面板右缘——换行只发生在 foreignObject 一侧。
-- [ ] DOM：inline 副本内 foreignObject 数量 ≥ 6，#fo-form 内 input、select、input[type=checkbox]、button 各 ≥ 1，#fo-math 内存在 math > mfrac 且含 msqrt 与 msup；对应的 <img> 副本 naturalWidth > 0 却查不到任何表单节点或文本节点。
-- [ ] 身份墙五块瓦片在 PNG 中呈现五种不同的纸底/线色组合（逐块采样中心区域，两两色差 ΔE > 12），而五块引用的文件摘要（或归一化路径）完全一致。
-- [ ] Tab 序列：document.querySelectorAll('[data-accession]') 的 DOM 序为 M-01…M-07，[data-paint-index] 的序列与之不同；从 M-01 连按 Tab，document.activeElement.dataset.accession 依次递增，且带 .kbd-focus 的焦点环在静帧里可见。
-- [ ] 播报区 #fo-live 具有 role="status" 与 aria-live="polite"，静帧里可读出包含当前编号（M-03）与身份名的文字；触发 pointermove 后 window.__INTERACTION_COUNT__ 增大。
-- [ ] 键盘：向 M-04 派发 3 次 ArrowRight 后测量游标的 x 增加 ≥ 24；派发 Space 后该热点 aria-pressed 由 false 变 true，且 .layer-section 的 getComputedStyle(display) 由 none 变 block。
-- [ ] 存档画布采样到非透明像素，自检徽章文本严格是「foreignObject 已参与栅格化」或「foreignObject 未参与栅格化」之一，且徽章结论与实际采样一致。
-- [ ] 媒体查询真实性：在 emulateMedia({media:'print'}) 下，object 文档内 matchMedia('print').matches === true 且 #fo-form 的 getComputedStyle(display) === 'none'；把窄幅瓦片的 <img> 宽度设为 380 时其文档内 matchMedia('(max-width: 420px)').matches === true。
+1. PNG 中 #fo-desc 的正文至少 4 行且全部落在 x=320–776 内；DOM 中同一句的对照 <text> 的 getComputedTextLength() > 456 且被 clipPath 裁于面板右缘——换行只发生在 foreignObject 一侧。
+2. DOM：inline 副本内 foreignObject 数量 ≥ 6，#fo-form 内 input、select、input[type=checkbox]、button 各 ≥ 1，#fo-math 内存在 math > mfrac 且含 msqrt 与 msup；对应的 <img> 副本 naturalWidth > 0 却查不到任何表单节点或文本节点。
+3. 身份墙五块瓦片在 PNG 中呈现五种不同的纸底/线色组合（逐块采样中心区域，两两色差 ΔE > 12），而五块引用的文件摘要（或归一化路径）完全一致。
+4. Tab 序列：document.querySelectorAll('[data-accession]') 的 DOM 序为 M-01…M-07，[data-paint-index] 的序列与之不同；从 M-01 连按 Tab，document.activeElement.dataset.accession 依次递增，且带 .kbd-focus 的焦点环在静帧里可见。
+5. 播报区 #fo-live 具有 role="status" 与 aria-live="polite"，静帧里可读出包含当前编号（M-03）与身份名的文字；触发 pointermove 后 window.__INTERACTION_COUNT__ 增大。
+6. 键盘：向 M-04 派发 3 次 ArrowRight 后测量游标的 x 增加 ≥ 24；派发 Space 后该热点 aria-pressed 由 false 变 true，且 .layer-section 的 getComputedStyle(display) 由 none 变 block。
+7. 存档画布采样到非透明像素，自检徽章文本严格是「foreignObject 已参与栅格化」或「foreignObject 未参与栅格化」之一，且徽章结论与实际采样一致。
+8. 媒体查询真实性：在 emulateMedia({media:'print'}) 下，object 文档内 matchMedia('print').matches === true 且 #fo-form 的 getComputedStyle(display) === 'none'；把窄幅瓦片的 <img> 宽度设为 380 时其文档内 matchMedia('(max-width: 420px)').matches === true。
 
-**浏览器注意**　Safari 对 foreignObject 的老问题集中在 transform 下：绝对定位/固定定位后代会错位、命中测试偏移，因此暂挂标签内部只用静态流布局，且不在旋转层里放交互控件；Safari 里 <iframe srcdoc> 嵌在 foreignObject 内历史上也不稳定，缺失时以同尺寸静态 HTML 卡兜底（因此不使用 <video>，网络被阻断的采集环境也无法加载媒体）。Safari 至今不实现 forced-colors，强制高对比身份改由镜像属性 :root[data-identity=\"forced\"] 与 @media (prefers-contrast: more) 呈现，系统色 CanvasText/Canvas/Highlight 本身在三家都可用。color-scheme 向 <img> 内 SVG 文档的传播在 Chrome/Safari 可用，Firefox 若未生效则该瓦片自动退回 <object>+data-identity=\"dark\" 版本，静帧不受影响。SVG 被当作图像栅格化（<img> 或 drawImage）时是否绘制 foreignObject 内的 HTML，各引擎历来不一致（Chrome 常整块丢弃，Firefox 多数情况绘制），所以存档画布带像素自检徽章，并在缺失时用 canvas 补绘摘要文字，而不是假装它一定成功。<object>/<iframe> 的 data 不接受 data: URI（data: 顶层导航被阻断），因此这两路走同源 /labels/*.svg 文件，只有 <img> 用 base64 data: URI；采集脚本的路由白名单需放行 127.0.0.1 与 data:。@media print 在 <img>/<object> 内嵌文档中的打印行为 Safari 支持较弱，静帧一律用镜像属性呈现，page.emulateMedia({media:'print'}) 只用于断言 matchMedia 与 display 计算值。MathML Core 三家均已支持，但无网络时依赖系统数学字体，度量异常时切到备用组里手绘的 SVG 分式。:has() 三家（Chrome/Safari/Firefox 121+）均可用，仍保留 JS 镜像 class 以保证截图确定性；@container 在 foreignObject 内 Chrome/Firefox 正常，Safari 个别版本对 SVG 内建立容器上下文有偏差，窄幅塌陷因此同时由 @media (max-width:420px) 保底。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+
+**浏览器注意**
+
+- Safari 对 foreignObject 的老问题集中在 transform 下：绝对定位/固定定位后代会错位、命中测试偏移，因此暂挂标签内部只用静态流布局，且不在旋转层里放交互控件；Safari 里 <iframe srcdoc> 嵌在 foreignObject 内历史上也不稳定，缺失时以同尺寸静态 HTML 卡兜底（因此不使用 <video>，网络被阻断的采集环境也无法加载媒体）。Safari 至今不实现 forced-colors，强制高对比身份改由镜像属性 :root[data-identity=\"forced\"] 与 @media (prefers-contrast: more) 呈现，系统色 CanvasText/Canvas/Highlight 本身在三家都可用。color-scheme 向 <img> 内 SVG 文档的传播在 Chrome/Safari 可用，Firefox 若未生效则该瓦片自动退回 <object>+data-identity=\"dark\" 版本，静帧不受影响。SVG 被当作图像栅格化（<img> 或 drawImage）时是否绘制 foreignObject 内的 HTML，各引擎历来不一致（Chrome 常整块丢弃，Firefox 多数情况绘制），所以存档画布带像素自检徽章，并在缺失时用 canvas 补绘摘要文字，而不是假装它一定成功。<object>/<iframe> 的 data 不接受 data: URI（data: 顶层导航被阻断），因此这两路走同源 /labels/*.svg 文件，只有 <img> 用 base64 data: URI；采集脚本的路由白名单需放行 127.0.0.1 与 data:。@media print 在 <img>/<object> 内嵌文档中的打印行为 Safari 支持较弱，静帧一律用镜像属性呈现，page.emulateMedia({media:'print'}) 只用于断言 matchMedia 与 display 计算值。MathML Core 三家均已支持，但无网络时依赖系统数学字体，度量异常时切到备用组里手绘的 SVG 分式。:has() 三家（Chrome/Safari/Firefox 121+）均可用，仍保留 JS 镜像 class 以保证截图确定性；@container 在 foreignObject 内 Chrome/Firefox 正常，Safari 个别版本对 SVG 内建立容器上下文有偏差，窄幅塌陷因此同时由 @media (max-width:420px) 保底。
 
 ### 3.3 `ship-lofting-floor` — 船体放样间
 
@@ -184,20 +186,16 @@
 
 **主打特性**
 
-- `at:path.d` — path data attribute d（全平台）：Same shape given in verbose and compact d syntax renders identically.
-- `av:path.d=A` — elliptical arc A/a（全平台）：Arc segment with rx != ry showing an elliptical curve between two points.
-- `concept:arc-flag-combinations` — large-arc and sweep flags four combinations（全平台）：Four arcs between the same two points (00, 01, 10, 11) tracing the four candidate arcs of the two ellipses.
-- `concept:smooth-cubic-reflection` — S reflects previous C/S second control point（全平台）：Overlay of reflected control handle shows S's first control mirrors the prior segment's last control.
-- `concept:relative-vs-absolute-commands` — lowercase relative vs uppercase absolute coordinates（全平台）：Same glyph drawn with uppercase and lowercase commands overlaps exactly; changing one relative value shifts everything after it.
-- `concept:isometric-projection-matrix` — Isometric / axonometric projection via matrix()（全平台）：Three flat squares with different matrices assemble into a convincing 3D cube (top, left, right faces) in isometric view.
+- `at:path.d` — path data attribute d
+- `av:path.d=A` — elliptical arc A/a
+- `concept:arc-flag-combinations` — large-arc and sweep flags four combinations
+- `concept:smooth-cubic-reflection` — S reflects previous C/S second control point
+- `concept:relative-vs-absolute-commands` — lowercase relative vs uppercase absolute coordinates
+- `concept:isometric-projection-matrix` — Isometric / axonometric projection via matrix()
 
-**辅助特性**（67 项，按领域）
+**辅助特性**
 
-- 基本图形与路径语法：`el:path`、`av:path.d=M`、`av:path.d=L`、`av:path.d=H`、`av:path.d=V`、`av:path.d=C`、`av:path.d=S`、`av:path.d=Q`、`av:path.d=T`、`av:path.d=Z`、`concept:arc-radius-scaling`、`concept:smooth-quadratic-reflection`、`concept:implicit-repeated-commands`、`concept:multiple-subpaths`、`concept:zero-length-subpath-round-cap-dot`、`at:path.pathLength`、`pr:fill-rule`、`css:d-property`、`api:SVGGeometryElement.getTotalLength`、`api:SVGGeometryElement.getPointAtLength`、`api:SVGGeometryElement.isPointInFill`、`api:SVGAnimatedLength.baseVal`、`concept:path-must-start-with-moveto`˚、`concept:empty-d-not-rendered`˚、`concept:path-error-partial-render`˚、`concept:path-number-syntax`˚、`concept:relative-moveto-after-closepath`˚、`concept:arc-x-axis-rotation`˚、`concept:arc-zero-radius-line`˚、`concept:arc-flag-compact-parsing`˚、`concept:smooth-command-without-predecessor`˚、`concept:closepath-join-vs-cap`˚、`concept:fill-closes-open-subpaths`˚、`concept:zero-length-subpath-square-cap`˚、`pv:fill-rule=nonzero`˚、`pv:fill-rule=evenodd`˚、`concept:winding-direction-holes`˚、`css:d-property-transition`˚、`css:geometry-properties-transition`˚、`css:custom-properties-in-geometry`˚、`concept:polygon-vs-path-equivalence`˚、`api:SVGGeometryElement.pathLength`˚、`api:SVGGeometryElement.isPointInStroke`˚、`api:SVGPathElement.getPathData`˚、`api:SVGPathElement.pathSegList`˚
-- 填充、描边与合成属性：`pr:stroke-width`、`pr:stroke-linecap`、`pr:stroke-linejoin`、`pr:stroke-miterlimit`、`pv:stroke-linecap=round`˚、`pv:stroke-linecap=square`˚、`pv:stroke-linejoin=round`˚、`pv:stroke-linejoin=bevel`˚、`pv:stroke-width=0`˚
-- SMIL 动画：`concept:animate-path-d-morph`、`concept:animate-path-d-mismatch-discrete`˚
-- CSS 动画、CSS 变换与脚本 API：`css:geometry-properties`、`api:SVGLength.convertToSpecifiedUnits`˚、`api:SVGAnimatedString.baseVal`˚、`api:Element.classList`˚、`api:SVGGraphicsElement.getScreenCTM`、`api:Window.requestAnimationFrame`
-- 变换与坐标系：`pv:transform=matrix`、`concept:negative-scale-mirroring`、`concept:length-units-absolute`、`concept:units-inside-viewbox-scaled`˚、`concept:mouse-to-svg-coordinates`
+`el:path`、`av:path.d=M`、`av:path.d=L`、`av:path.d=H`、`av:path.d=V`、`av:path.d=C`、`av:path.d=S`、`av:path.d=Q`、`av:path.d=T`、`av:path.d=Z`、`concept:arc-radius-scaling`、`concept:smooth-quadratic-reflection`、`concept:implicit-repeated-commands`、`concept:multiple-subpaths`、`concept:zero-length-subpath-round-cap-dot`、`at:path.pathLength`、`pr:fill-rule`、`css:d-property`、`api:SVGGeometryElement.getTotalLength`、`api:SVGGeometryElement.getPointAtLength`、`api:SVGGeometryElement.isPointInFill`、`api:SVGAnimatedLength.baseVal`、`pr:stroke-width`、`pr:stroke-linecap`、`pr:stroke-linejoin`、`pr:stroke-miterlimit`、`concept:animate-path-d-morph`、`css:geometry-properties`、`pv:transform=matrix`、`concept:negative-scale-mirroring`、`concept:length-units-absolute`、`concept:path-must-start-with-moveto`、`concept:empty-d-not-rendered`、`concept:path-error-partial-render`、`concept:path-number-syntax`、`concept:relative-moveto-after-closepath`、`concept:arc-x-axis-rotation`、`concept:arc-zero-radius-line`、`concept:arc-flag-compact-parsing`、`concept:smooth-command-without-predecessor`、`concept:closepath-join-vs-cap`、`concept:fill-closes-open-subpaths`、`concept:zero-length-subpath-square-cap`、`pv:fill-rule=nonzero`、`pv:fill-rule=evenodd`、`concept:winding-direction-holes`、`pv:stroke-linecap=round`、`pv:stroke-linecap=square`、`pv:stroke-linejoin=round`、`pv:stroke-linejoin=bevel`、`pv:stroke-width=0`、`css:d-property-transition`、`css:geometry-properties-transition`、`css:custom-properties-in-geometry`、`concept:units-inside-viewbox-scaled`、`concept:polygon-vs-path-equivalence`、`concept:animate-path-d-mismatch-discrete`、`api:SVGGeometryElement.pathLength`、`api:SVGGeometryElement.isPointInStroke`、`api:SVGPathElement.getPathData`、`api:SVGPathElement.pathSegList`、`api:SVGLength.convertToSpecifiedUnits`、`api:SVGAnimatedString.baseVal`、`api:Element.classList`、`concept:mouse-to-svg-coordinates`、`api:SVGGraphicsElement.getScreenCTM`、`api:Window.requestAnimationFrame`
 
 **构造要点**
 
@@ -220,16 +218,22 @@
 
 **验收要点**
 
-- [ ] 龙骨三写法核对：DOM 中 `#keel-verbose`、`#keel-compact`、`#keel-relative` 的 getTotalLength() 两两之差 < 0.5，PNG 中三者所在区域只见一根合并型线；`#keel-drift` 在第二段之后整体偏移 18，肉眼可辨为独立的橙色幽灵线。
-- [ ] 弧命令卡：构件卡① 中同一对端点之间存在 4 条 path，其 d 的标志位分别为 `0 0`、`0 1`、`1 0`、`1 1`，四条曲线互不重合且两两成对属于两个候选椭圆；构件卡② 中 `A1 1 0 0 1` 那条弧的渲染包围盒高度为 50±1，即半径被放大到 50。
-- [ ] 反射控制点：默认预选段与指针命中段的 `#control-net` 中至少含 1 条控制多边形 polyline、2 个实心方块控制点与 1 个空心圆反射控制点；把指针移到 `#sheer` 的 S 段时，空心圆与前一段末控制点关于公共端点严格中心对称（坐标之和的一半等于端点坐标，误差 < 0.5）。
-- [ ] 绝对/相对并排：读数条同时存在以 `绝对  C` 开头与以 `相对  c` 开头的两行文本，且相对行的每对数值等于绝对行对应数值减去当前点坐标；验证小窗内由两串分别构建的 path 完全重合，标注 Δ=0。
-- [ ] 零长子路径与 pathLength：构件卡④ 的 round 行出现 6 个圆点、square 行出现 6 个方块，butt 行对应像素带在 PNG 中 alpha 全为 0；构件卡⑥ 的两条长度不同的曲线各自呈现恰好 4 段等长实线。
-- [ ] 矩阵台：三面断面拼成闭合的轴测分段箱且共边无缝；`#iso-check-a` 与 `#iso-check-b` 的 getScreenCTM() 六个分量逐项之差 < 1e-6；左舷组的 transform 为 `matrix(-1 0 0 1 2290 0)`，其标签在 PNG 中为反写。
-- [ ] 绝对单位：六根标尺的右端 x 在 PNG 中对齐（差 ≤ 1px），DOM 中 width 属性分别为 96px / 1in / 2.54cm / 25.4mm / 72pt / 6pc；嵌套 viewBox 内的 1in 尺渲染宽度明显不等于 96px。
-- [ ] 交互与静帧：无任何点击、仅两次 pointermove 后 `window.__INTERACTION_COUNT__` 增大；指针状态点在型内为绿、型外为红且读数条文字随之切换；SMIL 被 pauseAnimations()+setCurrentTime(2.4) 冻结后 `#dwl` 仍位于两条常驻虚线端态之间，截图透明像素 ≥ 8%。
+1. 龙骨三写法核对：DOM 中 `#keel-verbose`、`#keel-compact`、`#keel-relative` 的 getTotalLength() 两两之差 < 0.5，PNG 中三者所在区域只见一根合并型线；`#keel-drift` 在第二段之后整体偏移 18，肉眼可辨为独立的橙色幽灵线。
+2. 弧命令卡：构件卡① 中同一对端点之间存在 4 条 path，其 d 的标志位分别为 `0 0`、`0 1`、`1 0`、`1 1`，四条曲线互不重合且两两成对属于两个候选椭圆；构件卡② 中 `A1 1 0 0 1` 那条弧的渲染包围盒高度为 50±1，即半径被放大到 50。
+3. 反射控制点：默认预选段与指针命中段的 `#control-net` 中至少含 1 条控制多边形 polyline、2 个实心方块控制点与 1 个空心圆反射控制点；把指针移到 `#sheer` 的 S 段时，空心圆与前一段末控制点关于公共端点严格中心对称（坐标之和的一半等于端点坐标，误差 < 0.5）。
+4. 绝对/相对并排：读数条同时存在以 `绝对  C` 开头与以 `相对  c` 开头的两行文本，且相对行的每对数值等于绝对行对应数值减去当前点坐标；验证小窗内由两串分别构建的 path 完全重合，标注 Δ=0。
+5. 零长子路径与 pathLength：构件卡④ 的 round 行出现 6 个圆点、square 行出现 6 个方块，butt 行对应像素带在 PNG 中 alpha 全为 0；构件卡⑥ 的两条长度不同的曲线各自呈现恰好 4 段等长实线。
+6. 矩阵台：三面断面拼成闭合的轴测分段箱且共边无缝；`#iso-check-a` 与 `#iso-check-b` 的 getScreenCTM() 六个分量逐项之差 < 1e-6；左舷组的 transform 为 `matrix(-1 0 0 1 2290 0)`，其标签在 PNG 中为反写。
+7. 绝对单位：六根标尺的右端 x 在 PNG 中对齐（差 ≤ 1px），DOM 中 width 属性分别为 96px / 1in / 2.54cm / 25.4mm / 72pt / 6pc；嵌套 viewBox 内的 1in 尺渲染宽度明显不等于 96px。
+8. 交互与静帧：无任何点击、仅两次 pointermove 后 `window.__INTERACTION_COUNT__` 增大；指针状态点在型内为绿、型外为红且读数条文字随之切换；SMIL 被 pauseAnimations()+setCurrentTime(2.4) 冻结后 `#dwl` 仍位于两条常驻虚线端态之间，截图透明像素 ≥ 8%。
 
-**浏览器注意**　CSS `d` 属性（css:d-property / css:d-property-transition）到 2026 年仍只有 Chrome 与 Safari 实现，Firefox 不支持，因此 `#rabbet-line` 先用 `CSS.supports('d','path(\"M0 0\")')` 探测，失败时由 JS 把同一字串写回 d 属性（几何照常出现，只是没有过渡），并在构件卡上盖「attribute fallback」戳，使降级本身也是可读的展示。CSS 几何属性（r/width/cx/cy…）同样是 Chrome/Safari 完整、Firefox 支持不全，压铁与样板用 `CSS.supports('r','10px')` 探测后回退为写属性 + requestAnimationFrame 手工补间，`--duck-r` 自定义属性在回退路径下改由 getComputedStyle 读出再赋值。`SVGPathElement.getPathData()` 仅 Chrome/Safari 提供，Firefox 缺失，故所有段信息以构建期生成的 `data-seg` 表为准，getPathData 只作可用时的交叉校验；`pathSegList` 已从三家引擎全部移除，场景中只以划掉的历史条目出现，绝不调用。`stroke-linejoin` 的 `miter-clip` 与 `arcs` 只有 Firefox 实现，样板上明确标注「Firefox only」，其余引擎按规范回退为 miter，回退结果本身即卡片说明的一部分。SMIL 的 `animate attributeName=\"d\"` 三家均可用，但 Chrome 曾在同一元素上混用 CSS `d` 与 SMIL `d` 时出现优先级抖动，故形变只作用于不写 CSS d 的 `#dwl`；截图时统一 `pauseAnimations()` + `setCurrentTime(2.4)` 取确定中间帧，Safari 对 setCurrentTime 后的首帧偶有一帧延迟，捕获前额外等一帧 rAF。`isPointInFill`/`isPointInStroke` 三家都有，但 Safari 对含 dasharray 的描边命中判定与其他引擎不一致，命中测试因此只对实线的 `#hull-shell` 进行。绝对单位在 96dpi 下三家换算一致，Safari 历史上对属性中的 `pc` 解析有偏差，该行同时标出 `= 96px` 的等价值以便肉眼核对。截图环境禁网，等宽标注字体以 data URI 的 `@font-face` 内嵌（失败时回退到通用 monospace，仅影响字距不影响几何），场景中不引用任何外部图像。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+
+**浏览器注意**
+
+- CSS `d` 属性（css:d-property / css:d-property-transition）到 2026 年仍只有 Chrome 与 Safari 实现，Firefox 不支持，因此 `#rabbet-line` 先用 `CSS.supports('d','path(\"M0 0\")')` 探测，失败时由 JS 把同一字串写回 d 属性（几何照常出现，只是没有过渡），并在构件卡上盖「attribute fallback」戳，使降级本身也是可读的展示。CSS 几何属性（r/width/cx/cy…）同样是 Chrome/Safari 完整、Firefox 支持不全，压铁与样板用 `CSS.supports('r','10px')` 探测后回退为写属性 + requestAnimationFrame 手工补间，`--duck-r` 自定义属性在回退路径下改由 getComputedStyle 读出再赋值。`SVGPathElement.getPathData()` 仅 Chrome/Safari 提供，Firefox 缺失，故所有段信息以构建期生成的 `data-seg` 表为准，getPathData 只作可用时的交叉校验；`pathSegList` 已从三家引擎全部移除，场景中只以划掉的历史条目出现，绝不调用。`stroke-linejoin` 的 `miter-clip` 与 `arcs` 只有 Firefox 实现，样板上明确标注「Firefox only」，其余引擎按规范回退为 miter，回退结果本身即卡片说明的一部分。SMIL 的 `animate attributeName=\"d\"` 三家均可用，但 Chrome 曾在同一元素上混用 CSS `d` 与 SMIL `d` 时出现优先级抖动，故形变只作用于不写 CSS d 的 `#dwl`；截图时统一 `pauseAnimations()` + `setCurrentTime(2.4)` 取确定中间帧，Safari 对 setCurrentTime 后的首帧偶有一帧延迟，捕获前额外等一帧 rAF。`isPointInFill`/`isPointInStroke` 三家都有，但 Safari 对含 dasharray 的描边命中判定与其他引擎不一致，命中测试因此只对实线的 `#hull-shell` 进行。绝对单位在 96dpi 下三家换算一致，Safari 历史上对属性中的 `pc` 解析有偏差，该行同时标出 `= 96px` 的等价值以便肉眼核对。截图环境禁网，等宽标注字体以 data URI 的 `@font-face` 内嵌（失败时回退到通用 monospace，仅影响字距不影响几何），场景中不引用任何外部图像。
 
 ### 3.4 `guilloche-intaglio-plate` — 玫瑰线雕版
 
@@ -241,19 +245,16 @@
 
 **主打特性**
 
-- `pr:paint-order` — paint-order（全平台）：Two identical shapes with thick strokes: normal order shows stroke covering half the fill, paint-order stroke shows full fill on top.
-- `pv:vector-effect=non-scaling-stroke` — vector-effect: non-scaling-stroke（全平台）：Scaled group where one child keeps a 1px hairline stroke while its twin's stroke scales up with the transform.
-- `concept:stroke-scales-with-ctm` — Stroke width and dashes scale with the transform（全平台）：Same stroke-width='2' dashed line under scale(3) shows a thick stroke and lengthened dashes beside the unscaled original.
-- `concept:transform-list-composition-order` — Transform list composition order (right-to-left application)（全平台）：translate(100 0) rotate(45) versus rotate(45) translate(100 0) land the same shape in visibly different positions.
-- `concept:hairline-stroke-rendering` — Sub-device-pixel strokes and zero width under downscale（全平台）：Lines with stroke-width 0.1 fade to faint grey under scale(0.2), stroke-width 0 disappears, non-scaling-stroke stays solid.
-- `css:css-color-paint` — CSS Color syntaxes as paint (rgb/hsl, #rrggbbaa, oklch, lab, color())（全平台）：Row of swatches filled with hsl(), oklch(), lab(), color(display-p3) values, vivid out-of-sRGB colours next to sRGB equivalents.
+- `pr:paint-order` — paint-order
+- `pv:vector-effect=non-scaling-stroke` — vector-effect: non-scaling-stroke
+- `concept:stroke-scales-with-ctm` — Stroke width and dashes scale with the transform
+- `concept:transform-list-composition-order` — Transform list composition order (right-to-left application)
+- `concept:hairline-stroke-rendering` — Sub-device-pixel strokes and zero width under downscale
+- `css:css-color-paint` — CSS Color syntaxes as paint (rgb/hsl, #rrggbbaa, oklch, lab, color())
 
-**辅助特性**（49 项，按领域）
+**辅助特性**
 
-- 基本图形与路径语法：`el:circle`、`el:ellipse`、`av:ellipse.rx=auto`、`at:circle.r`˚、`concept:radius-percentage-normalized-diagonal`˚、`at:ellipse.rx`˚、`at:ellipse.ry`˚
-- 填充、描边与合成属性：`pr:fill`、`pr:stroke`、`pv:fill=none`、`pv:fill=currentColor`、`pr:color`、`pr:fill-opacity`、`pr:stroke-opacity`、`pr:opacity`、`pr:stroke-dasharray`、`pr:stroke-dashoffset`、`pv:stroke=none`˚、`pv:fill=rgba()`˚、`pv:fill=color-mix()`˚、`concept:stroke-over-fill-transparency`˚、`concept:opacity-zero-still-hit-testable`˚、`concept:odd-dash-repetition`˚、`concept:dotted-line-round-caps`˚、`concept:marching-ants`˚、`pv:paint-order=stroke`˚、`concept:inner-outer-stroke-simulation`˚、`concept:stroke-width-under-nonuniform-scale`˚、`concept:currentcolor-icon-theming`˚
-- CSS 动画、CSS 变换与脚本 API：`pr:transform`、`pr:rotate`、`pr:transform-origin`、`pr:transform-box`、`css:3d-transforms`、`concept:transform-attribute-css-syntax`˚、`pv:transform-box=view-box`˚、`pv:transform-box=fill-box`˚、`pv:transform-box=stroke-box`˚、`pr:perspective`˚、`api:SVGGraphicsElement.getScreenCTM`
-- 变换与坐标系：`pv:transform=translate`、`pv:transform=scale`、`concept:nested-group-ctm-accumulation`、`css:transform-cascade-precedence`、`css:individual-transform-properties`、`css:transform-transition-animation`、`concept:non-uniform-scale-stroke-distortion`˚、`concept:invalid-transform-attribute-ignored`˚、`concept:scale-about-point`˚
+`el:circle`、`el:ellipse`、`av:ellipse.rx=auto`、`pr:fill`、`pr:stroke`、`pv:fill=none`、`pv:fill=currentColor`、`pr:color`、`pr:fill-opacity`、`pr:stroke-opacity`、`pr:opacity`、`pr:stroke-dasharray`、`pr:stroke-dashoffset`、`pr:transform`、`pr:rotate`、`pr:transform-origin`、`pr:transform-box`、`css:3d-transforms`、`pv:transform=translate`、`pv:transform=scale`、`concept:nested-group-ctm-accumulation`、`css:transform-cascade-precedence`、`css:individual-transform-properties`、`css:transform-transition-animation`、`at:circle.r`、`concept:radius-percentage-normalized-diagonal`、`at:ellipse.rx`、`at:ellipse.ry`、`pv:stroke=none`、`pv:fill=rgba()`、`pv:fill=color-mix()`、`concept:stroke-over-fill-transparency`、`concept:opacity-zero-still-hit-testable`、`concept:odd-dash-repetition`、`concept:dotted-line-round-caps`、`concept:marching-ants`、`pv:paint-order=stroke`、`concept:inner-outer-stroke-simulation`、`concept:stroke-width-under-nonuniform-scale`、`concept:non-uniform-scale-stroke-distortion`、`concept:transform-attribute-css-syntax`、`concept:invalid-transform-attribute-ignored`、`pv:transform-box=view-box`、`pv:transform-box=fill-box`、`pv:transform-box=stroke-box`、`concept:scale-about-point`、`concept:currentcolor-icon-theming`、`pr:perspective`、`api:SVGGraphicsElement.getScreenCTM`
 
 **构造要点**
 
@@ -276,16 +277,23 @@
 
 **验收要点**
 
-- [ ] 试印条 B 行六个倍率样块在 PNG 上量得的笔画宽度一致（约 0.6 设备像素，彼此差 <0.2px）；A 行 0.25× 样块的平均 alpha 低于 B 行同块的 1/3，4× 样块笔画明显加粗且虚线节距约为 1× 样块的四倍。DOM 中 B 行每条 path 的 `vector-effect` 计算值为 `non-scaling-stroke`，A 行为 `none`。
-- [ ] 开窗处真 `<ellipse>` 的描边在四个方位粗细一致；紧邻的被 `scale(1.18,0.72)` 的 `<circle>` keyline 在左右两侧的描边宽度至少是上下两侧的 1.5 倍，可在 PNG 上直接量出。
-- [ ] 团花右半（`paint-order: stroke fill markers`）花瓣的可见瓣宽明显大于左半，且外缘无描边侵蚀；左半瓣内侧存在一条描边与 0.4 填充相乘产生的深色带。DOM 中两个花瓣组的 `paint-order` 计算值不同。
-- [ ] 轮位对照的两枚卫星玫瑰线自同一锚点出发落在不同位置，中心距 ≥ 120px；DOM 中两组的 `transform` 属性分别为 `translate(210 0) rotate(24)` 与 `rotate(24) translate(210 0)`。
-- [ ] 套准十字的实心十字位于未平移处，与其虚线鬼影相距约 120px；DOM 中该元素同时存在 `transform="translate(120 0)"` 属性与计算值为 `none` 的 CSS transform。
-- [ ] 静帧（截图先于任何指针事件）中右栏读出面板已显示默认族 H-11 的 R/r/d/N 与 sx/sy，且 sx≠1（受 `#field` 的 scale 与整版 3D 微倾影响），末行为「笔宽 0.60 设备像素」。指针移入团花后 `window.__INTERACTION_COUNT__` 增加，且面板族名从 H-11 变为被命中环的族名。
-- [ ] 底纹带最内子带（行距 1.7px）在 PNG 中仍呈交替的着墨列与透明列，不是一块实色；四条子带的虚线节奏各不相同，其中 `stroke-dasharray="7"` 那条呈现二倍周期的墨/空互换。
-- [ ] 摩尔纹对照 A 块的交叉点像素比其线条本身更暗（多次 alpha 叠加），B 块的交叉点与线条亮度一致；全图透明像素 ≥ 8%、可见像素 ≥ 3.5%、彩色像素 > 2500。
+1. 试印条 B 行六个倍率样块在 PNG 上量得的笔画宽度一致（约 0.6 设备像素，彼此差 <0.2px）；A 行 0.25× 样块的平均 alpha 低于 B 行同块的 1/3，4× 样块笔画明显加粗且虚线节距约为 1× 样块的四倍。DOM 中 B 行每条 path 的 `vector-effect` 计算值为 `non-scaling-stroke`，A 行为 `none`。
+2. 开窗处真 `<ellipse>` 的描边在四个方位粗细一致；紧邻的被 `scale(1.18,0.72)` 的 `<circle>` keyline 在左右两侧的描边宽度至少是上下两侧的 1.5 倍，可在 PNG 上直接量出。
+3. 团花右半（`paint-order: stroke fill markers`）花瓣的可见瓣宽明显大于左半，且外缘无描边侵蚀；左半瓣内侧存在一条描边与 0.4 填充相乘产生的深色带。DOM 中两个花瓣组的 `paint-order` 计算值不同。
+4. 轮位对照的两枚卫星玫瑰线自同一锚点出发落在不同位置，中心距 ≥ 120px；DOM 中两组的 `transform` 属性分别为 `translate(210 0) rotate(24)` 与 `rotate(24) translate(210 0)`。
+5. 套准十字的实心十字位于未平移处，与其虚线鬼影相距约 120px；DOM 中该元素同时存在 `transform="translate(120 0)"` 属性与计算值为 `none` 的 CSS transform。
+6. 静帧（截图先于任何指针事件）中右栏读出面板已显示默认族 H-11 的 R/r/d/N 与 sx/sy，且 sx≠1（受 `#field` 的 scale 与整版 3D 微倾影响），末行为「笔宽 0.60 设备像素」。指针移入团花后 `window.__INTERACTION_COUNT__` 增加，且面板族名从 H-11 变为被命中环的族名。
+7. 底纹带最内子带（行距 1.7px）在 PNG 中仍呈交替的着墨列与透明列，不是一块实色；四条子带的虚线节奏各不相同，其中 `stroke-dasharray="7"` 那条呈现二倍周期的墨/空互换。
+8. 摩尔纹对照 A 块的交叉点像素比其线条本身更暗（多次 alpha 叠加），B 块的交叉点与线条亮度一致；全图透明像素 ≥ 8%、可见像素 ≥ 3.5%、彩色像素 > 2500。
 
-**浏览器注意**　「av:ellipse.rx=auto」：Chrome/Firefox 把省略的 rx 当作 auto 并回退为 ry 的圆，Safari/WebKit 至今把缺失或 auto 的半径当作不渲染，那枚校验环在 Safari 上会整个消失——因此旁边固定画一枚点线 `<circle r=\"40\">` 参照与刻字说明，两种结果都读得通，且该环不进入验收断言。「css:3d-transforms」：SVG 内部没有 3D 渲染上下文，`transform-style: preserve-3d` 在三家引擎里都被忽略、子元素一律拍平，所以纸张厚度只能用三条偏移边带伪造而不是真挤出；`perspective()`/`rotateX`/`rotateY` 只加在最外层 `#plate` 上并把角度压到 6°/8°，避免 Safari 对内层 SVG 组拍平方式差异带来的错位，也避免倾斜跨版造成的笔宽差超过半个设备像素。「getScreenCTM 与 CSS transform」：各引擎对 CSS transform（尤其被拍平的 3D 分量）是否折进 `getScreenCTM()` 的处理并不一致，Firefox 的合成结果与 Chrome 有差；读出面板因此同时给出 `getBoundingClientRect().width / getBBox().width` 作为交叉校验，两个数值都打印出来而不假装只有一个真值。「vector-effect」：只有 `non-scaling-stroke` 被三家普遍实现，`non-scaling-size`、`non-rotation`、`fixed-position` 仍是 Firefox 独有或未实现，本版一概不用。「transform 属性的 CSS 语法」：`transform=\"rotate(24deg)\"` 这类 SVG2 写法 2026 年三家都能解析，但所有承重定位仍用无单位的传统语法，带单位的写法只出现在一枚单独标注的样品件上。「无效 transform 属性」：SVG 1.1 规定文档进入错误状态，实际上三家引擎都只是忽略该属性、按未变换位置渲染；这块废样只作说明，不写进验收断言。「CSS 颜色」：`oklch()`/`lab()`/`color(display-p3 …)`/`color-mix()` 自 2023 年起三家都支持，但 headless Chrome 的 PNG 输出是 sRGB，display-p3 的广色域样块会被截到 sRGB 边界，所以每枚样块都并排刻出其 sRGB 回退值，静帧里仍能读出配方差异。「发丝描边」：亚设备像素描边的抗锯齿策略各家不同——Chrome 按覆盖率淡出，Safari 倾向于钳到一条最小可见线，Firefox 介于两者之间；试印条 A 行的 0.25× 样块因此只作「明显更淡」的相对断言，不断言绝对灰度。「个别 transform 属性」：`rotate`/`scale`/`translate` 三个独立属性在 SVG 元素上三家自 2022–2023 年起可用，但 Safari 对百分比原点需要显式写 `transform-box: fill-box`，本版所有相关元素都显式声明。全版不使用 SMIL，动画全部走 CSS `@keyframes`，静帧靠 `data-still` + `animation-play-state: paused` 与负 `animation-delay` 冻结在设计姿态。字体只用系统通用族栈（等宽 + 无衬线回退），不加载任何外部字体，符合断网抓图约束。
+**实现复审**
+
+- rx="auto" 属性被 Chrome 152 拒绝；改用 style="rx:auto"，以几何宽高相等验证效果。覆盖门禁接受同一几何属性的 DOM style 值。
+- 原验收 #4 的数值不自洽：相同锚点上交换 translate(210 0) 与 rotate(24) 的位移差为 2×210×sin(12°)≈87.3，无法同时要求 ≥120；原文保留待修订。
+
+**浏览器注意**
+
+- 「av:ellipse.rx=auto」：Chrome/Firefox 把省略的 rx 当作 auto 并回退为 ry 的圆，Safari/WebKit 至今把缺失或 auto 的半径当作不渲染，那枚校验环在 Safari 上会整个消失——因此旁边固定画一枚点线 `<circle r=\"40\">` 参照与刻字说明，两种结果都读得通，且该环不进入验收断言。「css:3d-transforms」：SVG 内部没有 3D 渲染上下文，`transform-style: preserve-3d` 在三家引擎里都被忽略、子元素一律拍平，所以纸张厚度只能用三条偏移边带伪造而不是真挤出；`perspective()`/`rotateX`/`rotateY` 只加在最外层 `#plate` 上并把角度压到 6°/8°，避免 Safari 对内层 SVG 组拍平方式差异带来的错位，也避免倾斜跨版造成的笔宽差超过半个设备像素。「getScreenCTM 与 CSS transform」：各引擎对 CSS transform（尤其被拍平的 3D 分量）是否折进 `getScreenCTM()` 的处理并不一致，Firefox 的合成结果与 Chrome 有差；读出面板因此同时给出 `getBoundingClientRect().width / getBBox().width` 作为交叉校验，两个数值都打印出来而不假装只有一个真值。「vector-effect」：只有 `non-scaling-stroke` 被三家普遍实现，`non-scaling-size`、`non-rotation`、`fixed-position` 仍是 Firefox 独有或未实现，本版一概不用。「transform 属性的 CSS 语法」：`transform=\"rotate(24deg)\"` 这类 SVG2 写法 2026 年三家都能解析，但所有承重定位仍用无单位的传统语法，带单位的写法只出现在一枚单独标注的样品件上。「无效 transform 属性」：SVG 1.1 规定文档进入错误状态，实际上三家引擎都只是忽略该属性、按未变换位置渲染；这块废样只作说明，不写进验收断言。「CSS 颜色」：`oklch()`/`lab()`/`color(display-p3 …)`/`color-mix()` 自 2023 年起三家都支持，但 headless Chrome 的 PNG 输出是 sRGB，display-p3 的广色域样块会被截到 sRGB 边界，所以每枚样块都并排刻出其 sRGB 回退值，静帧里仍能读出配方差异。「发丝描边」：亚设备像素描边的抗锯齿策略各家不同——Chrome 按覆盖率淡出，Safari 倾向于钳到一条最小可见线，Firefox 介于两者之间；试印条 A 行的 0.25× 样块因此只作「明显更淡」的相对断言，不断言绝对灰度。「个别 transform 属性」：`rotate`/`scale`/`translate` 三个独立属性在 SVG 元素上三家自 2022–2023 年起可用，但 Safari 对百分比原点需要显式写 `transform-box: fill-box`，本版所有相关元素都显式声明。全版不使用 SMIL，动画全部走 CSS `@keyframes`，静帧靠 `data-still` + `animation-play-state: paused` 与负 `animation-delay` 冻结在设计姿态。字体只用系统通用族栈（等宽 + 无衬线回退），不加载任何外部字体，符合断网抓图约束。
 
 ### 3.5 `auroral-spectrograph` — 极光分光台
 
@@ -297,19 +305,16 @@
 
 **主打特性**
 
-- `at:radialGradient.fx` — Focal point fx/fy（全平台）：A sphere whose highlight sits upper-left of centre while the outer rim remains a full circle, the classic glossy-ball look.
-- `at:radialGradient.fr` — Focal radius fr（部分支持）：A ring gradient: a solid inner disc of the first colour (radius fr) before the ramp begins, unlike fr=0.
-- `av:linearGradient.spreadMethod=reflect` — spreadMethod reflect（全平台）：A short vector produces mirrored back-and-forth colour bands with no hard seams across the whole shape.
-- `at:linearGradient.href` — href inheritance between gradients（全平台）：A gradient with no stops references another and renders its stops but with its own vector or spreadMethod.
-- `concept:conic-gradient-emulation` — Conic/angular gradient emulation（全平台）：A colour wheel built from many thin filled wedges (or four quadrant gradients) approximating a smooth angular sweep.
-- `concept:smil-animated-stops` — SMIL animation of stop offset and colour（全平台）：Stop offsets slide back and forth continuously, making the colour boundary breathe inside the shape.
+- `at:radialGradient.fx` — Focal point fx/fy
+- `at:radialGradient.fr` — Focal radius fr
+- `av:linearGradient.spreadMethod=reflect` — spreadMethod reflect
+- `at:linearGradient.href` — href inheritance between gradients
+- `concept:conic-gradient-emulation` — Conic/angular gradient emulation
+- `concept:smil-animated-stops` — SMIL animation of stop offset and colour
 
-**辅助特性**（34 项，按领域）
+**辅助特性**
 
-- 填充、描边与合成属性：`pv:fill=url()`、`concept:paint-server-fallback`
-- 渐变与图案：`el:linearGradient`、`at:linearGradient.x1`、`av:linearGradient.gradientUnits=userSpaceOnUse`、`av:linearGradient.gradientUnits=objectBoundingBox`˚、`at:linearGradient.gradientTransform`、`av:linearGradient.spreadMethod=repeat`、`av:linearGradient.spreadMethod=pad`˚、`concept:zero-length-gradient-vector`˚、`el:radialGradient`、`at:radialGradient.cx`、`av:radialGradient.spreadMethod=reflect`、`av:radialGradient.spreadMethod=repeat`˚、`concept:focal-point-outside-circle`˚、`el:stop`、`at:stop.offset`、`concept:hard-stop-banding`˚、`concept:stop-offset-clamping`˚、`pr:stop-color`、`pv:stop-color=currentcolor`˚、`pr:stop-opacity`、`concept:premultiplied-transparent-stop`˚、`css:gradient-stop-selectors`、`css:custom-properties-in-gradients`˚、`concept:animated-gradient-vector`、`concept:gradient-on-stroke`、`concept:gradient-on-text`、`api:SVGStopElement.offset`˚、`api:SVGRadialGradientElement.fx`˚
-- 文本与排版：`concept:text-gradient-fill`
-- SMIL 动画：`at:animate.values`、`concept:animate-color`、`concept:animate-gradient-stop`
+`pv:fill=url()`、`concept:paint-server-fallback`、`el:linearGradient`、`at:linearGradient.x1`、`av:linearGradient.gradientUnits=userSpaceOnUse`、`av:linearGradient.gradientUnits=objectBoundingBox`、`at:linearGradient.gradientTransform`、`av:linearGradient.spreadMethod=repeat`、`av:linearGradient.spreadMethod=pad`、`concept:zero-length-gradient-vector`、`el:radialGradient`、`at:radialGradient.cx`、`av:radialGradient.spreadMethod=reflect`、`av:radialGradient.spreadMethod=repeat`、`concept:focal-point-outside-circle`、`el:stop`、`at:stop.offset`、`concept:hard-stop-banding`、`concept:stop-offset-clamping`、`pr:stop-color`、`pv:stop-color=currentcolor`、`pr:stop-opacity`、`concept:premultiplied-transparent-stop`、`css:gradient-stop-selectors`、`css:custom-properties-in-gradients`、`concept:animated-gradient-vector`、`concept:gradient-on-stroke`、`concept:gradient-on-text`、`concept:text-gradient-fill`、`at:animate.values`、`concept:animate-color`、`concept:animate-gradient-stop`、`api:SVGStopElement.offset`、`api:SVGRadialGradientElement.fx`
 
 **构造要点**
 
@@ -332,16 +337,22 @@
 
 **验收要点**
 
-- [ ] DOM：44 条幕带渐变、96 个色轮楔渐变与 #crestRamp/#titleRamp/#labelRamp 的 childElementCount 全为 0 且 href 解析到 #auroraStops；#auroraStops 内 <stop> 数为 7；document.querySelectorAll('image').length===0。
-- [ ] PNG：沿 y=300 横扫 B 族幕带区间，绿-红峰对称镜像出现 ≥6 次且相邻像素通道差始终 <12/255（reflect 无缝）；标定卡 repeat 样条同排采样出现 ≥10 处 >60/255 的硬跳变。
-- [ ] PNG：③号球圆心 22px 半径内颜色标准差 <2（fr 实心内盘），④号 fr=0 孪生球同区域标准差 >25，且两球外缘直径相同。
-- [ ] PNG：②号光泽球最亮像素相对球心偏移 dx≤-8 且 dy≤-8，同时球外缘拟合圆的残差 <1px（焦点偏移不改变外缘形状）。
-- [ ] PNG：色轮沿 r=88 采样 352 点，色相单调推进且只跨越一次 0/360，相邻样本色相差 <6°、亮度无阶跃（96 段拼缝不可见），唯一断口是正上方 8° 零级缺口。
-- [ ] PNG：滤光片槽 A 内部为 #f2a154(±8) 而槽 B 内部 alpha=0，两者虚线框都完整可见。
-- [ ] PNG：主谱带在 x=200/700/1200 三列颜色随 x 单调推进，而正下方 objectBoundingBox 孪生条在同三列颜色互不相同且各自跨越整个色阶。
-- [ ] 动画与交互：export=1 下 svg.animationsPaused()===true 且 getCurrentTime()≈4.2，静帧仍可读；对比 setCurrentTime(0) 与 4.2 两帧，幕布区像素差异面积 >8%；派发 pointermove 到舞台 (0.54W,0.46H) 后 window.__INTERACTION_COUNT__≥1 且母版第 3 个 stop 的 offset.baseVal.value 相对初值改变 >0.02。
+1. DOM：44 条幕带渐变、96 个色轮楔渐变与 #crestRamp/#titleRamp/#labelRamp 的 childElementCount 全为 0 且 href 解析到 #auroraStops；#auroraStops 内 <stop> 数为 7；document.querySelectorAll('image').length===0。
+2. PNG：沿 y=300 横扫 B 族幕带区间，绿-红峰对称镜像出现 ≥6 次且相邻像素通道差始终 <12/255（reflect 无缝）；标定卡 repeat 样条同排采样出现 ≥10 处 >60/255 的硬跳变。
+3. PNG：③号球圆心 22px 半径内颜色标准差 <2（fr 实心内盘），④号 fr=0 孪生球同区域标准差 >25，且两球外缘直径相同。
+4. PNG：②号光泽球最亮像素相对球心偏移 dx≤-8 且 dy≤-8，同时球外缘拟合圆的残差 <1px（焦点偏移不改变外缘形状）。
+5. PNG：色轮沿 r=88 采样 352 点，色相单调推进且只跨越一次 0/360，相邻样本色相差 <6°、亮度无阶跃（96 段拼缝不可见），唯一断口是正上方 8° 零级缺口。
+6. PNG：滤光片槽 A 内部为 #f2a154(±8) 而槽 B 内部 alpha=0，两者虚线框都完整可见。
+7. PNG：主谱带在 x=200/700/1200 三列颜色随 x 单调推进，而正下方 objectBoundingBox 孪生条在同三列颜色互不相同且各自跨越整个色阶。
+8. 动画与交互：export=1 下 svg.animationsPaused()===true 且 getCurrentTime()≈4.2，静帧仍可读；对比 setCurrentTime(0) 与 4.2 两帧，幕布区像素差异面积 >8%；派发 pointermove 到舞台 (0.54W,0.46H) 后 window.__INTERACTION_COUNT__≥1 且母版第 3 个 stop 的 offset.baseVal.value 相对初值改变 >0.02。
 
-**浏览器注意**　2026 年 Chrome/Safari 对 radialGradient 的 fr 都已稳定（Chrome 85+、Safari 14+），Firefox 落地较晚，需在目标版本实测：若 fr 被忽略会退化为 fr=0，所以把 fr 球与 fr=0 孪生球并排放置——退化时表现为两球变得一样而不是内容消失，注记文字直接点明这一点。fx/fy 越出圆周（⑧号球）三家都按规范夹到圆周附近，但夹取后的彗尾长度略有差异，验收只检查高光方向而不比对像素。最大的真实风险是 SMIL 经 href 继承的传播：把 animate 挂在母版 stop 上，Chrome 与 Safari 会让所有引用该母版的渐变实时跟随，Firefox 在部分版本里只在初次解析时取值；因此生成器提供 fallback 开关，检测到不跟随时由 TS 把等价的 animate 节点复制进每个子渐变（视觉一致，DOM 体积变大），验收项 1 只校验 href 与 stop 数，不依赖某一实现。animateTransform 作用于 gradientTransform 在 Safari 上历史上有过不重绘的问题，兜底是用 requestAnimationFrame 直接写 gradientTransform 属性（同一套关键帧，export=1 时按 t=4.2s 定值写入，静帧不受影响）。锥形近似的楔缝在 Safari 与 Firefox 的抗锯齿下最容易露白，故相邻楔重叠 0.35°；若目标版本仍有 1px 缝，可把楔数从 96 降到 72 并把重叠加到 0.6°。stop-color 里的 var() 与 currentColor、以及 stop-opacity 的预乘插值三家一致；spreadMethod 在 userSpaceOnUse 下的舍入差异会让 repeat 样条最后一段宽度差 1px，验收用跳变计数而非位置。截图侧：capture.mjs 阻断非 localhost/data: 请求，故字体只用 data URI；SMIL 在无头 Chromium 下时间不确定，必须靠场景自身的 pauseAnimations()+setCurrentTime(4.2) 冻结；prefers-reduced-motion 命中时直接走同一条冻结路径，画面与静帧完全相同。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+
+**浏览器注意**
+
+- 2026 年 Chrome/Safari 对 radialGradient 的 fr 都已稳定（Chrome 85+、Safari 14+），Firefox 落地较晚，需在目标版本实测：若 fr 被忽略会退化为 fr=0，所以把 fr 球与 fr=0 孪生球并排放置——退化时表现为两球变得一样而不是内容消失，注记文字直接点明这一点。fx/fy 越出圆周（⑧号球）三家都按规范夹到圆周附近，但夹取后的彗尾长度略有差异，验收只检查高光方向而不比对像素。最大的真实风险是 SMIL 经 href 继承的传播：把 animate 挂在母版 stop 上，Chrome 与 Safari 会让所有引用该母版的渐变实时跟随，Firefox 在部分版本里只在初次解析时取值；因此生成器提供 fallback 开关，检测到不跟随时由 TS 把等价的 animate 节点复制进每个子渐变（视觉一致，DOM 体积变大），验收项 1 只校验 href 与 stop 数，不依赖某一实现。animateTransform 作用于 gradientTransform 在 Safari 上历史上有过不重绘的问题，兜底是用 requestAnimationFrame 直接写 gradientTransform 属性（同一套关键帧，export=1 时按 t=4.2s 定值写入，静帧不受影响）。锥形近似的楔缝在 Safari 与 Firefox 的抗锯齿下最容易露白，故相邻楔重叠 0.35°；若目标版本仍有 1px 缝，可把楔数从 96 降到 72 并把重叠加到 0.6°。stop-color 里的 var() 与 currentColor、以及 stop-opacity 的预乘插值三家一致；spreadMethod 在 userSpaceOnUse 下的舍入差异会让 repeat 样条最后一段宽度差 1px，验收用跳变计数而非位置。截图侧：capture.mjs 阻断非 localhost/data: 请求，故字体只用 data URI；SMIL 在无头 Chromium 下时间不确定，必须靠场景自身的 pauseAnimations()+setCurrentTime(4.2) 冻结；prefers-reduced-motion 命中时直接走同一条冻结路径，画面与静帧完全相同。
 
 ### 3.6 `jacquard-loom-draft` — 提花纹版房
 
@@ -353,22 +364,17 @@
 
 **主打特性**
 
-- `el:pattern` — pattern element（全平台）：A shape filled with a repeating polka-dot tile defined once in a pattern.
-- `at:pattern.patternTransform` — patternTransform rotates/scales the tile grid（全平台）：Hatching pattern rotated 45 degrees into diagonal stripes while the filled rect stays axis-aligned.
-- `concept:nested-pattern` — Pattern content filled with another pattern（全平台）：Large checker squares each filled with a fine hatch pattern, two tiling levels visible at once.
-- `concept:pattern-seams` — Tile seams and anti-aliasing artifacts（全平台）：A solid-colour tile with fractional size shows faint grid lines; the fixed twin (integer tile, overlapping content, crispEdges) shows none.
-- `el:feTile` — feTile repeating an input subregion（全平台）：A small feImage or feFlood square repeated as a checker pattern across the whole element.
-- `at:feTurbulence.stitchTiles` — stitchTiles seamless tiling（全平台）：Noise tiled in a pattern shows visible seams with noStitch and seamless continuation with stitch.
-- `at:pattern.href` — Pattern href inheritance（全平台）：A child pattern with no content but a different patternTransform or tile size reuses the referenced pattern's tile artwork.
+- `el:pattern` — pattern element
+- `at:pattern.patternTransform` — patternTransform rotates/scales the tile grid
+- `concept:nested-pattern` — Pattern content filled with another pattern
+- `concept:pattern-seams` — Tile seams and anti-aliasing artifacts
+- `el:feTile` — feTile repeating an input subregion
+- `at:feTurbulence.stitchTiles` — stitchTiles seamless tiling
+- `at:pattern.href` — Pattern href inheritance
 
-**辅助特性**（39 项，按领域）
+**辅助特性**
 
-- 嵌入、外来内容与语义：`el:image`、`at:image.href`、`at:image.preserveAspectRatio`、`concept:image-data-uri`、`concept:image-nested-svg-document`、`pr:image-rendering`、`concept:xlink-href-legacy`˚、`av:image.preserveAspectRatio=none`˚、`pv:image-rendering=pixelated`˚、`at:image.decoding`˚、`api:SVGImageElement.decode`˚
-- 基本图形与路径语法：`el:rect`、`at:rect.rx`、`at:rect.ry`˚
-- 渐变与图案：`at:pattern.width`、`av:pattern.patternUnits=userSpaceOnUse`、`av:pattern.patternContentUnits=objectBoundingBox`、`at:pattern.viewBox`、`concept:pattern-with-text`、`concept:pattern-with-image`、`concept:hatching-pattern`、`concept:animated-pattern`、`at:pattern.x`˚、`at:pattern.preserveAspectRatio`˚、`av:pattern.patternUnits=objectBoundingBox`˚、`av:pattern.patternContentUnits=userSpaceOnUse`˚、`concept:pattern-viewbox-overrides-contentunits`˚、`concept:pattern-overflow-visible`˚、`concept:pattern-with-use`˚、`concept:checkerboard-pattern`˚、`concept:cross-hatch-layering`˚、`concept:pattern-tile-rasterization`˚、`api:SVGPatternElement.patternTransform`˚
-- 滤镜：区域、连线、合成与颜色原语：`el:feImage`、`av:feImage.href=#element`、`at:feImage.href`˚、`concept:fetile-subregion-pattern`˚
-- 滤镜：卷积、形态学、噪声、置换与光照：`av:feTurbulence.stitchTiles=noStitch`˚
-- 变换与坐标系：`concept:objectboundingbox-unit-skew`
+`el:image`、`at:image.href`、`at:image.preserveAspectRatio`、`concept:image-data-uri`、`concept:image-nested-svg-document`、`pr:image-rendering`、`el:rect`、`at:rect.rx`、`at:pattern.width`、`av:pattern.patternUnits=userSpaceOnUse`、`av:pattern.patternContentUnits=objectBoundingBox`、`at:pattern.viewBox`、`concept:pattern-with-text`、`concept:pattern-with-image`、`concept:hatching-pattern`、`concept:animated-pattern`、`el:feImage`、`av:feImage.href=#element`、`concept:objectboundingbox-unit-skew`、`concept:xlink-href-legacy`、`av:image.preserveAspectRatio=none`、`pv:image-rendering=pixelated`、`at:image.decoding`、`api:SVGImageElement.decode`、`at:rect.ry`、`at:pattern.x`、`at:pattern.preserveAspectRatio`、`av:pattern.patternUnits=objectBoundingBox`、`av:pattern.patternContentUnits=userSpaceOnUse`、`concept:pattern-viewbox-overrides-contentunits`、`concept:pattern-overflow-visible`、`concept:pattern-with-use`、`concept:checkerboard-pattern`、`concept:cross-hatch-layering`、`concept:pattern-tile-rasterization`、`av:feTurbulence.stitchTiles=noStitch`、`at:feImage.href`、`concept:fetile-subregion-pattern`、`api:SVGPatternElement.patternTransform`
 
 **构造要点**
 
@@ -391,16 +397,22 @@
 
 **验收要点**
 
-- [ ] DOM：#dent12 / #dent16 / #satin5-24 / #satin5-36 / #laneBB 五个 <pattern> 都只有 href 与覆盖属性、childElementCount === 0；PNG 上它们各自渲染出可见且互不相同的 tile。
-- [ ] PNG：穿筘图四条带的线间距按 8:12:16 变化而线宽恒为 1.5，第四条呈十字交叉；量取相邻线中心距误差 ≤1px。
-- [ ] PNG：接缝检验尺车道 1 主区可见规则的浅色接缝网格（周期 17.3），其正下方修正条同色同画稿而无任何缝隙；车道 2 的斜纹角与车道 1 明显不同；车道 3 主区全区无接缝。
-- [ ] PNG：车道 3 修正条左右两半噪声粒感相近，但左半每 45 单位有一道横竖断纹，右半连续 —— 对应 stitchTiles="noStitch" 与 "stitch"。
-- [ ] PNG：幅宽三条中同一枚花样由近圆逐步拉成横椭圆（宽高比随 96/168/240 单调增大），右侧 userSpaceOnUse 对照方块内仍为正圆。
-- [ ] PNG：足尺放大样同时可见 96 单位的缎纹棋盘块与 6 单位的浮长排线两级平铺，且底层亚麻扫描纹理在块间连续。
-- [ ] PNG/DOM：两枚 20 倍放大的 3×3 纹版孔精灵 href 相同、image-rendering 分别为 auto 与 pixelated；PNG 上左枚边缘为渐变过渡、右枚为硬直角方块。
-- [ ] 交互与静帧：dispatchEvent 一次 pointermove 到放大样内某点后，读数条文本匹配 /经 #\d+ · 纬 #\d+/ 且数值随坐标变化，三条车道的 patternTransform / feImage x 同步更新；pauseAnimations() + setCurrentTime(0) 后纹版带孔位与踏板行对齐，导出 PNG 的四角为完全透明像素。
+1. DOM：#dent12 / #dent16 / #satin5-24 / #satin5-36 / #laneBB 五个 <pattern> 都只有 href 与覆盖属性、childElementCount === 0；PNG 上它们各自渲染出可见且互不相同的 tile。
+2. PNG：穿筘图四条带的线间距按 8:12:16 变化而线宽恒为 1.5，第四条呈十字交叉；量取相邻线中心距误差 ≤1px。
+3. PNG：接缝检验尺车道 1 主区可见规则的浅色接缝网格（周期 17.3），其正下方修正条同色同画稿而无任何缝隙；车道 2 的斜纹角与车道 1 明显不同；车道 3 主区全区无接缝。
+4. PNG：车道 3 修正条左右两半噪声粒感相近，但左半每 45 单位有一道横竖断纹，右半连续 —— 对应 stitchTiles="noStitch" 与 "stitch"。
+5. PNG：幅宽三条中同一枚花样由近圆逐步拉成横椭圆（宽高比随 96/168/240 单调增大），右侧 userSpaceOnUse 对照方块内仍为正圆。
+6. PNG：足尺放大样同时可见 96 单位的缎纹棋盘块与 6 单位的浮长排线两级平铺，且底层亚麻扫描纹理在块间连续。
+7. PNG/DOM：两枚 20 倍放大的 3×3 纹版孔精灵 href 相同、image-rendering 分别为 auto 与 pixelated；PNG 上左枚边缘为渐变过渡、右枚为硬直角方块。
+8. 交互与静帧：dispatchEvent 一次 pointermove 到放大样内某点后，读数条文本匹配 /经 #\d+ · 纬 #\d+/ 且数值随坐标变化，三条车道的 patternTransform / feImage x 同步更新；pauseAnimations() + setCurrentTime(0) 后纹版带孔位与踏板行对齐，导出 PNG 的四角为完全透明像素。
 
-**浏览器注意**　Firefox 至今不渲染 feImage href=\"#元素\"（bug 455986，2026 仍未修）：构建期额外产出一份 #weaveCell 的 data:image/svg+xml 副本，运行期用 'MozAppearance' in document.documentElement.style 判定 Gecko 后把 feImage 的 href 换成该 data URI（走 at:feImage.href），feTile 链路不变，车道 3 角标标注「Gecko 回退：data URI 元件」。feImage / feTile 的子区域摆位在三家引擎上并不完全一致（Safari 对省略 x/y 的 feImage 有历史偏移），因此滤镜一律写 filterUnits 与 primitiveUnits=\"userSpaceOnUse\"，并给每个 primitive 显式 x/y/width/height，避免默认 -10%/120% 滤镜区造成裁切与错位。stitchTiles=\"stitch\" 按规范允许引擎微调 baseFrequency 以整除 tile，stitch 一侧的噪声粒度会略粗于 noStitch 一侧 —— 这是规范行为不是渲染差错，图注写明。分数尺寸 tile 的接缝强度依赖设备像素对齐：Chromium / Safari 在 dpr=1 下缝隙明显，Firefox 因 tile 光栅化策略不同缝隙更细，故基线截图固定在 dpr=1 的 headless Chromium，其余引擎只作人工核对；修正条（整数 tile + overflow=\"visible\" 溢出 + crispEdges）在三家都干净。<image> 引用 SVG 文档按 secure static mode 处理：脚本、外链、外部字体一律不生效，SMIL 冻结在 t=0，因此纹样票内文字已在构建期转为路径，其 :hover 与 <a> 仅作为「不会生效」的说明存在。image-rendering: crisp-edges 各家映射仍不一致（Firefox 近邻，Safari 曾按平滑处理），对照组只用 auto 与 pixelated，后者三家一致。patternTransform 的 SMIL 动画三家可用，但 Safari 对 pattern 属性动画重绘节流较重；截图路径不依赖动画时间，pauseAnimations() + setCurrentTime(0) 即得确定静帧，若 SMIL 被禁用则回退为 rAF 直接写 patternTransform。patternUnits=\"objectBoundingBox\" 的包围盒按规范不含描边，车道 2 与幅宽架的承载矩形因此只用 fill、边框另画一层，否则 tile 尺寸会随描边取舍跨引擎漂移。采集时网络完全阻断：位图、外挂 SVG 与 CJK 子集 woff2 全部 data URI 内嵌，字体加载失败时回退系统 sans-serif，全部布局用固定坐标、不依赖字体度量。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+
+**浏览器注意**
+
+- Firefox 至今不渲染 feImage href=\"#元素\"（bug 455986，2026 仍未修）：构建期额外产出一份 #weaveCell 的 data:image/svg+xml 副本，运行期用 'MozAppearance' in document.documentElement.style 判定 Gecko 后把 feImage 的 href 换成该 data URI（走 at:feImage.href），feTile 链路不变，车道 3 角标标注「Gecko 回退：data URI 元件」。feImage / feTile 的子区域摆位在三家引擎上并不完全一致（Safari 对省略 x/y 的 feImage 有历史偏移），因此滤镜一律写 filterUnits 与 primitiveUnits=\"userSpaceOnUse\"，并给每个 primitive 显式 x/y/width/height，避免默认 -10%/120% 滤镜区造成裁切与错位。stitchTiles=\"stitch\" 按规范允许引擎微调 baseFrequency 以整除 tile，stitch 一侧的噪声粒度会略粗于 noStitch 一侧 —— 这是规范行为不是渲染差错，图注写明。分数尺寸 tile 的接缝强度依赖设备像素对齐：Chromium / Safari 在 dpr=1 下缝隙明显，Firefox 因 tile 光栅化策略不同缝隙更细，故基线截图固定在 dpr=1 的 headless Chromium，其余引擎只作人工核对；修正条（整数 tile + overflow=\"visible\" 溢出 + crispEdges）在三家都干净。<image> 引用 SVG 文档按 secure static mode 处理：脚本、外链、外部字体一律不生效，SMIL 冻结在 t=0，因此纹样票内文字已在构建期转为路径，其 :hover 与 <a> 仅作为「不会生效」的说明存在。image-rendering: crisp-edges 各家映射仍不一致（Firefox 近邻，Safari 曾按平滑处理），对照组只用 auto 与 pixelated，后者三家一致。patternTransform 的 SMIL 动画三家可用，但 Safari 对 pattern 属性动画重绘节流较重；截图路径不依赖动画时间，pauseAnimations() + setCurrentTime(0) 即得确定静帧，若 SMIL 被禁用则回退为 rAF 直接写 patternTransform。patternUnits=\"objectBoundingBox\" 的包围盒按规范不含描边，车道 2 与幅宽架的承载矩形因此只用 fill、边框另画一层，否则 tile 尺寸会随描边取舍跨引擎漂移。采集时网络完全阻断：位图、外挂 SVG 与 CJK 子集 woff2 全部 data URI 内嵌，字体加载失败时回退系统 sans-serif，全部布局用固定坐标、不依赖字体度量。
 
 ### 3.7 `stele-rubbing-hall` — 碑林拓片厅
 
@@ -412,22 +424,17 @@
 
 **主打特性**
 
-- `el:textPath` — <textPath> text along a path（全平台）：Glyphs following a visible curved path, each rotated tangent to the curve.
-- `at:textPath.side` — side=right (text on other side of path)（部分支持）：Text running along the underside of an arc, reading correctly, mirrored placement relative to side=left.
-- `concept:textpath-closed-path` — Text around a closed circle path（全平台）：A circular badge with text wrapping fully around the circumference.
-- `pv:writing-mode=vertical-rl` — writing-mode vertical-rl（全平台）：Japanese column flowing top-to-bottom with successive tspans stacking leftwards.
-- `pr:text-orientation` — text-orientation mixed / upright / sideways（全平台）：Vertical Latin text: upright letters stacked versus rotated sideways letters, side by side.
-- `at:text.rotate` — rotate list per glyph (last value repeats)（全平台）：Each glyph rotated about its own origin by rotate="0 15 30 45", remaining glyphs keep 45 degrees.
-- `concept:text-in-clippath` — text and textPath inside clipPath（全平台）：Large bold glyphs act as windows onto a photo or animated gradient; letters on a curved textPath also clip.
+- `el:textPath` — <textPath> text along a path
+- `at:textPath.side` — side=right (text on other side of path)
+- `concept:textpath-closed-path` — Text around a closed circle path
+- `pv:writing-mode=vertical-rl` — writing-mode vertical-rl
+- `pr:text-orientation` — text-orientation mixed / upright / sideways
+- `at:text.rotate` — rotate list per glyph (last value repeats)
+- `concept:text-in-clippath` — text and textPath inside clipPath
 
-**辅助特性**（49 项，按领域）
+**辅助特性**
 
-- 文档结构与复用：`el:switch`、`at:switch.systemLanguage`、`at:svg.lang`、`at:switch.requiredExtensions`˚、`concept:conditional-attrs-outside-switch`˚
-- 嵌入、外来内容与语义：`css:lang-selector`˚、`concept:lang-dependent-glyph-selection`˚
-- 文本与排版：`el:text`、`el:tspan`、`concept:multiline-text-tspan`、`at:text.x`、`at:text.dy`、`at:textPath.href`、`at:textPath.startOffset`、`at:textPath.path`、`pr:text-anchor`、`pr:dominant-baseline`、`pr:alignment-baseline`、`pr:baseline-shift`、`pr:direction`、`pr:unicode-bidi`、`concept:text-as-clip-path`、`css:text-transform`˚、`concept:nested-tspan-inheritance`˚、`concept:tspan-absolute-repositioning`˚、`at:text.y`˚、`at:text.dx`˚、`api:SVGTextPositioningElement.x`˚、`at:textPath.xlink:href`˚、`concept:textpath-centered-text`˚、`concept:textpath-overflow-clipped`˚、`concept:textpath-startoffset-animation`˚、`api:SVGTextPathElement.startOffset`˚、`pv:text-anchor=middle`˚、`pv:text-anchor=end`˚、`concept:text-anchor-rtl-interaction`˚、`pv:dominant-baseline=ideographic`˚、`pv:dominant-baseline=central`˚、`pv:dominant-baseline=middle`˚、`pv:dominant-baseline=hanging`˚、`pv:baseline-shift=super`˚、`pv:baseline-shift=sub`˚、`pv:writing-mode=vertical-lr`˚、`concept:mixed-script-bidi`˚、`css:font-face-data-uri`
-- 裁剪与遮罩：`concept:mask-with-text`
-- SMIL 动画：`concept:animate-text-attributes`
-- 交互与无障碍：`css:user-select`、`css:selection-pseudo`˚
+`el:switch`、`at:switch.systemLanguage`、`at:svg.lang`、`el:text`、`el:tspan`、`concept:multiline-text-tspan`、`at:text.x`、`at:text.dy`、`at:textPath.href`、`at:textPath.startOffset`、`at:textPath.path`、`pr:text-anchor`、`pr:dominant-baseline`、`pr:alignment-baseline`、`pr:baseline-shift`、`pr:direction`、`pr:unicode-bidi`、`concept:text-as-clip-path`、`concept:mask-with-text`、`concept:animate-text-attributes`、`css:user-select`、`at:switch.requiredExtensions`、`concept:conditional-attrs-outside-switch`、`css:lang-selector`、`concept:lang-dependent-glyph-selection`、`css:text-transform`、`concept:nested-tspan-inheritance`、`concept:tspan-absolute-repositioning`、`at:text.y`、`at:text.dx`、`api:SVGTextPositioningElement.x`、`at:textPath.xlink:href`、`concept:textpath-centered-text`、`concept:textpath-overflow-clipped`、`concept:textpath-startoffset-animation`、`api:SVGTextPathElement.startOffset`、`pv:text-anchor=middle`、`pv:text-anchor=end`、`concept:text-anchor-rtl-interaction`、`pv:dominant-baseline=ideographic`、`pv:dominant-baseline=central`、`pv:dominant-baseline=middle`、`pv:dominant-baseline=hanging`、`pv:baseline-shift=super`、`pv:baseline-shift=sub`、`pv:writing-mode=vertical-lr`、`concept:mixed-script-bidi`、`css:selection-pseudo`、`css:font-face-data-uri`
 
 **构造要点**
 
@@ -450,16 +457,22 @@
 
 **验收要点**
 
-- [ ] 主拓片为墨底白字：在墨区背景采样的像素亮度 < 40，字口采样 > 190；DOM 中 #zhengwen 下恰有 8 个 <text>，computed writing-mode 全为 vertical-rl，其中 1 列 text-orientation 为 mixed、其余为 upright，最右列列心 x ≈ 836。
-- [ ] 题额与碑侧题记共用同一条弧：两个 textPath 引用的路径在几何上同圆心同半径（原生分支下 href 均为 #arc-e），其中一个带 side="right"；PNG 中弧的外侧与内侧各有一行字，内侧一行的字符朝向与外侧相反；碑侧题记末尾至少一个字符因溢出未渲染（getNumberOfChars 大于实际有 extent 的字符数）。
-- [ ] 逐字旋转成立：每个正文 <text> 的 rotate.baseVal.numberOfItems ≥ 6，且同一列相邻字符的 getExtentOfChar 外接框宽高比互不相同，说明旋转逐字生效、末值向后重复。
-- [ ] 朱拓小样是裁切窗口：笔画内部存在 R > 150 且 R−B > 60 的朱砂像素，而笔画外 6px 处像素与纸色的色差 < 12；DOM 中 clipPath#clip-zhu 的后代同时包含 <text> 与 <textPath>。
-- [ ] mask 的灰度可辨：主拓片中被标为「未拓透」的 4 个字，其笔画像素亮度落在 80–170 之间，既不等于全墨也不等于纸色，与二值裁切区分开。
-- [ ] 条件处理只放行一个分支：<switch> 的 5 个子节点里 getBoundingClientRect().width > 0 的恰好 1 个，带 requiredExtensions 的诱饵分支为 0×0；语言分支账中被打勾的行与该子节点一致，且截图上打印了 navigator.language 原值。
-- [ ] 骑缝印绕满一周并压住接缝：两段环形 textPath 的首尾间隙 < 8px，印记包围盒同时跨过 x=898 与 x=920 两条版面边界。
-- [ ] 交互与可选性：pointermove 后 window.__INTERACTION_COUNT__ 增加，拓包圆心与指针换算所得用户坐标误差 ≤ 1，该处墨色比移动前更深；导出前 getSelection().toString().length ≥ 6，而 mask/clipPath 内克隆文本层的 computed user-select 为 'none'。
+1. 主拓片为墨底白字：在墨区背景采样的像素亮度 < 40，字口采样 > 190；DOM 中 #zhengwen 下恰有 8 个 <text>，computed writing-mode 全为 vertical-rl，其中 1 列 text-orientation 为 mixed、其余为 upright，最右列列心 x ≈ 836。
+2. 题额与碑侧题记共用同一条弧：两个 textPath 引用的路径在几何上同圆心同半径（原生分支下 href 均为 #arc-e），其中一个带 side="right"；PNG 中弧的外侧与内侧各有一行字，内侧一行的字符朝向与外侧相反；碑侧题记末尾至少一个字符因溢出未渲染（getNumberOfChars 大于实际有 extent 的字符数）。
+3. 逐字旋转成立：每个正文 <text> 的 rotate.baseVal.numberOfItems ≥ 6，且同一列相邻字符的 getExtentOfChar 外接框宽高比互不相同，说明旋转逐字生效、末值向后重复。
+4. 朱拓小样是裁切窗口：笔画内部存在 R > 150 且 R−B > 60 的朱砂像素，而笔画外 6px 处像素与纸色的色差 < 12；DOM 中 clipPath#clip-zhu 的后代同时包含 <text> 与 <textPath>。
+5. mask 的灰度可辨：主拓片中被标为「未拓透」的 4 个字，其笔画像素亮度落在 80–170 之间，既不等于全墨也不等于纸色，与二值裁切区分开。
+6. 条件处理只放行一个分支：<switch> 的 5 个子节点里 getBoundingClientRect().width > 0 的恰好 1 个，带 requiredExtensions 的诱饵分支为 0×0；语言分支账中被打勾的行与该子节点一致，且截图上打印了 navigator.language 原值。
+7. 骑缝印绕满一周并压住接缝：两段环形 textPath 的首尾间隙 < 8px，印记包围盒同时跨过 x=898 与 x=920 两条版面边界。
+8. 交互与可选性：pointermove 后 window.__INTERACTION_COUNT__ 增加，拓包圆心与指针换算所得用户坐标误差 ≤ 1，该处墨色比移动前更深；导出前 getSelection().toString().length ≥ 6，而 mask/clipPath 内克隆文本层的 computed user-select 为 'none'。
 
-**浏览器注意**　textPath 的 side="right" 到 2026 年仍只有 Firefox（61+）实现，Chrome 与 Safari 直接忽略该属性、把题记画回弧外侧并与题额重叠；场景用 1×1 探针实测首字落在弧的哪一侧，不支持时切到脚本生成的 #arc-e-rev（端点互换、sweep-flag 取反的同一条几何），视觉结果一致而实现不同，底部 chip 明写走了哪条路。textPath 的内联 path 属性同样只有 Firefox 支持，Chrome/Safari 会把该 textPath 渲染成零长度，探测靠 getComputedTextLength()/getBBox().height，回退时把同一条 d 写进 <defs><path> 改用 href。alignment-baseline 在 Firefox 未实现（按 dominant-baseline 处理），那个 hanging 的 tspan 在 Firefox 下与基线行重合，注记已标明并同时给出 dominant-baseline 的近似值。writing-mode 只使用 vertical-rl / vertical-lr，旧值 tb、tb-rl 已废弃不用；Safari 对竖排文本的 rotate 与字距舍入与 Chrome 有约半像素差异，验收阈值按此放宽。text-orientation 的 sideways 值 Safari 落地最晚，场景只把 sideways 用在小样上并允许退化为 mixed，主对照使用支持面完整的 mixed 与 upright。systemLanguage 依赖 Accept-Language / navigator.languages：Chrome 按前缀匹配（zh 命中 zh-Hans），Safari 历史上更严格，故每个分支都写出 "zh,zh-Hans,zh-CN" 这样的完整列表；Playwright 需显式设置 locale，否则默认 en-US 命中英文分支——这正是分支账要把 navigator.language 原样打印出来的原因。用 <use> 引用文本进 clipPath/mask 在三家表现不一致（Safari 对 use→text 的裁切有长期缺陷），因此一律用脚本克隆真实文本节点，克隆加 aria-hidden 与 user-select:none。SVG 2 的自动换行（inline-size / shape-inside）三家都不可用，多行释文只能用 tspan 的 x 复位 + dy 实现。SMIL 在 Chrome 的弃用计划始终未执行，animate 对 x 列表与 startOffset 的动画三家可用，但导出前必须 pauseAnimations() 并 setCurrentTime 固定时刻，否则静帧不确定。网络被封锁，全部字体（CJK 楷体与篆体子集、带变音符号的拉丁子集、叙利亚文子集、等宽子集）都按实际用字 pyftsubset 后以 woff2 data URI 内联，缺一个码位就掉成 .notdef，尤其是梵文转写的 ā/ī/ū/ṣ/ṭ 与叙利亚文的连写形；叙利亚文整形在三家排版引擎间仍有细微差异，只作 direction/unicode-bidi 的演示而不作像素级校验。SVG 文本的 user-select 需显式声明并补 -webkit-user-select，::selection 在 SVG <text> 上 Chrome/Firefox 可自定义颜色、Safari 支持有限，故朱砂高亮只作增强，验收以 getSelection().toString() 为准。
+**实现复审**
+
+- 两条方向注释移出 #zhengwen，正文组恰含8列；switch 的 systemLanguage 门禁检查分支子元素。
+
+**浏览器注意**
+
+- textPath 的 side="right" 到 2026 年仍只有 Firefox（61+）实现，Chrome 与 Safari 直接忽略该属性、把题记画回弧外侧并与题额重叠；场景用 1×1 探针实测首字落在弧的哪一侧，不支持时切到脚本生成的 #arc-e-rev（端点互换、sweep-flag 取反的同一条几何），视觉结果一致而实现不同，底部 chip 明写走了哪条路。textPath 的内联 path 属性同样只有 Firefox 支持，Chrome/Safari 会把该 textPath 渲染成零长度，探测靠 getComputedTextLength()/getBBox().height，回退时把同一条 d 写进 <defs><path> 改用 href。alignment-baseline 在 Firefox 未实现（按 dominant-baseline 处理），那个 hanging 的 tspan 在 Firefox 下与基线行重合，注记已标明并同时给出 dominant-baseline 的近似值。writing-mode 只使用 vertical-rl / vertical-lr，旧值 tb、tb-rl 已废弃不用；Safari 对竖排文本的 rotate 与字距舍入与 Chrome 有约半像素差异，验收阈值按此放宽。text-orientation 的 sideways 值 Safari 落地最晚，场景只把 sideways 用在小样上并允许退化为 mixed，主对照使用支持面完整的 mixed 与 upright。systemLanguage 依赖 Accept-Language / navigator.languages：Chrome 按前缀匹配（zh 命中 zh-Hans），Safari 历史上更严格，故每个分支都写出 "zh,zh-Hans,zh-CN" 这样的完整列表；Playwright 需显式设置 locale，否则默认 en-US 命中英文分支——这正是分支账要把 navigator.language 原样打印出来的原因。用 <use> 引用文本进 clipPath/mask 在三家表现不一致（Safari 对 use→text 的裁切有长期缺陷），因此一律用脚本克隆真实文本节点，克隆加 aria-hidden 与 user-select:none。SVG 2 的自动换行（inline-size / shape-inside）三家都不可用，多行释文只能用 tspan 的 x 复位 + dy 实现。SMIL 在 Chrome 的弃用计划始终未执行，animate 对 x 列表与 startOffset 的动画三家可用，但导出前必须 pauseAnimations() 并 setCurrentTime 固定时刻，否则静帧不确定。网络被封锁，全部字体（CJK 楷体与篆体子集、带变音符号的拉丁子集、叙利亚文子集、等宽子集）都按实际用字 pyftsubset 后以 woff2 data URI 内联，缺一个码位就掉成 .notdef，尤其是梵文转写的 ā/ī/ū/ṣ/ṭ 与叙利亚文的连写形；叙利亚文整形在三家排版引擎间仍有细微差异，只作 direction/unicode-bidi 的演示而不作像素级校验。SVG 文本的 user-select 需显式声明并补 -webkit-user-select，::selection 在 SVG <text> 上 Chrome/Firefox 可自定义颜色、Safari 支持有限，故朱砂高亮只作增强，验收以 getSelection().toString() 为准。
 
 ### 3.8 `letterpress-type-specimen` — 铅字样本册
 
@@ -471,24 +484,17 @@
 
 **主打特性**
 
-- `css:font-face-data-uri` — @font-face with data-URI font embedded in SVG（全平台）：Distinctive custom typeface rendering identically when the SVG is inlined or used as an image.
-- `pr:font-feature-settings` — font-feature-settings OpenType features（全平台）："office" with liga on vs off, and 0123 with tnum aligned in columns.
-- `at:text.textLength` — textLength forced advance width（全平台）：Same sentence rendered three times fitted exactly to 200, 300 and 400 unit rulers drawn beneath.
-- `av:text.lengthAdjust=spacingAndGlyphs` — lengthAdjust spacingAndGlyphs (glyphs scale)（全平台）：Text squeezed into a narrow textLength where letters themselves become visibly condensed horizontally.
-- `api:SVGTextContentElement.getComputedTextLength` — getComputedTextLength（全平台）：A rect drawn exactly as wide as the measured text with label showing the number.
-- `api:SVGTextContentElement.getStartPositionOfChar` — getStartPositionOfChar / getEndPositionOfChar（全平台）：Small dots drawn at the start position of every glyph, including along a textPath.
-- `css:presentation-attribute-specificity` — Presentation attributes lose to any CSS rule（全平台）：Shape with fill=red attribute renders blue because a stylesheet rule sets fill:blue; inline style beats both.
+- `css:font-face-data-uri` — @font-face with data-URI font embedded in SVG
+- `pr:font-feature-settings` — font-feature-settings OpenType features
+- `at:text.textLength` — textLength forced advance width
+- `av:text.lengthAdjust=spacingAndGlyphs` — lengthAdjust spacingAndGlyphs (glyphs scale)
+- `api:SVGTextContentElement.getComputedTextLength` — getComputedTextLength
+- `api:SVGTextContentElement.getStartPositionOfChar` — getStartPositionOfChar / getEndPositionOfChar
+- `css:presentation-attribute-specificity` — Presentation attributes lose to any CSS rule
 
-**辅助特性**（61 项，按领域）
+**辅助特性**
 
-- 文档结构与复用：`el:style`、`concept:xml-stylesheet-pi`、`pv:white-space=pre`、`av:g.xml:space=preserve`˚、`at:g.class`˚
-- 嵌入、外来内容与语义：`concept:presentation-attribute-specificity`、`concept:style-attribute`、`css:important-override`˚、`concept:ua-stylesheet-defaults`˚、`api:SVGElement.style`˚
-- 基本图形与路径语法：`api:SVGGraphicsElement.getBBox`、`concept:bbox-excludes-stroke-and-control-points`˚
-- 填充、描边与合成属性：`pr:text-rendering`
-- 文本与排版：`pr:white-space`、`pr:letter-spacing`、`pr:word-spacing`、`pr:font-family`、`pr:font-size`、`pr:font-weight`、`pr:font-style`、`pr:font-stretch`、`pr:font-variant`、`pr:font-kerning`、`pr:text-decoration`、`concept:text-stroke-paint-order`、`api:FontFaceSet.ready`˚、`concept:svg-as-image-external-font-blocked`˚、`av:text.lengthAdjust=spacing`˚、`concept:textlength-on-tspan`˚、`api:SVGTextContentElement.getExtentOfChar`˚、`api:SVGTextContentElement.getSubStringLength`˚、`api:SVGTextContentElement.getNumberOfChars`˚、`api:SVGTextContentElement.getCharNumAtPosition`˚、`pr:font-variation-settings`˚、`concept:faux-italic-skewx`˚、`pr:font-variant-ligatures`˚、`pr:font-variant-numeric`˚、`pr:kerning`˚、`pv:text-rendering=geometricPrecision`˚、`at:text.xml:space`˚、`css:text-decoration-styling`˚、`concept:hollow-outline-text`˚
-- 滤镜：区域、连线、合成与颜色原语：`el:feFlood`、`pr:flood-color`、`pr:flood-opacity`、`concept:filter-on-text`、`concept:text-background-box-via-flood`、`pv:flood-color=currentColor`˚、`css:custom-properties-in-filter`˚、`css:flood-color-transition`˚、`concept:flood-fills-filter-region`˚
-- CSS 动画、CSS 变换与脚本 API：`concept:presentation-attribute-cascade`、`api:Window.getComputedStyle`、`css:keyframes-paint-animation`、`css:keyframes-on-svg`、`css:transitions`、`api:SVGBoundingBoxOptions.stroke`˚、`api:CSSStyleDeclaration.fill`˚、`api:SVGElement.getPresentationAttribute`˚、`at:style.type`˚
-- 变换与坐标系：`concept:length-units-font-relative`
+`el:style`、`concept:xml-stylesheet-pi`、`pv:white-space=pre`、`pr:white-space`、`concept:presentation-attribute-specificity`、`concept:presentation-attribute-cascade`、`concept:style-attribute`、`api:Window.getComputedStyle`、`api:SVGGraphicsElement.getBBox`、`pr:text-rendering`、`pr:letter-spacing`、`pr:word-spacing`、`pr:font-family`、`pr:font-size`、`pr:font-weight`、`pr:font-style`、`pr:font-stretch`、`pr:font-variant`、`pr:font-kerning`、`pr:text-decoration`、`concept:text-stroke-paint-order`、`el:feFlood`、`pr:flood-color`、`pr:flood-opacity`、`concept:filter-on-text`、`concept:text-background-box-via-flood`、`css:keyframes-paint-animation`、`css:keyframes-on-svg`、`css:transitions`、`concept:length-units-font-relative`、`api:FontFaceSet.ready`、`concept:svg-as-image-external-font-blocked`、`av:text.lengthAdjust=spacing`、`concept:textlength-on-tspan`、`api:SVGTextContentElement.getExtentOfChar`、`api:SVGTextContentElement.getSubStringLength`、`api:SVGTextContentElement.getNumberOfChars`、`api:SVGTextContentElement.getCharNumAtPosition`、`concept:bbox-excludes-stroke-and-control-points`、`api:SVGBoundingBoxOptions.stroke`、`pr:font-variation-settings`、`concept:faux-italic-skewx`、`pr:font-variant-ligatures`、`pr:font-variant-numeric`、`pr:kerning`、`pv:text-rendering=geometricPrecision`、`at:text.xml:space`、`av:g.xml:space=preserve`、`css:text-decoration-styling`、`pv:flood-color=currentColor`、`css:custom-properties-in-filter`、`css:flood-color-transition`、`concept:flood-fills-filter-region`、`css:important-override`、`concept:ua-stylesheet-defaults`、`api:SVGElement.style`、`api:CSSStyleDeclaration.fill`、`api:SVGElement.getPresentationAttribute`、`at:g.class`、`at:style.type`、`concept:hollow-outline-text`
 
 **构造要点**
 
@@ -511,16 +517,22 @@
 
 **验收要点**
 
-- [ ] 截图四周留有透明纸边（alpha=0 像素 ≥ 全图 12%），纸面为暖白 `#f4ead6`，四角十字规矩线与左缘毛边可见。
-- [ ] DOM：`document.fonts.check('16px "Praktika VF"')` 为 true；字号阶梯六行印出的宽度与各自 `getComputedTextLength()` 相差 < 0.5，且六个数值严格递增。
-- [ ] 强制栏宽试验：`lengthAdjust="spacing"` 样本的 `getExtentOfChar(0).width` 与自然样本相差 < 0.05 而实测跨距等于 textLength ±0.5；`spacingAndGlyphs` 样本的 `getExtentOfChar(0).width` ≤ 自然值的 0.9；两行盖出的判定印章文字分别为「字距被挤」与「字形被压」。
-- [ ] 级联五行的 `getComputedStyle(el).fill` 依次为 `rgb(20,87,122)`、`rgb(179,39,30)`、`rgb(29,122,75)`、`rgb(122,63,160)`、`rgb(0,0,0)`，且每行色片元素的 fill 与该字符串逐字相同，旁边印出的 rgb() 文本一致。
-- [ ] 截图中标签底板随文字长度张缩：最长栏目标题的底板像素宽度至少为最短者的 2 倍；底板为半透明（板内取样像素既不等于纯底板色也不等于纸色）。
-- [ ] 标题的 getBBox 虚线框宽度与 `getComputedTextLength()` 相差 < 1，且该框外仍存在描边墨色像素（证明几何框不含 7u 描边）。
-- [ ] 空白检验孪生对：`white-space:pre` 行与 `xml:space="preserve"` 行的 `getComputedTextLength()` 相等（±0.5），且均 ≥ 折叠孪生行的 1.8 倍。
-- [ ] pointermove 之后 `window.__INTERACTION_COUNT__` 增加，游标读数栏的 textContent 变为命中字符的序号与实测前进宽；`?export=1` 静帧中该读数栏已有默认命中的 32pt 阶梯行读数，且动画层被冻结在同一帧（两次渲染像素一致）。
+1. 截图四周留有透明纸边（alpha=0 像素 ≥ 全图 12%），纸面为暖白 `#f4ead6`，四角十字规矩线与左缘毛边可见。
+2. DOM：`document.fonts.check('16px "Praktika VF"')` 为 true；字号阶梯六行印出的宽度与各自 `getComputedTextLength()` 相差 < 0.5，且六个数值严格递增。
+3. 强制栏宽试验：`lengthAdjust="spacing"` 样本的 `getExtentOfChar(0).width` 与自然样本相差 < 0.05 而实测跨距等于 textLength ±0.5；`spacingAndGlyphs` 样本的 `getExtentOfChar(0).width` ≤ 自然值的 0.9；两行盖出的判定印章文字分别为「字距被挤」与「字形被压」。
+4. 级联五行的 `getComputedStyle(el).fill` 依次为 `rgb(20,87,122)`、`rgb(179,39,30)`、`rgb(29,122,75)`、`rgb(122,63,160)`、`rgb(0,0,0)`，且每行色片元素的 fill 与该字符串逐字相同，旁边印出的 rgb() 文本一致。
+5. 截图中标签底板随文字长度张缩：最长栏目标题的底板像素宽度至少为最短者的 2 倍；底板为半透明（板内取样像素既不等于纯底板色也不等于纸色）。
+6. 标题的 getBBox 虚线框宽度与 `getComputedTextLength()` 相差 < 1，且该框外仍存在描边墨色像素（证明几何框不含 7u 描边）。
+7. 空白检验孪生对：`white-space:pre` 行与 `xml:space="preserve"` 行的 `getComputedTextLength()` 相等（±0.5），且均 ≥ 折叠孪生行的 1.8 倍。
+8. pointermove 之后 `window.__INTERACTION_COUNT__` 增加，游标读数栏的 textContent 变为命中字符的序号与实测前进宽；`?export=1` 静帧中该读数栏已有默认命中的 32pt 阶梯行读数，且动画层被冻结在同一帧（两次渲染像素一致）。
 
-**浏览器注意**　Chromium 152 实测：`lengthAdjust=\"spacing\"` 时 `getComputedTextLength()` 返回自然宽度（238.88）而非 textLength（200），只有 `spacingAndGlyphs` 会返回 200.00；Firefox / Safari 可能直接返回强制值。因此所有量规一律以 `getStartPositionOfChar` / `getEndPositionOfChar` 的实测跨距为准，引擎读数只作对照印刷，两者不等时那条差异本身就是展品，不会导致版面出错。`getBBox({stroke:true})` 在 Chromium 152 与不带参数结果完全一致（实测同为 200.00×57.74），说明 SVGBoundingBoxOptions 未生效；标题的描边框改用 stroke-width/2 手工外扩，并把这一点印在标签里。`flood-color:currentColor` 解析的是 `<filter>` 自身继承的 color 而非被滤镜引用元素的颜色（Chromium 实测得 rgb(0,0,0)），这是规范语义而非 bug，因此各底板色用独立 filter 或在 `<filter>` 上声明 `--plate` 自定义属性来切换。`<?xml-stylesheet?>` 携带 `data:text/css` 在 Chromium 152 的 SVG-as-image 中确认生效（`fill=\"red\"` 的 rect 被 PI 改成 lime）；Firefox 对 data: 样式表限制更严，Safari 的 secure static mode 也可能忽略，故校样卡的呈现属性故意设为朱红并配说明文字：卡片呈朱红即表示该引擎忽略了 PI，页面依旧可读。SVG-as-image 三家引擎一律阻断外部字体，中间那张校样卡因此回退 serif，右侧卡把 micro subset 写进卡内 `@font-face` 才恢复本体字面。数值 font-weight 与 font-stretch 依赖真实 wght/wdth 轴：缺轴时 Chrome 只能合成粗体、宽度毫无变化（本机回退 serif 实测三档 font-stretch 宽度均为 202.44），自检栏据此打 ✗ 并盖「合成」印章。`font-kerning:none` 只有在 subset 保留 GPOS kern 时才有可测差值（本机回退字体实测 Δ=0.00）；SVG 1.1 的 `kerning` 属性在三家引擎均已移除，Δ 恒为 0，样本册用删除线行陈列。`text-rendering` 三档只有 Chrome 会因 optimizeSpeed 关闭连字与字距、geometricPrecision 关闭 hinting，Firefox 仅部分响应，Safari 基本忽略，Δ 为 0 时该行自动改印「本引擎无差异」。`white-space:pre` 在 Chrome / Firefox 正常（实测 101.16 对折叠 43.36），Safari 表现不稳，故正文块并列保留 `xml:space=\"preserve\"` 孪生行（Chromium 实测同为 101.16）作为兜底。几何长度单位：`r=\"1em\"` 属性三家可用（font-size 32 时 bbox 宽实测 64），`style=\"r:1rem\"` 依赖几何属性 CSS 化（实测 32 = 2×16），旧版 Safari 不支持时脚本回退为写像素值的属性并改印栏头。所有度量都必须在 `await document.fonts.ready` 之后进行，否则读到的全是回退字体的数值；截图前脚本会再核对一次 `document.fonts.check`，未加载则在纸面盖「字体未就绪·数值来自回退字面」印章而不是静默出错。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+
+**浏览器注意**
+
+- Chromium 152 实测：`lengthAdjust=\"spacing\"` 时 `getComputedTextLength()` 返回自然宽度（238.88）而非 textLength（200），只有 `spacingAndGlyphs` 会返回 200.00；Firefox / Safari 可能直接返回强制值。因此所有量规一律以 `getStartPositionOfChar` / `getEndPositionOfChar` 的实测跨距为准，引擎读数只作对照印刷，两者不等时那条差异本身就是展品，不会导致版面出错。`getBBox({stroke:true})` 在 Chromium 152 与不带参数结果完全一致（实测同为 200.00×57.74），说明 SVGBoundingBoxOptions 未生效；标题的描边框改用 stroke-width/2 手工外扩，并把这一点印在标签里。`flood-color:currentColor` 解析的是 `<filter>` 自身继承的 color 而非被滤镜引用元素的颜色（Chromium 实测得 rgb(0,0,0)），这是规范语义而非 bug，因此各底板色用独立 filter 或在 `<filter>` 上声明 `--plate` 自定义属性来切换。`<?xml-stylesheet?>` 携带 `data:text/css` 在 Chromium 152 的 SVG-as-image 中确认生效（`fill=\"red\"` 的 rect 被 PI 改成 lime）；Firefox 对 data: 样式表限制更严，Safari 的 secure static mode 也可能忽略，故校样卡的呈现属性故意设为朱红并配说明文字：卡片呈朱红即表示该引擎忽略了 PI，页面依旧可读。SVG-as-image 三家引擎一律阻断外部字体，中间那张校样卡因此回退 serif，右侧卡把 micro subset 写进卡内 `@font-face` 才恢复本体字面。数值 font-weight 与 font-stretch 依赖真实 wght/wdth 轴：缺轴时 Chrome 只能合成粗体、宽度毫无变化（本机回退 serif 实测三档 font-stretch 宽度均为 202.44），自检栏据此打 ✗ 并盖「合成」印章。`font-kerning:none` 只有在 subset 保留 GPOS kern 时才有可测差值（本机回退字体实测 Δ=0.00）；SVG 1.1 的 `kerning` 属性在三家引擎均已移除，Δ 恒为 0，样本册用删除线行陈列。`text-rendering` 三档只有 Chrome 会因 optimizeSpeed 关闭连字与字距、geometricPrecision 关闭 hinting，Firefox 仅部分响应，Safari 基本忽略，Δ 为 0 时该行自动改印「本引擎无差异」。`white-space:pre` 在 Chrome / Firefox 正常（实测 101.16 对折叠 43.36），Safari 表现不稳，故正文块并列保留 `xml:space=\"preserve\"` 孪生行（Chromium 实测同为 101.16）作为兜底。几何长度单位：`r=\"1em\"` 属性三家可用（font-size 32 时 bbox 宽实测 64），`style=\"r:1rem\"` 依赖几何属性 CSS 化（实测 32 = 2×16），旧版 Safari 不支持时脚本回退为写像素值的属性并改印栏头。所有度量都必须在 `await document.fonts.ready` 之后进行，否则读到的全是回退字体的数值；截图前脚本会再核对一次 `document.fonts.check`，未加载则在纸面盖「字体未就绪·数值来自回退字面」印章而不是静默出错。
 
 ### 3.9 `pipeline-mimic-board` — 管网模拟盘
 
@@ -532,22 +544,17 @@
 
 **主打特性**
 
-- `av:marker.orient=auto-start-reverse` — orient auto-start-reverse（全平台）：One marker definition yields a double-headed arrow: start arrow points backwards, end arrow points forwards.
-- `concept:marker-vertex-bisector` — mid-marker direction is the bisector of adjacent segments（全平台）：At a 90-degree corner the mid arrow points diagonally, halfway between incoming and outgoing directions.
-- `pv:fill=context-stroke` — Cross-using context paints (fill=context-stroke)（全平台）：Marker filled with fill=context-stroke so a solid arrowhead matches the line colour while the line itself has no fill.
-- `concept:marker-dimension-ticks` — dimension line ticks perpendicular to the line（全平台）：A measuring line ends in short perpendicular ticks that stay perpendicular when the line is rotated.
-- `concept:marker-closed-path-direction` — closed subpath orientation at the closing vertex（全平台）：On a closed triangle the start marker is angled between the closing segment and the first segment, not along the first only.
-- `concept:marker-smil-attribute-animation` — SMIL animation of refX, orient, markerWidth（全平台）：Arrowheads slide along or spin as animate targets the marker's orient or refX attribute.
-- `concept:marker-non-scaling-stroke` — markers under vector-effect non-scaling-stroke（全平台）：Zoomed group: line stays 1px thin but its arrowheads grow with the zoom factor.
+- `av:marker.orient=auto-start-reverse` — orient auto-start-reverse
+- `concept:marker-vertex-bisector` — mid-marker direction is the bisector of adjacent segments
+- `pv:fill=context-stroke` — Cross-using context paints (fill=context-stroke)
+- `concept:marker-dimension-ticks` — dimension line ticks perpendicular to the line
+- `concept:marker-closed-path-direction` — closed subpath orientation at the closing vertex
+- `concept:marker-smil-attribute-animation` — SMIL animation of refX, orient, markerWidth
+- `concept:marker-non-scaling-stroke` — markers under vector-effect non-scaling-stroke
 
-**辅助特性**（76 项，按领域）
+**辅助特性**
 
-- 基本图形与路径语法：`el:line`、`el:polyline`、`el:polygon`、`at:polygon.points`、`at:polyline.points`˚、`at:line.x1`˚、`concept:line-has-no-fill-area`˚、`concept:polyline-fill-implicit-close`˚、`concept:points-odd-coordinate-count`˚、`concept:points-parse-error-partial-render`˚、`api:SVGPointList`˚
-- 填充、描边与合成属性：`pv:fill=context-fill`、`pv:stroke=context-stroke`、`concept:context-paint-in-use`˚、`pv:paint-order=markers`
-- 渐变与图案：`concept:gradient-on-marker`
-- 标记 (marker)：`el:marker`、`pv:stroke=context-fill`˚、`concept:context-paint-gradient`˚、`concept:marker-currentcolor`˚、`pr:marker-knockout-left`˚、`concept:marker-content-paint-servers`˚、`concept:nested-markers`˚、`concept:marker-text-content`˚、`concept:marker-style-isolation`˚、`concept:marker-display-ua-style`˚、`concept:markers-on-basic-shapes`˚、`at:marker.markerWidth`、`at:marker.markerHeight`˚、`av:marker.markerWidth=0`˚、`at:marker.refX`、`av:marker.refX=center`˚、`at:marker.refY`、`at:marker.markerUnits`、`av:marker.markerUnits=userSpaceOnUse`、`concept:marker-without-stroke`˚、`at:marker.orient`、`av:marker.orient=auto`、`av:marker.orient=angle`、`concept:marker-curve-tangent`˚、`concept:marker-reverse-arrow-fallback`˚、`concept:marker-zero-length-direction`˚、`at:marker.viewBox`、`at:marker.preserveAspectRatio`、`av:marker.preserveAspectRatio=none`˚、`pr:marker-start`、`pr:marker-mid`、`pr:marker-end`、`pr:marker`、`pv:marker=none`˚、`css:marker-properties`˚、`concept:marker-property-inheritance`˚、`concept:marker-subpath-vertices`˚、`concept:marker-dashed-stroke`˚、`concept:marker-arrowhead`、`concept:marker-vertex-glyphs`、`concept:marker-graph-nodes`、`concept:marker-vs-symbol`、`concept:marker-pointer-events`˚、`concept:marker-css-state-swap`、`api:CSSStyleDeclaration.markerEnd`˚、`concept:marker-animated-content`˚、`concept:marker-follows-animated-path`˚、`api:SVGMarkerElement.setOrientToAuto`、`api:SVGMarkerElement.setOrientToAngle`˚、`api:SVGMarkerElement.orientType`˚、`api:SVGMarkerElement.refX`˚、`api:SVGMarkerElement.markerUnits`˚、`api:SVGMarkerElement.viewBox`˚、`api:SVGBoundingBoxOptions.markers`˚、`concept:marker-transform-inheritance`
-- 变换与坐标系：`pv:transform=skewX`、`pv:transform=skewY`
-- 交互与无障碍：`css:hover`、`css:active`˚、`concept:hover-state-transition`˚
+`el:marker`、`el:line`、`el:polyline`、`el:polygon`、`at:polygon.points`、`at:polyline.points`、`at:line.x1`、`concept:line-has-no-fill-area`、`concept:polyline-fill-implicit-close`、`concept:points-odd-coordinate-count`、`concept:points-parse-error-partial-render`、`api:SVGPointList`、`pv:fill=context-fill`、`pv:stroke=context-stroke`、`pv:stroke=context-fill`、`concept:context-paint-in-use`、`concept:context-paint-gradient`、`concept:marker-currentcolor`、`pv:paint-order=markers`、`pr:marker-knockout-left`、`concept:gradient-on-marker`、`concept:marker-content-paint-servers`、`concept:nested-markers`、`concept:marker-text-content`、`concept:marker-style-isolation`、`concept:marker-display-ua-style`、`concept:markers-on-basic-shapes`、`at:marker.markerWidth`、`at:marker.markerHeight`、`av:marker.markerWidth=0`、`at:marker.refX`、`av:marker.refX=center`、`at:marker.refY`、`at:marker.markerUnits`、`av:marker.markerUnits=userSpaceOnUse`、`concept:marker-without-stroke`、`at:marker.orient`、`av:marker.orient=auto`、`av:marker.orient=angle`、`concept:marker-curve-tangent`、`concept:marker-reverse-arrow-fallback`、`concept:marker-zero-length-direction`、`at:marker.viewBox`、`at:marker.preserveAspectRatio`、`av:marker.preserveAspectRatio=none`、`pr:marker-start`、`pr:marker-mid`、`pr:marker-end`、`pr:marker`、`pv:marker=none`、`css:marker-properties`、`concept:marker-property-inheritance`、`concept:marker-subpath-vertices`、`concept:marker-dashed-stroke`、`concept:marker-arrowhead`、`concept:marker-vertex-glyphs`、`concept:marker-graph-nodes`、`concept:marker-vs-symbol`、`concept:marker-pointer-events`、`concept:marker-css-state-swap`、`api:CSSStyleDeclaration.markerEnd`、`concept:marker-animated-content`、`concept:marker-follows-animated-path`、`api:SVGMarkerElement.setOrientToAuto`、`api:SVGMarkerElement.setOrientToAngle`、`api:SVGMarkerElement.orientType`、`api:SVGMarkerElement.refX`、`api:SVGMarkerElement.markerUnits`、`api:SVGMarkerElement.viewBox`、`api:SVGBoundingBoxOptions.markers`、`concept:marker-transform-inheritance`、`pv:transform=skewX`、`pv:transform=skewY`、`css:hover`、`css:active`、`concept:hover-state-transition`
 
 **构造要点**
 
@@ -570,16 +577,22 @@
 
 **验收要点**
 
-- [ ] 回流支路的 marker-start 与 marker-end 在 DOM 中指向同一个 id（#mk-arrow），而 PNG 上两枚箭头分别朝向管线两端，方向相反。
-- [ ] W1 中点标记的旋转角为入边与出边方向的平均（读数 45°±1°），与画出的两枚幽灵切向箭头都不重合；零长段样本的标记方向与其相邻非零段一致。
-- [ ] 同一个 #mk-valve 在蒸汽管上取样像素接近 --steam(#e8792b)、在冷却水支管上接近 --cw(#7f9db0)，且 DOM 中两条管线的 marker-mid 解析为同一 id、场景中该 marker 只定义一次。
-- [ ] W2 中 polygon 与 polyline 使用同一份 points（DOM 可比对字符串相等），但起点标记的渲染角度可见不同；奇数坐标样本只渲染到最后一个完整坐标对。
-- [ ] 底带三条尺寸线（0°、90°、30°）的端撇与各自线的夹角均为 90°±2°；量程短撇整体位于管线下方（refY=0 生效），不跨过线心。
-- [ ] W3 中被 scale(3) 的管线描边在 PNG 上仍量得约 1px，而其箭头面积明显大于右侧未缩放孪生件的同款箭头。
-- [ ] 调用 pauseAnimations() 并 setCurrentTime(2.4) 后，量程游标停在管段中部且不与端点重叠，#mk-cursor 的 refX.baseVal.value 读数非 0；同一时刻阀符处于半开姿态。
-- [ ] 在任一管段上派发 pointermove 后：该 polyline 带有 .live 类，getComputedStyle 的 markerMid 指向高亮标记 id，读数行出现该点 DN 与流向文字，PNG 上该整条线的符号换色。
+1. 回流支路的 marker-start 与 marker-end 在 DOM 中指向同一个 id（#mk-arrow），而 PNG 上两枚箭头分别朝向管线两端，方向相反。
+2. W1 中点标记的旋转角为入边与出边方向的平均（读数 45°±1°），与画出的两枚幽灵切向箭头都不重合；零长段样本的标记方向与其相邻非零段一致。
+3. 同一个 #mk-valve 在蒸汽管上取样像素接近 --steam(#e8792b)、在冷却水支管上接近 --cw(#7f9db0)，且 DOM 中两条管线的 marker-mid 解析为同一 id、场景中该 marker 只定义一次。
+4. W2 中 polygon 与 polyline 使用同一份 points（DOM 可比对字符串相等），但起点标记的渲染角度可见不同；奇数坐标样本只渲染到最后一个完整坐标对。
+5. 底带三条尺寸线（0°、90°、30°）的端撇与各自线的夹角均为 90°±2°；量程短撇整体位于管线下方（refY=0 生效），不跨过线心。
+6. W3 中被 scale(3) 的管线描边在 PNG 上仍量得约 1px，而其箭头面积明显大于右侧未缩放孪生件的同款箭头。
+7. 调用 pauseAnimations() 并 setCurrentTime(2.4) 后，量程游标停在管段中部且不与端点重叠，#mk-cursor 的 refX.baseVal.value 读数非 0；同一时刻阀符处于半开姿态。
+8. 在任一管段上派发 pointermove 后：该 polyline 带有 .live 类，getComputedStyle 的 markerMid 指向高亮标记 id，读数行出现该点 DN 与流向文字，PNG 上该整条线的符号换色。
 
-**浏览器注意**　context-fill / context-stroke 在 2026 年的 Chromium、Firefox、Safari 均可用（Chromium 97+、Safari 16.4+），仍做特性探测：离屏渲染一枚 fill=\"context-stroke\" 的标记并读 getComputedStyle().fill，拿不到上下文色时由 JS 按介质克隆三份标记并改写 marker-* 引用，视觉退化为“每种介质一枚符号”。上下文取色引用渐变（context-paint-gradient）在各引擎对 gradientUnits=\"objectBoundingBox\" 在标记坐标系下的重解析并不一致，WebKit 倾向按标记内容自身 bbox 求解，故主蒸汽渐变改用 userSpaceOnUse，并在 #mk-head 内自带一份 radialGradient 保证造型稳定。orient 的带单位写法（45deg / 0.7854rad / 50grad）属 SVG2，Chromium 与 WebKit 仍可能整条属性失效回落为 0，因此实际管线只写裸数值，W4 把 orientAngle.baseVal.value 的实测值打印出来把浏览器差异变成内容。refX=\"center\" 至今无实现，探测后回退为 viewBox 中心的数值 refX。getBBox({markers:true}) 的 SVGBoundingBoxOptions 三家都未生效，尺寸带手工把 markerWidth×stroke-width 折进包围盒并同时展示两组数字。SVG2 的分布式标记 marker-pattern / marker-segment / marker 的 position 属性全无实现，场景不依赖，仅在图例里标为“未实现”。嵌套标记（#mk-noz 内容里的路径再挂 marker-end）在 Chromium 与 Firefox 渲染，WebKit 偶有丢失，探测后把内层箭头替换为预烘焙 path。auto-start-reverse 在旧 WebKit 缺失，保留 rotate(180) 的 #mk-arrow-rev 作回退（同时也是节省定义的对照）。SMIL 对 refX / orient / markerWidth 的 animate 在 Chromium 与 WebKit 稳定，Firefox 对标记属性动画的重绘节流较明显，故截图统一走 pauseAnimations()+setCurrentTime(2.4) 取确定静帧。标记内容在所有引擎都不接收指针事件，hover 命中目标只能是宿主路径，需要可点的阀件用 <use> 版本承担。网络被禁：位号字体以 woff2 data URI 内嵌，标记内 <text> 显式指定字体族并给系统等宽回退，避免标记样式隔离导致继承不到宿主字体时字形跳变。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+
+**浏览器注意**
+
+- context-fill / context-stroke 在 2026 年的 Chromium、Firefox、Safari 均可用（Chromium 97+、Safari 16.4+），仍做特性探测：离屏渲染一枚 fill=\"context-stroke\" 的标记并读 getComputedStyle().fill，拿不到上下文色时由 JS 按介质克隆三份标记并改写 marker-* 引用，视觉退化为“每种介质一枚符号”。上下文取色引用渐变（context-paint-gradient）在各引擎对 gradientUnits=\"objectBoundingBox\" 在标记坐标系下的重解析并不一致，WebKit 倾向按标记内容自身 bbox 求解，故主蒸汽渐变改用 userSpaceOnUse，并在 #mk-head 内自带一份 radialGradient 保证造型稳定。orient 的带单位写法（45deg / 0.7854rad / 50grad）属 SVG2，Chromium 与 WebKit 仍可能整条属性失效回落为 0，因此实际管线只写裸数值，W4 把 orientAngle.baseVal.value 的实测值打印出来把浏览器差异变成内容。refX=\"center\" 至今无实现，探测后回退为 viewBox 中心的数值 refX。getBBox({markers:true}) 的 SVGBoundingBoxOptions 三家都未生效，尺寸带手工把 markerWidth×stroke-width 折进包围盒并同时展示两组数字。SVG2 的分布式标记 marker-pattern / marker-segment / marker 的 position 属性全无实现，场景不依赖，仅在图例里标为“未实现”。嵌套标记（#mk-noz 内容里的路径再挂 marker-end）在 Chromium 与 Firefox 渲染，WebKit 偶有丢失，探测后把内层箭头替换为预烘焙 path。auto-start-reverse 在旧 WebKit 缺失，保留 rotate(180) 的 #mk-arrow-rev 作回退（同时也是节省定义的对照）。SMIL 对 refX / orient / markerWidth 的 animate 在 Chromium 与 WebKit 稳定，Firefox 对标记属性动画的重绘节流较明显，故截图统一走 pauseAnimations()+setCurrentTime(2.4) 取确定静帧。标记内容在所有引擎都不接收指针事件，hover 命中目标只能是宿主路径，需要可点的阀件用 <use> 版本承担。网络被禁：位号字体以 woff2 data URI 内嵌，标记内 <text> 显式指定字体族并给系统等宽回退，避免标记样式隔离导致继承不到宿主字体时字形跳变。
 
 ### 3.10 `four-colour-press-check` — 四色套印检版台
 
@@ -593,22 +606,16 @@
 
 **主打特性**
 
-- `el:feComponentTransfer` — feComponentTransfer per-channel remap（全平台）：Gradient bar shows posterized, inverted, or contrast-stretched bands compared to the original.
-- `concept:duotone-via-component-transfer` — Duotone/false-colour by greyscale plus per-channel tables（全平台）：Photo rendered in two brand colors mapped from dark to light.
-- `av:feComposite.operator=arithmetic` — feComposite arithmetic with k1..k4（全平台）：k2=0.5 k3=0.5 cross-fades two inputs; k4 adds a constant giving a lifted, tinted look.
-- `pr:color-interpolation-filters` — color-interpolation-filters (linearRGB default vs sRGB)（全平台）：Two blurred red/green boundaries: linearRGB gives a bright yellowish mid, sRGB gives a darker muddy mid.
-- `concept:halftone-dots` — Halftone dot screen（全平台）：A gradient or photo reproduced as a grid of dots whose size varies with brightness, like newspaper print.
-- `concept:filter-input-wiring` — in / in2 / result wiring between primitives（全平台）：A named 'blur' result is reused by a later offset and merge, producing a shadow plus glow from one blur pass.
+- `el:feComponentTransfer` — feComponentTransfer per-channel remap
+- `concept:duotone-via-component-transfer` — Duotone/false-colour by greyscale plus per-channel tables
+- `av:feComposite.operator=arithmetic` — feComposite arithmetic with k1..k4
+- `pr:color-interpolation-filters` — color-interpolation-filters (linearRGB default vs sRGB)
+- `concept:halftone-dots` — Halftone dot screen
+- `concept:filter-input-wiring` — in / in2 / result wiring between primitives
 
-**辅助特性**（85 项，按领域）
+**辅助特性**
 
-- 基本图形与路径语法：`pr:shape-rendering`、`pv:shape-rendering=auto`˚、`pv:shape-rendering=optimizeSpeed`˚、`pv:shape-rendering=crispEdges`˚、`pv:shape-rendering=geometricPrecision`˚
-- 填充、描边与合成属性：`pr:color-interpolation`、`concept:half-pixel-crisp-lines`˚
-- 渐变与图案：`concept:halftone-pattern`、`concept:gradient-banding-noise`˚、`el:pattern`、`at:pattern.patternTransform`
-- 滤镜：区域、连线、合成与颜色原语：`el:filter`、`pr:filter`、`at:filter.x`、`at:filter.filterUnits`、`concept:filter-primitive-subregion`、`el:feMerge`、`el:feMergeNode`、`el:feBlend`、`el:feComposite`、`el:feColorMatrix`、`el:feFuncR`、`el:feFuncG`、`el:feFuncB`、`el:feFuncA`、`pv:filter=none`˚、`api:CSS.supports-filter`˚、`concept:filter-region-default`˚、`concept:filter-region-clipping-trap`˚、`av:filter.filterUnits=objectBoundingBox`˚、`av:filter.filterUnits=userSpaceOnUse`˚、`concept:reuse-filter-across-elements`˚、`concept:filter-and-transform`˚、`concept:filter-clip-mask-opacity-order`˚、`concept:primitive-subregion-defaults`˚、`concept:subregion-crop-technique`˚、`pv:color-interpolation-filters=sRGB`˚、`pv:color-interpolation-filters=linearRGB`˚、`concept:implicit-chaining`˚、`concept:last-primitive-is-output`˚、`concept:multiple-results-fan-out`˚、`av:feGaussianBlur.in=SourceGraphic`˚、`api:SVGFilterPrimitiveStandardAttributes.result`˚、`at:feMergeNode.in`˚、`at:feBlend.in2`˚、`at:feBlend.mode`˚、`av:feBlend.mode=multiply`˚、`av:feBlend.mode=screen`˚、`av:feBlend.mode=darken`˚、`av:feBlend.mode=overlay`˚、`av:feBlend.mode=luminosity`˚、`av:feBlend.mode=difference`˚、`at:feComposite.operator`˚、`av:feComposite.operator=over`˚、`av:feComposite.operator=in`˚、`av:feComposite.operator=out`˚、`av:feComposite.operator=atop`˚、`av:feComposite.operator=xor`˚、`av:feComposite.operator=lighter`˚、`at:feComposite.k1`˚、`at:feColorMatrix.type`˚、`at:feColorMatrix.values`˚、`av:feColorMatrix.type=matrix`˚、`av:feColorMatrix.type=saturate`˚、`av:feColorMatrix.type=hueRotate`˚、`concept:premultiplied-alpha-in-colormatrix`˚、`at:feFuncR.type`˚、`av:feFuncR.type=identity`˚、`av:feFuncR.type=table`˚、`av:feFuncR.type=discrete`˚、`av:feFuncR.type=linear`˚、`av:feFuncR.type=gamma`˚、`at:feFuncR.tableValues`˚、`at:feFuncR.slope`˚、`at:feFuncR.intercept`˚、`at:feFuncR.amplitude`˚、`at:feFuncR.exponent`˚、`at:feFuncR.offset`˚、`api:SVGComponentTransferFunctionElement.tableValues`˚、`api:SVGFEColorMatrixElement.values`˚
-- 滤镜：卷积、形态学、噪声、置换与光照：`concept:filter-device-pixel-resolution`、`concept:filter-performance-caveats`˚
-- CSS 动画、CSS 变换与脚本 API：`api:SVGGraphicsElement.getScreenCTM`
-- 变换与坐标系：`concept:half-pixel-crisp-alignment`、`concept:mouse-to-svg-coordinates`
+`el:filter`、`pr:filter`、`at:filter.x`、`at:filter.filterUnits`、`concept:filter-primitive-subregion`、`el:feMerge`、`el:feMergeNode`、`el:feBlend`、`el:feComposite`、`el:feColorMatrix`、`el:feFuncR`、`el:feFuncG`、`el:feFuncB`、`el:feFuncA`、`concept:halftone-pattern`、`concept:filter-device-pixel-resolution`、`concept:half-pixel-crisp-alignment`、`pr:shape-rendering`、`pr:color-interpolation`、`pv:shape-rendering=auto`、`pv:shape-rendering=optimizeSpeed`、`pv:shape-rendering=crispEdges`、`pv:shape-rendering=geometricPrecision`、`concept:half-pixel-crisp-lines`、`concept:gradient-banding-noise`、`pv:filter=none`、`api:CSS.supports-filter`、`concept:filter-region-default`、`concept:filter-region-clipping-trap`、`av:filter.filterUnits=objectBoundingBox`、`av:filter.filterUnits=userSpaceOnUse`、`concept:reuse-filter-across-elements`、`concept:filter-and-transform`、`concept:filter-clip-mask-opacity-order`、`concept:primitive-subregion-defaults`、`concept:subregion-crop-technique`、`pv:color-interpolation-filters=sRGB`、`pv:color-interpolation-filters=linearRGB`、`concept:implicit-chaining`、`concept:last-primitive-is-output`、`concept:multiple-results-fan-out`、`av:feGaussianBlur.in=SourceGraphic`、`api:SVGFilterPrimitiveStandardAttributes.result`、`at:feMergeNode.in`、`at:feBlend.in2`、`at:feBlend.mode`、`av:feBlend.mode=multiply`、`av:feBlend.mode=screen`、`av:feBlend.mode=darken`、`av:feBlend.mode=overlay`、`av:feBlend.mode=luminosity`、`av:feBlend.mode=difference`、`at:feComposite.operator`、`av:feComposite.operator=over`、`av:feComposite.operator=in`、`av:feComposite.operator=out`、`av:feComposite.operator=atop`、`av:feComposite.operator=xor`、`av:feComposite.operator=lighter`、`at:feComposite.k1`、`at:feColorMatrix.type`、`at:feColorMatrix.values`、`av:feColorMatrix.type=matrix`、`av:feColorMatrix.type=saturate`、`av:feColorMatrix.type=hueRotate`、`concept:premultiplied-alpha-in-colormatrix`、`at:feFuncR.type`、`av:feFuncR.type=identity`、`av:feFuncR.type=table`、`av:feFuncR.type=discrete`、`av:feFuncR.type=linear`、`av:feFuncR.type=gamma`、`at:feFuncR.tableValues`、`at:feFuncR.slope`、`at:feFuncR.intercept`、`at:feFuncR.amplitude`、`at:feFuncR.exponent`、`at:feFuncR.offset`、`api:SVGComponentTransferFunctionElement.tableValues`、`api:SVGFEColorMatrixElement.values`、`concept:filter-performance-caveats`、`el:pattern`、`at:pattern.patternTransform`、`concept:mouse-to-svg-coordinates`、`api:SVGGraphicsElement.getScreenCTM`
 
 **构造要点**
 
@@ -631,16 +638,22 @@
 
 **验收要点**
 
-- [ ] DOM：`#overprint` 内 `result="src"` 被四条 ink 分支的 `in` 引用，三条 `feComposite[operator="arithmetic"][k1="1"][k2="0"][k3="0"][k4="0"]` 把 cyanT/magT/yelT/blkT 串成 cmyk，且滤镜内所有 in/in2 要么是标准输入名要么指向已存在的 result（无悬空引用）。
-- [ ] PNG：同空间回验片（sRGB）190×120 区域平均亮度 < 12/255；跨空间回验片（linearRGB 叠印）同区域 > 40/255，两者相差 ≥ 3 倍——分色可逆与“为什么发灰”同时成立。
-- [ ] PNG：一致性验版片（arithmetic 与 feBlend multiply 的 difference ×6）平均亮度 < 8/255，最大亮度 < 40/255。
-- [ ] PNG：沿 21 阶灰梯尺中线采样 300 点，能分出 21 个平台，平台内标准差 ≤ 2/255、相邻平台差 ≥ 8/255；同排加噪那条的相邻列亮度差方差高于 discrete 那条，证明抖动生效。
-- [ ] PNG：放大镜圆内沿水平中线扫描，左半 pattern 网点每个点边缘的灰度过渡 ≤ 2 像素、右半 feImage 网屏 ≥ 4 像素，而两半的点心间距差 ≤ 1px——同一网线数，两种栅格化。
-- [ ] PNG：半像素 ×8 对照区里，`translate(0.5 0.5)` 一侧的竖线只占 1 列且最暗值 ≤ 40/255；整数坐标一侧占 2 列且最暗值 ≥ 90/255。
-- [ ] PNG：四张分色片各取 40×40 实地区，青片 hue ∈ [185°,205°]、品红 ∈ [315°,335°]、黄 ∈ [45°,62°]，黑片饱和度 < 0.08。
-- [ ] DOM + PNG：两次 pointermove 后 `__INTERACTION_COUNT__` 增加、`#loupe` 的 transform 跟随指针；拖动品红曲线面板后 `#curve-m` 里 feFuncG 的 `tableValues.baseVal.numberOfItems` 保持 9 且第 5 项数值改变，同空间回验片平均亮度随之上升 ≥ 20/255。
+1. DOM：`#overprint` 内 `result="src"` 被四条 ink 分支的 `in` 引用，三条 `feComposite[operator="arithmetic"][k1="1"][k2="0"][k3="0"][k4="0"]` 把 cyanT/magT/yelT/blkT 串成 cmyk，且滤镜内所有 in/in2 要么是标准输入名要么指向已存在的 result（无悬空引用）。
+2. PNG：同空间回验片（sRGB）190×120 区域平均亮度 < 12/255；跨空间回验片（linearRGB 叠印）同区域 > 40/255，两者相差 ≥ 3 倍——分色可逆与“为什么发灰”同时成立。
+3. PNG：一致性验版片（arithmetic 与 feBlend multiply 的 difference ×6）平均亮度 < 8/255，最大亮度 < 40/255。
+4. PNG：沿 21 阶灰梯尺中线采样 300 点，能分出 21 个平台，平台内标准差 ≤ 2/255、相邻平台差 ≥ 8/255；同排加噪那条的相邻列亮度差方差高于 discrete 那条，证明抖动生效。
+5. PNG：放大镜圆内沿水平中线扫描，左半 pattern 网点每个点边缘的灰度过渡 ≤ 2 像素、右半 feImage 网屏 ≥ 4 像素，而两半的点心间距差 ≤ 1px——同一网线数，两种栅格化。
+6. PNG：半像素 ×8 对照区里，`translate(0.5 0.5)` 一侧的竖线只占 1 列且最暗值 ≤ 40/255；整数坐标一侧占 2 列且最暗值 ≥ 90/255。
+7. PNG：四张分色片各取 40×40 实地区，青片 hue ∈ [185°,205°]、品红 ∈ [315°,335°]、黄 ∈ [45°,62°]，黑片饱和度 < 0.08。
+8. DOM + PNG：两次 pointermove 后 `__INTERACTION_COUNT__` 增加、`#loupe` 的 transform 跟随指针；拖动品红曲线面板后 `#curve-m` 里 feFuncG 的 `tableValues.baseVal.numberOfItems` 保持 9 且第 5 项数值改变，同空间回验片平均亮度随之上升 ≥ 20/255。
 
-**浏览器注意**　2026 年三家的实际差距与本场景的兜底：(1) 非滤镜的 `color-interpolation` 只有 Firefox 会按 linearRGB 插值渐变，Chrome 与 Safari 忽略该属性，所以那两条渐变梯尺不写死结论——脚本采样两条中点，把“本浏览器有／无差异”实测印在标签上；headless Chrome 的基准截图里两条相同并显示“无差异”。(2) `color-interpolation-filters` 三家都实现，但中间缓存的 8-bit 舍入不同，Safari 在长链上会多出可见色阶，因此回验残差与一致性片的阈值都留了 ±4/255 余量，且一致性片刻意声明 `sRGB` 以避开 linearRGB 往返的量化。(3) `feImage href=\"#element\"` 引用同文档元素在 Chrome 早已移除、Safari 不稳，Firefox 仍支持——网屏因此一律用 data: URI PNG，三家表现一致；`filterRes` 已废弃且无实现，网屏分辨率靠位图自身像素密度控制。(4) `feComposite operator=\"arithmetic\"` 按预乘 alpha 计算并 clamp 到 [0,1]，半透明输入会出现暗边，所以四条 ink 分支在相乘前一律映射到不透明纸基；那枚 64×64 警示片就是把这个坑显式画出来。(5) Safari 对 `filterUnits=\"userSpaceOnUse\"` 加大缩放的滤镜会分块重采样、可能露出接缝，放大镜的滤镜区域因此被限制在圆的外接矩形内，并把 ×8 的滤镜结果按指针空闲缓存，避免逐帧重栅格化。(6) `shape-rendering=\"optimizeSpeed\"` 在 Chrome 与 Safari 上关抗锯齿的程度不同，Firefox 的 `crispEdges` 会额外把边对齐到像素网格，所以四枚靶下印的是实测过渡像素数而不是断言。(7) 截图基准是 deviceScaleFactor=1；在 2× 屏上滤镜网屏会重采样而 pattern 网点不会，这正是要展示的差异，但阈值以 1× 为准。(8) 网络被屏蔽，全场只有三个 data: URI 位图，文字使用系统 sans/mono 栈、不加载 webfont，因此字形宽度在三家略有差别，标签均按左对齐排布、不依赖精确文本宽度。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+
+**浏览器注意**
+
+- 2026 年三家的实际差距与本场景的兜底：(1) 非滤镜的 `color-interpolation` 只有 Firefox 会按 linearRGB 插值渐变，Chrome 与 Safari 忽略该属性，所以那两条渐变梯尺不写死结论——脚本采样两条中点，把“本浏览器有／无差异”实测印在标签上；headless Chrome 的基准截图里两条相同并显示“无差异”。(2) `color-interpolation-filters` 三家都实现，但中间缓存的 8-bit 舍入不同，Safari 在长链上会多出可见色阶，因此回验残差与一致性片的阈值都留了 ±4/255 余量，且一致性片刻意声明 `sRGB` 以避开 linearRGB 往返的量化。(3) `feImage href=\"#element\"` 引用同文档元素在 Chrome 早已移除、Safari 不稳，Firefox 仍支持——网屏因此一律用 data: URI PNG，三家表现一致；`filterRes` 已废弃且无实现，网屏分辨率靠位图自身像素密度控制。(4) `feComposite operator=\"arithmetic\"` 按预乘 alpha 计算并 clamp 到 [0,1]，半透明输入会出现暗边，所以四条 ink 分支在相乘前一律映射到不透明纸基；那枚 64×64 警示片就是把这个坑显式画出来。(5) Safari 对 `filterUnits=\"userSpaceOnUse\"` 加大缩放的滤镜会分块重采样、可能露出接缝，放大镜的滤镜区域因此被限制在圆的外接矩形内，并把 ×8 的滤镜结果按指针空闲缓存，避免逐帧重栅格化。(6) `shape-rendering=\"optimizeSpeed\"` 在 Chrome 与 Safari 上关抗锯齿的程度不同，Firefox 的 `crispEdges` 会额外把边对齐到像素网格，所以四枚靶下印的是实测过渡像素数而不是断言。(7) 截图基准是 deviceScaleFactor=1；在 2× 屏上滤镜网屏会重采样而 pattern 网点不会，这正是要展示的差异，但阈值以 1× 为准。(8) 网络被屏蔽，全场只有三个 data: URI 位图，文字使用系统 sans/mono 栈、不加载 webfont，因此字形宽度在三家略有差别，标签均按左对齐排布、不依赖精确文本宽度。
 
 ### 3.11 `forge-metallography-bench` — 锻件金相台
 
@@ -652,20 +665,17 @@
 
 **主打特性**
 
-- `el:feSpecularLighting` — feSpecularLighting primitive（全平台）：Bright glossy highlights on a bump map, rendered alone as white speckles on transparent background.
-- `el:feSpotLight` — feSpotLight source（全平台）：A cone of light illuminating part of the surface with darkness outside the cone.
-- `concept:lighting-alpha-bump-map` — Alpha channel as height map（全平台）：Blurred SourceAlpha yields rounded beveled edges; unblurred alpha yields a flat plateau with a thin lit rim only.
-- `at:feConvolveMatrix.kernelMatrix` — kernelMatrix weights（全平台）：Several tiles, each with a different kernel: identity, sharpen, emboss, Sobel edges, Gaussian-like blur, all from one source image.
-- `concept:convolve-emboss` — Emboss recipe（全平台）：Text or logo looks stamped into grey metal with light top-left and dark bottom-right relief edges.
-- `concept:animated-light-source` — Animated light position / angle（全平台）：Highlight and shadow sweep across an embossed logo as the light orbits it continuously.
-- `at:feDiffuseLighting.surfaceScale` — surfaceScale height（全平台）：Increasing surfaceScale makes the same bump map look deeper with stronger shadows; negative inverts bumps to dents.
+- `el:feSpecularLighting` — feSpecularLighting primitive
+- `el:feSpotLight` — feSpotLight source
+- `concept:lighting-alpha-bump-map` — Alpha channel as height map
+- `at:feConvolveMatrix.kernelMatrix` — kernelMatrix weights
+- `concept:convolve-emboss` — Emboss recipe
+- `concept:animated-light-source` — Animated light position / angle
+- `at:feDiffuseLighting.surfaceScale` — surfaceScale height
 
-**辅助特性**（50 项，按领域）
+**辅助特性**
 
-- 滤镜：区域、连线、合成与颜色原语：`av:feGaussianBlur.stdDeviation=two-values`
-- 滤镜：卷积、形态学、噪声、置换与光照：`el:feDiffuseLighting`、`el:fePointLight`、`el:feDistantLight`、`at:feDistantLight.azimuth`、`at:fePointLight.z`、`at:feSpotLight.pointsAtX`、`at:feSpotLight.limitingConeAngle`、`at:feSpecularLighting.specularExponent`、`pr:lighting-color`、`el:feConvolveMatrix`、`at:feConvolveMatrix.order`、`at:feConvolveMatrix.edgeMode`、`concept:convolve-sharpen`、`concept:convolve-edge-detect`、`concept:brushed-metal-texture`、`concept:chrome-metal-effect`、`at:feConvolveMatrix.preserveAlpha`˚、`at:feConvolveMatrix.divisor`˚、`at:feConvolveMatrix.bias`˚、`at:feConvolveMatrix.targetX`˚、`av:feConvolveMatrix.edgeMode=duplicate`˚、`av:feConvolveMatrix.edgeMode=wrap`˚、`av:feConvolveMatrix.edgeMode=none`˚、`concept:convolve-box-blur`˚、`api:SVGFEConvolveMatrixElement.kernelMatrix`˚、`at:feDiffuseLighting.diffuseConstant`˚、`concept:diffuse-output-opaque`˚、`concept:single-light-source-child`˚、`at:feSpecularLighting.surfaceScale`˚、`at:feSpecularLighting.specularConstant`˚、`concept:specular-composite-add`˚、`at:feDistantLight.elevation`˚、`api:SVGFEDistantLightElement.azimuth`˚、`at:fePointLight.x`˚、`at:fePointLight.y`˚、`at:feSpotLight.x`˚、`at:feSpotLight.z`˚、`at:feSpotLight.pointsAtY`˚、`at:feSpotLight.pointsAtZ`˚、`at:feSpotLight.specularExponent`˚、`api:SVGFESpotLightElement.pointsAtX`˚、`api:SVGFEPointLightElement.x`˚、`concept:primitive-units-lighting-coordinates`˚
-- SMIL 动画：`av:animate.calcMode=paced`
-- 交互与无障碍：`concept:mouse-events`、`concept:drag-with-pointer-events`、`api:Element.setPointerCapture`、`concept:event-delegation-on-group`˚、`concept:mouseenter-vs-mouseover`˚
+`el:feDiffuseLighting`、`el:fePointLight`、`el:feDistantLight`、`at:feDistantLight.azimuth`、`at:fePointLight.z`、`at:feSpotLight.pointsAtX`、`at:feSpotLight.limitingConeAngle`、`at:feSpecularLighting.specularExponent`、`pr:lighting-color`、`el:feConvolveMatrix`、`at:feConvolveMatrix.order`、`at:feConvolveMatrix.edgeMode`、`concept:convolve-sharpen`、`concept:convolve-edge-detect`、`av:feGaussianBlur.stdDeviation=two-values`、`concept:brushed-metal-texture`、`concept:chrome-metal-effect`、`av:animate.calcMode=paced`、`concept:mouse-events`、`concept:drag-with-pointer-events`、`api:Element.setPointerCapture`、`at:feConvolveMatrix.preserveAlpha`、`at:feConvolveMatrix.divisor`、`at:feConvolveMatrix.bias`、`at:feConvolveMatrix.targetX`、`av:feConvolveMatrix.edgeMode=duplicate`、`av:feConvolveMatrix.edgeMode=wrap`、`av:feConvolveMatrix.edgeMode=none`、`concept:convolve-box-blur`、`api:SVGFEConvolveMatrixElement.kernelMatrix`、`at:feDiffuseLighting.diffuseConstant`、`concept:diffuse-output-opaque`、`concept:single-light-source-child`、`at:feSpecularLighting.surfaceScale`、`at:feSpecularLighting.specularConstant`、`concept:specular-composite-add`、`at:feDistantLight.elevation`、`api:SVGFEDistantLightElement.azimuth`、`at:fePointLight.x`、`at:fePointLight.y`、`at:feSpotLight.x`、`at:feSpotLight.z`、`at:feSpotLight.pointsAtY`、`at:feSpotLight.pointsAtZ`、`at:feSpotLight.specularExponent`、`api:SVGFESpotLightElement.pointsAtX`、`api:SVGFEPointLightElement.x`、`concept:primitive-units-lighting-coordinates`、`concept:event-delegation-on-group`、`concept:mouseenter-vs-mouseover`
 
 **构造要点**
 
@@ -688,16 +698,22 @@
 
 **验收要点**
 
-- [ ] PNG：透明像素 ≥18%（板块缝隙与切角），可见像素 ≥60%，彩色像素 ≥2500（琥珀/青灯色带与 HUD 文字）；画面四周无因 lighting 输出未夹形而产生的不透明矩形。
-- [ ] DOM：`#f-plate` 内 feDiffuseLighting 与 feSpecularLighting 的 `surfaceScale.baseVal` 相等，且与 HUD `#hud-surface-scale` 的文本数值一致；点击深度标尺第 1 片（−12）后三者同步变为 −12。
-- [ ] DOM：读片框九块的 feConvolveMatrix 两两不同——第一行 `order` 全为 "3 3" 而 `kernelMatrix` 互异，第二行 `order` 依次为 3×3 / 5×5 / 7×1（末块 `targetX="6"`），第三行 `edgeMode` 依次为 duplicate / wrap / none；每块下方打印的数字网格与 `kernelMatrix.baseVal` 逐项相等。
-- [ ] PNG：浮雕块左上亮、右下暗（沿光轴的亮度梯度符号相反）；边缘块的中位亮度显著低于源裁切且字形呈亮线；锐化块在字口边缘的梯度峰值高于源裁切（可见光晕）。
-- [ ] PNG：edgeMode 三块的边缘行为可测——wrap 块右上角出现源图左下角的橙色定位条，none 块外圈 8px 的平均亮度显著低于块中心，duplicate 块外圈无暗环且呈条纹拖影。
-- [ ] DOM + PNG：把 `#lamp-head` 拖动 200px 后，feSpotLight 的 `x.baseVal/y.baseVal` 随之更新，`#cast-shadow` 的 transform 改变，重新截图时铭牌高光质心位移 >120px；把 limitingConeAngle 调到 8° 后，铭牌上锥外区域的平均亮度下降且出现清晰圆形边界。
-- [ ] DOM：在任一手柄上 pointerdown 会触发 `setPointerCapture`（该手柄收到 `gotpointercapture`、环色变琥珀），指针移出 `#stage` 边界仍继续跟随，pointerup 后 `releasePointerCapture` 且手柄环复位。
-- [ ] DOM：仅移动指针（不按键）即可使 `window.__INTERACTION_COUNT__` 递增，事件日志追加带 `#target-id` 的行，且悬停某读片框时日志同时出现 mouseover（冒泡多次）与 mouseenter（仅一次）。
+1. PNG：透明像素 ≥18%（板块缝隙与切角），可见像素 ≥60%，彩色像素 ≥2500（琥珀/青灯色带与 HUD 文字）；画面四周无因 lighting 输出未夹形而产生的不透明矩形。
+2. DOM：`#f-plate` 内 feDiffuseLighting 与 feSpecularLighting 的 `surfaceScale.baseVal` 相等，且与 HUD `#hud-surface-scale` 的文本数值一致；点击深度标尺第 1 片（−12）后三者同步变为 −12。
+3. DOM：读片框九块的 feConvolveMatrix 两两不同——第一行 `order` 全为 "3 3" 而 `kernelMatrix` 互异，第二行 `order` 依次为 3×3 / 5×5 / 7×1（末块 `targetX="6"`），第三行 `edgeMode` 依次为 duplicate / wrap / none；每块下方打印的数字网格与 `kernelMatrix.baseVal` 逐项相等。
+4. PNG：浮雕块左上亮、右下暗（沿光轴的亮度梯度符号相反）；边缘块的中位亮度显著低于源裁切且字形呈亮线；锐化块在字口边缘的梯度峰值高于源裁切（可见光晕）。
+5. PNG：edgeMode 三块的边缘行为可测——wrap 块右上角出现源图左下角的橙色定位条，none 块外圈 8px 的平均亮度显著低于块中心，duplicate 块外圈无暗环且呈条纹拖影。
+6. DOM + PNG：把 `#lamp-head` 拖动 200px 后，feSpotLight 的 `x.baseVal/y.baseVal` 随之更新，`#cast-shadow` 的 transform 改变，重新截图时铭牌高光质心位移 >120px；把 limitingConeAngle 调到 8° 后，铭牌上锥外区域的平均亮度下降且出现清晰圆形边界。
+7. DOM：在任一手柄上 pointerdown 会触发 `setPointerCapture`（该手柄收到 `gotpointercapture`、环色变琥珀），指针移出 `#stage` 边界仍继续跟随，pointerup 后 `releasePointerCapture` 且手柄环复位。
+8. DOM：仅移动指针（不按键）即可使 `window.__INTERACTION_COUNT__` 递增，事件日志追加带 `#target-id` 的行，且悬停某读片框时日志同时出现 mouseover（冒泡多次）与 mouseenter（仅一次）。
 
-**浏览器注意**　无网络环境下不加载任何外部字体或位图：铭牌字形、厂徽、铬件字样全部是运行时生成的 stencil 路径，标注只用系统等宽栈（ui-monospace / DejaVu Sans Mono / monospace）且全为拉丁字符与数字，避免无头 Linux 缺 CJK 字体导致豆腐块；中文只出现在文档与 catalog 中。WebKit 至今对 SMIL 直接动画滤镜原语属性（fePointLight 的 x/y、feSpotLight 的 pointsAtX）不总触发滤镜重算，因此在 WebKit 上默认走 rAF 回退：`<animate>` 元素仍保留在 DOM 中作为声明式来源，JS 读它的 `values`/`dur` 自行插值并写 `light.x.baseVal`，Chrome/Firefox 仍走原生 SMIL；巡检轨道的两根指针动画作用在普通图形属性上，三引擎一致，因此 `calcMode=\"paced\"` 的可见对照不依赖回退路径。feConvolveMatrix 的 `kernelUnitLength` 在三引擎中基本被忽略（Firefox 未实现），所以场景不依赖它做与分辨率无关的卷积，而是固定 userSpaceOnUse 与 deviceScaleFactor=1 的 1:1 像素比；同理 `filterRes` 已废弃，读片框改用 0.62 缩放裁切来控制像素量。各引擎对 feDiffuseLighting/feSpecularLighting 的表面法线估计不同（Firefox 边缘更硬、Chrome 的 SwiftShader 路径在镜面高光上有轻微色带），因此浮雕深浅与高光形状存在可见的跨引擎差异；HUD 打印 surfaceScale / specularExponent / z 等原始参数，验收只比较同一截图内的相对关系而不比对绝对像素值。lighting 原语输出恒为不透明，若省略 filter region 或末端的 `feComposite operator=\"in\"`，在 `omitBackground` 截图上会留下实心矩形——这是本场景最容易踩的坑，已在每个滤镜上显式声明区域并夹形。`SVGGeometryElement.isPointInFill` 在 Chrome/Firefox 接受 DOMPoint，旧版 WebKit 需要 `svg.createSVGPoint()`，探针代码做两路兼容；`setPointerCapture` 在 SVG 元素上三引擎均可用，但 Firefox 在指针移出窗口时偶尔只派发 `lostpointercapture`，故拖拽结束逻辑同时监听 pointerup 与 lostpointercapture。Safari 对 `limitingConeAngle` 的锥边抗锯齿较差（硬边略有锯齿），且对「已滤镜化的组再被 use 引用后二次滤镜」代价较高，读片框因此限制在九块 200px 级瓦片内。
+**实现复审**
+
+- 六个检查图块原先与滤镜重名，现以 insp-tile-* 区分；全场景执行唯一 ID 检查。
+
+**浏览器注意**
+
+- 无网络环境下不加载任何外部字体或位图：铭牌字形、厂徽、铬件字样全部是运行时生成的 stencil 路径，标注只用系统等宽栈（ui-monospace / DejaVu Sans Mono / monospace）且全为拉丁字符与数字，避免无头 Linux 缺 CJK 字体导致豆腐块；中文只出现在文档与 catalog 中。WebKit 至今对 SMIL 直接动画滤镜原语属性（fePointLight 的 x/y、feSpotLight 的 pointsAtX）不总触发滤镜重算，因此在 WebKit 上默认走 rAF 回退：`<animate>` 元素仍保留在 DOM 中作为声明式来源，JS 读它的 `values`/`dur` 自行插值并写 `light.x.baseVal`，Chrome/Firefox 仍走原生 SMIL；巡检轨道的两根指针动画作用在普通图形属性上，三引擎一致，因此 `calcMode=\"paced\"` 的可见对照不依赖回退路径。feConvolveMatrix 的 `kernelUnitLength` 在三引擎中基本被忽略（Firefox 未实现），所以场景不依赖它做与分辨率无关的卷积，而是固定 userSpaceOnUse 与 deviceScaleFactor=1 的 1:1 像素比；同理 `filterRes` 已废弃，读片框改用 0.62 缩放裁切来控制像素量。各引擎对 feDiffuseLighting/feSpecularLighting 的表面法线估计不同（Firefox 边缘更硬、Chrome 的 SwiftShader 路径在镜面高光上有轻微色带），因此浮雕深浅与高光形状存在可见的跨引擎差异；HUD 打印 surfaceScale / specularExponent / z 等原始参数，验收只比较同一截图内的相对关系而不比对绝对像素值。lighting 原语输出恒为不透明，若省略 filter region 或末端的 `feComposite operator=\"in\"`，在 `omitBackground` 截图上会留下实心矩形——这是本场景最容易踩的坑，已在每个滤镜上显式声明区域并夹形。`SVGGeometryElement.isPointInFill` 在 Chrome/Firefox 接受 DOMPoint，旧版 WebKit 需要 `svg.createSVGPoint()`，探针代码做两路兼容；`setPointerCapture` 在 SVG 元素上三引擎均可用，但 Firefox 在指针移出窗口时偶尔只派发 `lostpointercapture`，故拖拽结束逻辑同时监听 pointerup 与 lostpointercapture。Safari 对 `limitingConeAngle` 的锥边抗锯齿较差（硬边略有锯齿），且对「已滤镜化的组再被 use 引用后二次滤镜」代价较高，读片框因此限制在九块 200px 级瓦片内。
 
 ### 3.12 `mycelium-culture-chamber` — 菌种培养舱
 
@@ -709,24 +725,17 @@
 
 **主打特性**
 
-- `el:feTurbulence` — feTurbulence primitive（全平台）：A rectangle filled with coloured Perlin noise clouds instead of a solid fill.
-- `el:feDisplacementMap` — feDisplacementMap primitive（全平台）：Straight grid lines or text are warped into wobbly distortions driven by a second image.
-- `concept:watercolor-bleed-effect` — Watercolor bleed edges（全平台）：Crisp shapes get ragged, feathered edges with darker pooled rims, like pigment bleeding on wet paper.
-- `concept:animate-filter-basefrequency` — animating feTurbulence baseFrequency（全平台）：Noise texture visibly ripples or breathes as frequency changes, e.g. animated water or smoke.
-- `concept:liquid-distortion-effect` — Liquid / gooey distortion（全平台）：Text or blobs wobble like they are underwater, edges undulating continuously via animated turbulence plus displacement.
-- `av:animate.accumulate=sum` — accumulate sum across repeats（全平台）：Each repetition builds on the last, producing a staircase growth rather than a sawtooth reset.
-- `at:feDisplacementMap.in2` — in2 map source（全平台）：Same text distorted by turbulence noise, then by a linear gradient (smooth lens bend), then by a feImage bitmap.
+- `el:feTurbulence` — feTurbulence primitive
+- `el:feDisplacementMap` — feDisplacementMap primitive
+- `concept:watercolor-bleed-effect` — Watercolor bleed edges
+- `concept:animate-filter-basefrequency` — animating feTurbulence baseFrequency
+- `concept:liquid-distortion-effect` — Liquid / gooey distortion
+- `av:animate.accumulate=sum` — accumulate sum across repeats
+- `at:feDisplacementMap.in2` — in2 map source
 
-**辅助特性**（35 项，按领域）
+**辅助特性**
 
-- 文档结构与复用：`el:script`、`concept:script-cdata`、`api:Document.createElementNS`、`concept:script-blocked-in-img`˚
-- 嵌入、外来内容与语义：`concept:standalone-svg-document`
-- 渐变与图案：`concept:mesh-gradient-emulation`
-- 裁剪与遮罩：`concept:mask-with-filter`、`concept:mask-with-image`
-- 滤镜：区域、连线、合成与颜色原语：`at:filter.primitiveUnits`、`concept:filter-on-group-vs-children`、`av:filter.primitiveUnits=objectBoundingBox`˚、`av:filter.primitiveUnits=userSpaceOnUse`˚
-- 滤镜：卷积、形态学、噪声、置换与光照：`at:feTurbulence.type`、`at:feTurbulence.baseFrequency`、`at:feTurbulence.numOctaves`、`concept:animated-turbulence`、`at:feDisplacementMap.scale`、`at:feDisplacementMap.xChannelSelector`、`concept:glass-refraction-effect`、`concept:paper-grain-texture`、`concept:heat-shimmer-animation`、`av:feTurbulence.type=fractalNoise`˚、`av:feTurbulence.type=turbulence`˚、`at:feTurbulence.seed`˚、`concept:turbulence-fills-filter-region`˚、`concept:cloud-smoke-texture`˚、`concept:wood-marble-texture`˚、`at:feDisplacementMap.yChannelSelector`˚、`av:feDisplacementMap.xChannelSelector=A`˚、`concept:displacement-gradient-lens`˚、`concept:displacement-filter-region-overflow`˚、`concept:smil-animate-displacement-scale`˚、`api:SVGFETurbulenceElement.baseFrequencyX`˚
-- SMIL 动画：`at:animate.by`
-- CSS 动画、CSS 变换与脚本 API：`api:SVGUnknownElement`˚
+`el:script`、`concept:script-cdata`、`api:Document.createElementNS`、`concept:mesh-gradient-emulation`、`concept:mask-with-filter`、`concept:mask-with-image`、`at:filter.primitiveUnits`、`concept:filter-on-group-vs-children`、`at:feTurbulence.type`、`at:feTurbulence.baseFrequency`、`at:feTurbulence.numOctaves`、`concept:animated-turbulence`、`at:feDisplacementMap.scale`、`at:feDisplacementMap.xChannelSelector`、`concept:glass-refraction-effect`、`concept:paper-grain-texture`、`concept:heat-shimmer-animation`、`at:animate.by`、`av:feTurbulence.type=fractalNoise`、`av:feTurbulence.type=turbulence`、`at:feTurbulence.seed`、`concept:turbulence-fills-filter-region`、`concept:cloud-smoke-texture`、`concept:wood-marble-texture`、`at:feDisplacementMap.yChannelSelector`、`av:feDisplacementMap.xChannelSelector=A`、`concept:displacement-gradient-lens`、`concept:displacement-filter-region-overflow`、`concept:smil-animate-displacement-scale`、`api:SVGFETurbulenceElement.baseFrequencyX`、`api:SVGUnknownElement`、`concept:script-blocked-in-img`、`av:filter.primitiveUnits=objectBoundingBox`、`av:filter.primitiveUnits=userSpaceOnUse`、`concept:standalone-svg-document`
 
 **构造要点**
 
@@ -749,16 +758,26 @@
 
 **验收要点**
 
-- [ ] DOM：#colony-a / #colony-b / #colony-c 三组合计 ≥72 条 <path>，其 d 属性中的 M 命令总数 ≥12000，且每条的 namespaceURI 均为 http://www.w3.org/2000/svg。
-- [ ] DOM：#colony-a、#colony-b 的 filter 写在组元素上、子 path 无 filter 属性；#colony-c 相反（组上无、24 条 path 各带 filter）。PNG 中 C 皿边缘可见互相穿插、不合并的多圈水痕，A/B 为一条连续湿边。
-- [ ] DOM：#warp-noise、#bleed-noise、#grain-noise 的 seed 均等于 #master-noise 的 seed；导出瞬间前两者的 baseFrequencyX 等于母版 animVal（误差 ≤1e-4），#grain-noise 等于母版初值 ×64 且与 animVal 无关。
-- [ ] PNG：三块皿底铭牌 A-03 / B-07 / C-11 与接种日期 2026-03-14 全部清晰可读（这些文字位于 warp 与 liquid 滤镜链之外）。
-- [ ] PNG：A 皿菌落外缘 3px 环带的平均亮度比菌落内部低 ≥8%（水彩积色边成立）；同一条水平扫描线上，B 皿的亮度过零点数至少是 A 皿的 1.6 倍（turbulence 脉络 vs fractalNoise 云团）。
-- [ ] PNG：灯下抖动带内每条横向基准线的左右端点 x 偏移 <1px，中段 y 起伏 ≥3px——只有纵向抖动，无横向位移。
-- [ ] PNG：记录纸卡片内任取 200×200 区域，相邻像素亮度差的标准差 >3；舱内背板同尺寸区域 <1.5（纸纹存在且仅限卡片）。
-- [ ] DOM + PNG：#ns-control 试片有 4 个子节点，其中恰有 1 个 namespaceURI 为 http://www.w3.org/1999/xhtml；该试片在 PNG 中只渲染出 3 根菌丝。
+1. DOM：#colony-a / #colony-b / #colony-c 三组合计 ≥72 条 <path>，其 d 属性中的 M 命令总数 ≥12000，且每条的 namespaceURI 均为 http://www.w3.org/2000/svg。
+2. DOM：#colony-a、#colony-b 的 filter 写在组元素上、子 path 无 filter 属性；#colony-c 相反（组上无、24 条 path 各带 filter）。PNG 中 C 皿边缘可见互相穿插、不合并的多圈水痕，A/B 为一条连续湿边。
+3. DOM：#warp-noise、#bleed-noise、#grain-noise 的 seed 均等于 #master-noise 的 seed；导出瞬间前两者的 baseFrequencyX 等于母版 animVal（误差 ≤1e-4），#grain-noise 等于母版初值 ×64 且与 animVal 无关。
+4. PNG：三块皿底铭牌 A-03 / B-07 / C-11 与接种日期 2026-03-14 全部清晰可读（这些文字位于 warp 与 liquid 滤镜链之外）。
+5. PNG：A 皿菌落外缘 3px 环带的平均亮度比菌落内部低 ≥8%（水彩积色边成立）；同一条水平扫描线上，B 皿的亮度过零点数至少是 A 皿的 1.6 倍（turbulence 脉络 vs fractalNoise 云团）。
+6. PNG：灯下抖动带内每条横向基准线的左右端点 x 偏移 <1px，中段 y 起伏 ≥3px——只有纵向抖动，无横向位移。
+7. PNG：记录纸卡片内任取 200×200 区域，相邻像素亮度差的标准差 >3；舱内背板同尺寸区域 <1.5（纸纹存在且仅限卡片）。
+8. DOM + PNG：#ns-control 试片有 4 个子节点，其中恰有 1 个 namespaceURI 为 http://www.w3.org/1999/xhtml；该试片在 PNG 中只渲染出 3 根菌丝。
 
-**浏览器注意**　feImage 引用同文档元素（href=\"#id\"）至今只有 Firefox 稳定支持，Chrome 与 Safari 长期未实现，因此透镜图与褶皱位图一律走 data: URI（矢量渐变用 data:image/svg+xml，位图用 data:image/png），既绕开该差异也满足断网抓图；噪声母版监视窗因此只是一块可见的滤镜矩形，不作为 feImage 源。SMIL 对 baseFrequency 这类 number-optional-number 属性的动画在 Firefox 上历史性不稳（有时只吃第一个分量），accumulate=\"sum\" 在部分实现里对该类型会退化成 replace；脚本在 600ms 后比对 animVal 与初值，若未推进就接管，用 SVGFETurbulenceElement.baseFrequencyX/Y 自行复现 by + accumulate 的阶梯，观感一致。Safari 对 primitiveUnits=\"objectBoundingBox\" 的 stdDeviation 折算历史上偏小，退化结果只是孢子晕更紧，不影响铭牌与日期可读性，试片区那枚 userSpaceOnUse 对照仍能显出差别。三家浏览器的滤镜默认 color-interpolation-filters=\"linearRGB\"，湍流与积色边都会偏暗发灰，故 warp / bleed / grain 三条链显式写 sRGB，只有热抖动保留 linearRGB（那里要的就是低对比）。位移会把内容推出默认滤镜区（-10%/120%），scale=70 的试片尤甚，所有位移滤镜写 x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"；Safari 对超大滤镜区会降采样，因此单块滤镜区控制在 420px 以内，三皿各自成链而不共用一个大滤镜。<img> 引用 SVG 时脚本被禁用（三家一致），故宿主页用 <object type=\"image/svg+xml\">，并等内部文档 load 后再置 __VIS_READY__；Playwright 对 <object> 内容截图正常，指针事件需在内部文档监听并回写 parent 计数。12600 段路径先合成再滤镜，Firefox 在 1400×900 上约 60–90ms/帧，故导出前只跑 2.6s SMIL 即 pauseAnimations()，交互态临时降 numOctaves 保帧率。独立 XML SVG 中 <script> 内的 < 与 && 必须 CDATA 包裹；HTML 前景内容解析同样接受 CDATA 段，故同一份文件既能独立打开也能内联进宿主页。
+**实现复审**
+
+- 主场景直接挂在 #stage，独立 SVG 试片分别经 image 与 object 展示脚本禁用和启用。
+- 主场景在 7.8 s 冻结；warp ×1、bleed ×2.2，grain 为初值 ×64。原验收要求 warp 与 bleed 同频和构造第4点矛盾，以明确倍率为准。
+- heat-shimmer 的 R 通道必须为 0.5 才无横向偏移：scale × (R−0.5)。R=0 会整体左移。
+- 菌丝共72条路径、固定种子产生37748个线段；命名空间和 CDATA 有正反例验证。
+- 捕获管线移除强制 SwiftShader，交由 Chrome 选择渲染后端，保留全部 72 条路径与嵌套滤镜。
+
+**浏览器注意**
+
+- feImage 引用同文档元素（href=\"#id\"）至今只有 Firefox 稳定支持，Chrome 与 Safari 长期未实现，因此透镜图与褶皱位图一律走 data: URI（矢量渐变用 data:image/svg+xml，位图用 data:image/png），既绕开该差异也满足断网抓图；噪声母版监视窗因此只是一块可见的滤镜矩形，不作为 feImage 源。SMIL 对 baseFrequency 这类 number-optional-number 属性的动画在 Firefox 上历史性不稳（有时只吃第一个分量），accumulate=\"sum\" 在部分实现里对该类型会退化成 replace；脚本在 600ms 后比对 animVal 与初值，若未推进就接管，用 SVGFETurbulenceElement.baseFrequencyX/Y 自行复现 by + accumulate 的阶梯，观感一致。Safari 对 primitiveUnits=\"objectBoundingBox\" 的 stdDeviation 折算历史上偏小，退化结果只是孢子晕更紧，不影响铭牌与日期可读性，试片区那枚 userSpaceOnUse 对照仍能显出差别。三家浏览器的滤镜默认 color-interpolation-filters=\"linearRGB\"，湍流与积色边都会偏暗发灰，故 warp / bleed / grain 三条链显式写 sRGB，只有热抖动保留 linearRGB（那里要的就是低对比）。位移会把内容推出默认滤镜区（-10%/120%），scale=70 的试片尤甚，所有位移滤镜写 x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\"；Safari 对超大滤镜区会降采样，因此单块滤镜区控制在 420px 以内，三皿各自成链而不共用一个大滤镜。<img> 引用 SVG 时脚本被禁用（三家一致），故宿主页用 <object type=\"image/svg+xml\">，并等内部文档 load 后再置 __VIS_READY__；Playwright 对 <object> 内容截图正常，指针事件需在内部文档监听并回写 parent 计数。12600 段路径先合成再滤镜，Firefox 在 1400×900 上约 60–90ms/帧，故导出前只跑 2.6s SMIL 即 pauseAnimations()，交互态临时降 numOctaves 保帧率。独立 XML SVG 中 <script> 内的 < 与 && 必须 CDATA 包裹；HTML 前景内容解析同样接受 CDATA 段，故同一份文件既能独立打开也能内联进宿主页。
 
 ### 3.13 `neon-sign-workshop` — 霓虹招牌工坊
 
@@ -770,22 +789,17 @@
 
 **主打特性**
 
-- `concept:neon-glow-morphology` — Neon glow via dilate + blur（全平台）：Thin strokes wrapped in a bright halo with a thicker inner tube colour, glowing on a dark background.
-- `at:feMorphology.radius` — radius with two values (anisotropic)（全平台）：radius="8 0" stretches shapes horizontally only, while "0 8" stretches vertically; square becomes a wide or tall rectangle.
-- `concept:inner-shadow-technique` — Inner shadow via SourceAlpha out compositing（全平台）：Shape looks recessed with a shadow along its inside edge, built from feComposite out + blur + in.
-- `css:mask-composite` — mask-composite (add, subtract, intersect, exclude)（全平台）：Two circular radial-gradient mask layers combined with subtract show a crescent; intersect shows only the lens overlap; exclude shows both crescents.
-- `css:svg-filter-on-html-element` — SVG filter applied to HTML elements and the outermost svg via filter:url(#id)（全平台）：An HTML div or img gets an SVG feColorMatrix duotone from a filter defined in an inline svg.
-- `pr:mix-blend-mode` — mix-blend-mode on SVG elements（全平台）：Overlapping cyan, magenta and yellow circles with multiply produce subtractive colour mixing where they intersect.
-- `concept:animate-filter-stddeviation` — animating feGaussianBlur stdDeviation（全平台）：Text goes from sharp to heavily blurred and back.
+- `concept:neon-glow-morphology` — Neon glow via dilate + blur
+- `at:feMorphology.radius` — radius with two values (anisotropic)
+- `concept:inner-shadow-technique` — Inner shadow via SourceAlpha out compositing
+- `css:mask-composite` — mask-composite (add, subtract, intersect, exclude)
+- `css:svg-filter-on-html-element` — SVG filter applied to HTML elements and the outermost svg via filter:url(#id)
+- `pr:mix-blend-mode` — mix-blend-mode on SVG elements
+- `concept:animate-filter-stddeviation` — animating feGaussianBlur stdDeviation
 
-**辅助特性**（56 项，按领域）
+**辅助特性**
 
-- 嵌入、外来内容与语义：`concept:inline-svg-in-html`、`concept:inline-svg-id-collisions`˚、`concept:svg-as-css-background-image`、`concept:svg-data-uri-encoding`˚
-- 填充、描边与合成属性：`pr:isolation`、`pv:mix-blend-mode=screen`˚、`concept:svg-blend-with-html-backdrop`˚
-- 文本与排版：`css:font-face-data-uri`
-- 裁剪与遮罩：`concept:clip-path-html-to-svg-reference`、`css:clip-path-basic-shapes`、`pv:clip-path=inset()`˚、`pv:clip-path=circle()`˚、`pv:clip-path=ellipse()`˚、`pv:clip-path=polygon()`˚、`pv:clip-path=path()`˚、`pv:clip-path=rect()`˚、`css:clip-path-geometry-box`、`pv:clip-path=fill-box`˚、`pv:clip-path=stroke-box`˚、`pv:clip-path=view-box`˚、`concept:clip-path-shape-transition`、`api:CSSStyleDeclaration.clipPath`、`concept:mask-html-to-svg-reference`、`css:mask-image`、`concept:mask-image-svg-url`˚、`css:mask-mode`、`css:mask-layers`、`css:mask-size`、`css:mask-repeat`˚、`el:mask`、`pr:mask-type`
-- 滤镜：区域、连线、合成与颜色原语：`css:filter-functions-on-svg`、`css:filter-chaining`、`css:filter-transition`˚、`el:feOffset`、`at:feOffset.dx`˚、`el:feGaussianBlur`、`at:feGaussianBlur.stdDeviation`、`av:feGaussianBlur.stdDeviation=0`˚、`api:SVGFEGaussianBlurElement.setStdDeviation`˚、`el:feDropShadow`、`at:feDropShadow.dx`˚、`concept:classic-drop-shadow-chain`、`concept:outline-stroke-via-alpha-dilate`、`el:feComponentTransfer`、`concept:filter-input-wiring`、`pr:color-interpolation-filters`
-- 滤镜：卷积、形态学、噪声、置换与光照：`el:feMorphology`、`at:feMorphology.operator`、`av:feMorphology.operator=erode`˚、`av:feMorphology.operator=dilate`˚、`concept:morphology-thicken-text`˚、`concept:morphology-zero-radius`˚、`concept:smil-animate-morphology-radius`˚、`api:SVGFEMorphologyElement.radiusX`˚、`concept:morphology-outline-stroke`
+`concept:inline-svg-in-html`、`concept:inline-svg-id-collisions`、`concept:svg-as-css-background-image`、`concept:svg-data-uri-encoding`、`pr:isolation`、`pv:mix-blend-mode=screen`、`concept:svg-blend-with-html-backdrop`、`concept:clip-path-html-to-svg-reference`、`css:clip-path-basic-shapes`、`pv:clip-path=inset()`、`pv:clip-path=circle()`、`pv:clip-path=ellipse()`、`pv:clip-path=polygon()`、`pv:clip-path=path()`、`pv:clip-path=rect()`、`css:clip-path-geometry-box`、`pv:clip-path=fill-box`、`pv:clip-path=stroke-box`、`pv:clip-path=view-box`、`concept:clip-path-shape-transition`、`api:CSSStyleDeclaration.clipPath`、`concept:mask-html-to-svg-reference`、`css:mask-image`、`concept:mask-image-svg-url`、`css:mask-mode`、`css:mask-layers`、`css:mask-size`、`css:mask-repeat`、`css:filter-functions-on-svg`、`css:filter-chaining`、`css:filter-transition`、`el:feOffset`、`at:feOffset.dx`、`el:feGaussianBlur`、`at:feGaussianBlur.stdDeviation`、`av:feGaussianBlur.stdDeviation=0`、`api:SVGFEGaussianBlurElement.setStdDeviation`、`el:feDropShadow`、`at:feDropShadow.dx`、`concept:classic-drop-shadow-chain`、`concept:outline-stroke-via-alpha-dilate`、`el:feMorphology`、`at:feMorphology.operator`、`av:feMorphology.operator=erode`、`av:feMorphology.operator=dilate`、`concept:morphology-thicken-text`、`concept:morphology-zero-radius`、`concept:smil-animate-morphology-radius`、`api:SVGFEMorphologyElement.radiusX`、`concept:morphology-outline-stroke`、`el:feComponentTransfer`、`concept:filter-input-wiring`、`pr:color-interpolation-filters`、`el:mask`、`pr:mask-type`、`css:font-face-data-uri`
 
 **构造要点**
 
@@ -808,16 +822,22 @@
 
 **验收要点**
 
-- [ ] DOM：`getComputedStyle(document.querySelector('.board'))` 的 filter / clip-path / mask 分别解析到 `url("#ns-f-neon")`、`url("#ns-clip-plate")`、`url("#ns-m-tube-fade")`，与 SVG 招牌组上的三个属性字符串逐一相同——同一枚滤镜、同一条裁切、同一张掩码被 SVG 图形与 HTML 元素同时引用。
-- [ ] PNG：招牌笔画外法线方向 22px 处的像素红/蓝通道比台面基线高 ≥12%，粉色外晕外缘（亮度阈值轮廓）离笔画 ≥26px；HTML 价目板文字外同样距离处出现同色相外晕，两者色相角差 < 8°。
-- [ ] PNG：做法卡③（四基元链）与卡⑤（feDropShadow）的阴影相对字形质心的偏移均为 (6,8)px ±1.5px，两卡阴影 alpha 剖面的逐点差异 < 4%。
-- [ ] PNG：半径尺中 `radius="10 0"` 样件的包围盒比 `radius="0 0"` 宽 ≥18px 而高度差 < 3px；`radius="0 10"` 反之（高 ≥18px、宽差 < 3px）。
-- [ ] PNG：三块水洼的连通亮区计数依次为 1（subtract 单月牙）、1（intersect 透镜且面积最小）、2（exclude 双月牙），且 intersect 面积 < subtract 面积 < 两层遮罩并集面积。
-- [ ] PNG：内阴影卡的暗带完全在字形内部——形状内边缘内 3px 处亮度比字形形心低 ≥35%，形状外 3px 处亮度与卡面背景差 < 5%（与投影卡的外侧暗斑形成对照）。
-- [ ] DOM：六块做法卡的 `getComputedStyle(...).clipPath` 依次以 `inset(`、`circle(`、`ellipse(`、`polygon(`、`path(`、`rect(`（或 `@supports` 回退后的 `inset(`）开头；全文档 `document.querySelectorAll('clipPath').length === 1`（只有共享的 `#ns-clip-plate`），证明卡片裁切全部来自 CSS 基本形状。
-- [ ] 交互与透明：合成 pointermove 到 (200,120) 与 (1200,820) 两次采样后，`#ns-morph.radiusX.baseVal` 与 `#ns-halo.stdDeviationX.baseVal` 均随之改变、`window.__INTERACTION_COUNT__` 递增，且 SVG 招牌与 HTML 价目板同一相对采样点的外晕亮度变化同号；导出的 PNG 四角 alpha = 0，全透明像素占比 ≥ 8%。
+1. DOM：`getComputedStyle(document.querySelector('.board'))` 的 filter / clip-path / mask 分别解析到 `url("#ns-f-neon")`、`url("#ns-clip-plate")`、`url("#ns-m-tube-fade")`，与 SVG 招牌组上的三个属性字符串逐一相同——同一枚滤镜、同一条裁切、同一张掩码被 SVG 图形与 HTML 元素同时引用。
+2. PNG：招牌笔画外法线方向 22px 处的像素红/蓝通道比台面基线高 ≥12%，粉色外晕外缘（亮度阈值轮廓）离笔画 ≥26px；HTML 价目板文字外同样距离处出现同色相外晕，两者色相角差 < 8°。
+3. PNG：做法卡③（四基元链）与卡⑤（feDropShadow）的阴影相对字形质心的偏移均为 (6,8)px ±1.5px，两卡阴影 alpha 剖面的逐点差异 < 4%。
+4. PNG：半径尺中 `radius="10 0"` 样件的包围盒比 `radius="0 0"` 宽 ≥18px 而高度差 < 3px；`radius="0 10"` 反之（高 ≥18px、宽差 < 3px）。
+5. PNG：三块水洼的连通亮区计数依次为 1（subtract 单月牙）、1（intersect 透镜且面积最小）、2（exclude 双月牙），且 intersect 面积 < subtract 面积 < 两层遮罩并集面积。
+6. PNG：内阴影卡的暗带完全在字形内部——形状内边缘内 3px 处亮度比字形形心低 ≥35%，形状外 3px 处亮度与卡面背景差 < 5%（与投影卡的外侧暗斑形成对照）。
+7. DOM：六块做法卡的 `getComputedStyle(...).clipPath` 依次以 `inset(`、`circle(`、`ellipse(`、`polygon(`、`path(`、`rect(`（或 `@supports` 回退后的 `inset(`）开头；全文档 `document.querySelectorAll('clipPath').length === 1`（只有共享的 `#ns-clip-plate`），证明卡片裁切全部来自 CSS 基本形状。
+8. 交互与透明：合成 pointermove 到 (200,120) 与 (1200,820) 两次采样后，`#ns-morph.radiusX.baseVal` 与 `#ns-halo.stdDeviationX.baseVal` 均随之改变、`window.__INTERACTION_COUNT__` 递增，且 SVG 招牌与 HTML 价目板同一相对采样点的外晕亮度变化同号；导出的 PNG 四角 alpha = 0，全透明像素占比 ≥ 8%。
 
-**浏览器注意**　主截图目标是 Playwright/Chromium，其余为真实浏览的回退。① HTML 元素引用 SVG `<mask>`（倒影的 `mask:url(#ns-m-puddle)`）在 Chrome 120+/Firefox 稳定，Safari 至今对 HTML 上的 SVG mask 与 `mask-type:luminance` 处理不一致，故 `@supports (mask-image: url(#x))` 检测失败时回退到等效的 `-webkit-mask-image: radial-gradient(...)` 水洼形状，并把波纹改成第二层线性渐变。② `clip-path:url()` 与 `mask` 作用于 HTML 元素时必须用 `clipPathUnits/maskContentUnits=\"objectBoundingBox\"`：userSpaceOnUse 在 Chrome 与 Safari 上对 HTML 盒的原点解释不同，会把招牌与价目板切到两个位置。③ `mask-composite` 标准语法在 Chrome 120+/Firefox/Safari 15.4+ 可用，旧 WebKit 只认 `-webkit-mask-composite: source-out|source-in|xor`，两套并写；`mask-mode` 在老 WebKit 需要 `-webkit-mask-source-type`，对照补丁同时给出两种写法。④ `clip-path: rect()` 与 `shape()` 各引擎落地时间不同（Safari 与 Chrome 较早、Firefox 偏晚），卡⑥ 用 `@supports (clip-path: rect(0 auto auto 0))` 回退到 `inset(4px)`，回退时标注文字同步改写以免图注说谎。⑤ 几何盒关键字：`fill-box`/`stroke-box` 作用在 SVG 元素上曾有引擎把它当 border-box 处理，故三份样件各自把实测裁切矩形数值打在旁边，读者以数字而非记忆核对；不支持时全部退化为 `view-box` 并标注「回退」。⑥ SVG filter 应用于 HTML 元素三家皆支持，但 Safari 会在合成层重采样、文字边缘略软；滤镜区必须显式放大到 -45%/190%，否则默认区域会削掉大半径 halo。⑦ `color-interpolation-filters` 默认 linearRGB，各家实现一致但霓虹亮度观感差异极大，全部显式声明 sRGB 并在标注里给出两种取值的对比说明。⑧ 跨 SVG/HTML 的 `mix-blend-mode` 依赖祖先没有因 filter/opacity/transform 产生隔离，因此辉光单独一层 `<svg>` 且其父容器不写 `isolation`；反过来「隔离开关」小样刻意写 `isolation:isolate` 展示相反效果。⑨ SMIL 对 `feMorphology/@radius` 的插值在部分 Chrome 版本会向整数取整，动画显得跳格，故半径的连续控制以 DOM（`radiusX.baseVal`）为准、SMIL 只做慢速加压演示；启辉抖动的 `additive=\"sum\"` 在三家均可与 DOM 基值叠加。⑩ 网络被阻断：字体只用内联 base64 WOFF2 子集、`font-display:block`，墙面瓦片与雨点遮罩用 data:image/svg+xml（非 base64、`#` 转 `%23`）；截图前 `document.fonts.ready` + `pauseAnimations()/setCurrentTime(1.6)` + `getAnimations()` 冻结，并等两帧 rAF 以避开 Firefox 对 HTML 遮罩合成时机的差异。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+
+**浏览器注意**
+
+- 主截图目标是 Playwright/Chromium，其余为真实浏览的回退。① HTML 元素引用 SVG `<mask>`（倒影的 `mask:url(#ns-m-puddle)`）在 Chrome 120+/Firefox 稳定，Safari 至今对 HTML 上的 SVG mask 与 `mask-type:luminance` 处理不一致，故 `@supports (mask-image: url(#x))` 检测失败时回退到等效的 `-webkit-mask-image: radial-gradient(...)` 水洼形状，并把波纹改成第二层线性渐变。② `clip-path:url()` 与 `mask` 作用于 HTML 元素时必须用 `clipPathUnits/maskContentUnits=\"objectBoundingBox\"`：userSpaceOnUse 在 Chrome 与 Safari 上对 HTML 盒的原点解释不同，会把招牌与价目板切到两个位置。③ `mask-composite` 标准语法在 Chrome 120+/Firefox/Safari 15.4+ 可用，旧 WebKit 只认 `-webkit-mask-composite: source-out|source-in|xor`，两套并写；`mask-mode` 在老 WebKit 需要 `-webkit-mask-source-type`，对照补丁同时给出两种写法。④ `clip-path: rect()` 与 `shape()` 各引擎落地时间不同（Safari 与 Chrome 较早、Firefox 偏晚），卡⑥ 用 `@supports (clip-path: rect(0 auto auto 0))` 回退到 `inset(4px)`，回退时标注文字同步改写以免图注说谎。⑤ 几何盒关键字：`fill-box`/`stroke-box` 作用在 SVG 元素上曾有引擎把它当 border-box 处理，故三份样件各自把实测裁切矩形数值打在旁边，读者以数字而非记忆核对；不支持时全部退化为 `view-box` 并标注「回退」。⑥ SVG filter 应用于 HTML 元素三家皆支持，但 Safari 会在合成层重采样、文字边缘略软；滤镜区必须显式放大到 -45%/190%，否则默认区域会削掉大半径 halo。⑦ `color-interpolation-filters` 默认 linearRGB，各家实现一致但霓虹亮度观感差异极大，全部显式声明 sRGB 并在标注里给出两种取值的对比说明。⑧ 跨 SVG/HTML 的 `mix-blend-mode` 依赖祖先没有因 filter/opacity/transform 产生隔离，因此辉光单独一层 `<svg>` 且其父容器不写 `isolation`；反过来「隔离开关」小样刻意写 `isolation:isolate` 展示相反效果。⑨ SMIL 对 `feMorphology/@radius` 的插值在部分 Chrome 版本会向整数取整，动画显得跳格，故半径的连续控制以 DOM（`radiusX.baseVal`）为准、SMIL 只做慢速加压演示；启辉抖动的 `additive=\"sum\"` 在三家均可与 DOM 基值叠加。⑩ 网络被阻断：字体只用内联 base64 WOFF2 子集、`font-display:block`，墙面瓦片与雨点遮罩用 data:image/svg+xml（非 base64、`#` 转 `%23`）；截图前 `document.fonts.ready` + `pauseAnimations()/setCurrentTime(1.6)` + `getAnimations()` 冻结，并等两帧 rAF 以避开 Firefox 对 HTML 遮罩合成时机的差异。
 
 ### 3.14 `escapement-chronometer` — 擒纵天文钟
 
@@ -829,20 +849,16 @@
 
 **主打特性**
 
-- `av:animate.begin=syncbase` — syncbase begin id.begin / id.end + offset（全平台）：A chain of moves where each starts exactly when the previous ends, or 0.5s after another begins.
-- `at:animate.keySplines` — keySplines cubic-Bezier easing per segment（全平台）：Ball eases in and out (slow-fast-slow) versus a linear sibling moving at constant speed.
-- `api:SVGSVGElement.setCurrentTime` — setCurrentTime() timeline scrubbing（全平台）：Dragging a range slider scrubs every animation forwards and backwards through the document timeline.
-- `concept:smil-events` — beginEvent / endEvent / repeatEvent DOM events（全平台）：A counter increments on each repeatEvent and a label changes on endEvent.
-- `at:animateMotion.keyPoints` — animateMotion keyPoints with keyTimes（全平台）：Mover runs the path backwards (keyPoints 1;0) or pauses mid-route, proving distance control independent of time.
-- `av:animateTransform.additive=sum` — stacked animateTransforms with additive=sum（全平台）：Rotate plus translate animateTransforms combine into an orbit; without additive=sum the later one replaces the first.
+- `av:animate.begin=syncbase` — syncbase begin id.begin / id.end + offset
+- `at:animate.keySplines` — keySplines cubic-Bezier easing per segment
+- `api:SVGSVGElement.setCurrentTime` — setCurrentTime() timeline scrubbing
+- `concept:smil-events` — beginEvent / endEvent / repeatEvent DOM events
+- `at:animateMotion.keyPoints` — animateMotion keyPoints with keyTimes
+- `av:animateTransform.additive=sum` — stacked animateTransforms with additive=sum
 
-**辅助特性**（64 项，按领域）
+**辅助特性**
 
-- 嵌入、外来内容与语义：`css:prefers-reduced-motion`
-- 填充、描边与合成属性：`pr:visibility`、`concept:visibility-child-override`˚、`pv:visibility=collapse`˚、`pr:display`
-- SMIL 动画：`el:animate`、`at:animate.attributeName`˚、`at:animate.attributeType`˚、`concept:smil-overrides-css`˚、`concept:animation-sandwich-priority`˚、`api:SVGAnimatedLength.animVal`˚、`el:set`、`at:set.to`˚、`concept:set-visibility-toggle`˚、`el:animateTransform`、`at:animateTransform.type`˚、`av:animateTransform.type=rotate`、`concept:animate-transform-requires-animatetransform`˚、`concept:animatetransform-base-transform-preserved`˚、`el:animateMotion`、`at:animateMotion.path`、`el:mpath`、`at:mpath.href`˚、`av:animateMotion.rotate=auto`、`av:animateMotion.rotate=auto-reverse`˚、`concept:animatemotion-transform-stacking`˚、`el:discard`、`at:discard.begin`˚、`at:discard.href`˚、`at:animate.begin`、`av:animate.begin=offset`˚、`av:animate.begin=repeat`˚、`concept:multiple-begin-values`˚、`av:animate.begin=event`、`av:animate.begin=indefinite`、`at:animate.dur`、`at:animate.end`、`at:animate.restart`、`av:animate.restart=whenNotActive`˚、`av:animate.restart=never`˚、`at:animate.repeatCount`、`av:animate.repeatCount=indefinite`˚、`at:animate.repeatDur`˚、`at:animate.keyTimes`、`av:animate.calcMode=spline`˚、`av:animate.calcMode=discrete`、`av:animate.additive=sum`、`at:animate.href`、`api:SVGAnimationElement.beginElement`、`api:SVGAnimationElement.beginElementAt`˚、`api:SVGAnimationElement.endElement`˚、`api:SVGAnimationElement.getStartTime`˚、`api:SVGAnimationElement.getSimpleDuration`˚、`api:SVGAnimationElement.getCurrentTime`˚、`api:SVGAnimationElement.targetElement`˚、`at:animate.onbegin`˚、`api:TimeEvent`˚、`api:SVGSVGElement.pauseAnimations`、`api:SVGSVGElement.unpauseAnimations`˚、`api:SVGSVGElement.animationsPaused`˚、`api:SVGSVGElement.getCurrentTime`˚、`concept:smil-2026-support-status`
-- CSS 动画、CSS 变换与脚本 API：`api:SVGAnimationElement.onbegin`˚
-- 变换与坐标系：`pv:transform=rotate`
+`el:animate`、`at:animate.attributeName`、`at:animate.attributeType`、`concept:smil-overrides-css`、`concept:animation-sandwich-priority`、`api:SVGAnimatedLength.animVal`、`el:set`、`at:set.to`、`concept:set-visibility-toggle`、`el:animateTransform`、`at:animateTransform.type`、`av:animateTransform.type=rotate`、`concept:animate-transform-requires-animatetransform`、`concept:animatetransform-base-transform-preserved`、`el:animateMotion`、`at:animateMotion.path`、`el:mpath`、`at:mpath.href`、`av:animateMotion.rotate=auto`、`av:animateMotion.rotate=auto-reverse`、`concept:animatemotion-transform-stacking`、`el:discard`、`at:discard.begin`、`at:discard.href`、`at:animate.begin`、`av:animate.begin=offset`、`av:animate.begin=repeat`、`concept:multiple-begin-values`、`av:animate.begin=event`、`av:animate.begin=indefinite`、`at:animate.dur`、`at:animate.end`、`at:animate.restart`、`av:animate.restart=whenNotActive`、`av:animate.restart=never`、`at:animate.repeatCount`、`av:animate.repeatCount=indefinite`、`at:animate.repeatDur`、`at:animate.keyTimes`、`av:animate.calcMode=spline`、`av:animate.calcMode=discrete`、`av:animate.additive=sum`、`at:animate.href`、`api:SVGAnimationElement.beginElement`、`api:SVGAnimationElement.beginElementAt`、`api:SVGAnimationElement.endElement`、`api:SVGAnimationElement.getStartTime`、`api:SVGAnimationElement.getSimpleDuration`、`api:SVGAnimationElement.getCurrentTime`、`api:SVGAnimationElement.targetElement`、`api:SVGAnimationElement.onbegin`、`at:animate.onbegin`、`api:TimeEvent`、`api:SVGSVGElement.pauseAnimations`、`api:SVGSVGElement.unpauseAnimations`、`api:SVGSVGElement.animationsPaused`、`api:SVGSVGElement.getCurrentTime`、`concept:smil-2026-support-status`、`css:prefers-reduced-motion`、`pr:visibility`、`concept:visibility-child-override`、`pv:visibility=collapse`、`pr:display`、`pv:transform=rotate`
 
 **构造要点**
 
@@ -865,16 +881,23 @@
 
 **验收要点**
 
-- [ ] 冻结帧：导出时 `svg.animationsPaused() === true` 且 `svg.getCurrentTime()` 为 7.40±0.01；PNG 中擒纵叉与擒纵轮齿处于咬合冲量中段、报时锤抬起、播放头落在时序尺 x≈643。
-- [ ] 事件日志：`#event-log [data-fired="1"]` 至少 8 行，且 beginEvent / repeatEvent / endEvent 三类各至少 1 行；"拍数 #N" 与摆轮实际 repeatEvent 次数一致（(7.40−2.40)/0.8 = 6）。
-- [ ] 倒带可核对：调用 `setCurrentTime(2.05)` 后重截图，分针角度与 7.40 帧相差 ≥ 30°，运输固定夹在该帧仍然可见，滑块把手 x 与 t 的线性映射误差 < 2px。
-- [ ] discard：Chrome / Safari 中 t>2.5s 后 `document.getElementById('shipping-clamp') === null`；Firefox 中该元素仍在 DOM 但 computed opacity 为 0，且支持状态铭牌文字显示"本引擎忽略，已用 set 兜底"。
-- [ ] dur 对照：同一帧下主摆轮与对照次摆的 rotate 角度差 ≥ 20°，时序尺上两条泳道条宽比为 0.8 : 2.4（±2px）。
-- [ ] 占位对照：含 visibility="hidden" 夹板的组 `getBBox().width` 比 display="none" 组大 ≥ 90 user units，两条虚线外框在 PNG 中均可见，且隐藏夹板内的红宝石轴承依然显影。
-- [ ] keyPoints：同一帧两枚从动件在 `#eot-cam-profile` 上的归一化弧长位置相差 ≥ 0.3（用 getPointAtLength 反查最近点），rotate="auto" 箭头朝向与该点切线夹角 < 8°。
-- [ ] 交互：pointermove 使 `window.__INTERACTION_COUNT__` 递增且 HUD 时间读数刷新；连点 restart="never" 的棘爪按钮其计数停在 1，restart="always" 的计数随每次点击递增，restart="whenNotActive" 只在空闲时递增。
+1. 冻结帧：导出时 `svg.animationsPaused() === true` 且 `svg.getCurrentTime()` 为 7.40±0.01；PNG 中擒纵叉与擒纵轮齿处于咬合冲量中段、报时锤抬起、播放头落在时序尺 x≈643。
+2. 事件日志：`#event-log [data-fired="1"]` 至少 8 行，且 beginEvent / repeatEvent / endEvent 三类各至少 1 行；"拍数 #N" 与摆轮实际 repeatEvent 次数一致（(7.40−2.40)/0.8 = 6）。
+3. 倒带可核对：调用 `setCurrentTime(2.05)` 后重截图，分针角度与 7.40 帧相差 ≥ 30°，运输固定夹在该帧仍然可见，滑块把手 x 与 t 的线性映射误差 < 2px。
+4. discard：Chrome / Safari 中 t>2.5s 后 `document.getElementById('shipping-clamp') === null`；Firefox 中该元素仍在 DOM 但 computed opacity 为 0，且支持状态铭牌文字显示"本引擎忽略，已用 set 兜底"。
+5. dur 对照：同一帧下主摆轮与对照次摆的 rotate 角度差 ≥ 20°，时序尺上两条泳道条宽比为 0.8 : 2.4（±2px）。
+6. 占位对照：含 visibility="hidden" 夹板的组 `getBBox().width` 比 display="none" 组大 ≥ 90 user units，两条虚线外框在 PNG 中均可见，且隐藏夹板内的红宝石轴承依然显影。
+7. keyPoints：同一帧两枚从动件在 `#eot-cam-profile` 上的归一化弧长位置相差 ≥ 0.3（用 getPointAtLength 反查最近点），rotate="auto" 箭头朝向与该点切线夹角 < 8°。
+8. 交互：pointermove 使 `window.__INTERACTION_COUNT__` 递增且 HUD 时间读数刷新；连点 restart="never" 的棘爪按钮其计数停在 1，restart="always" 的计数随每次点击递增，restart="whenNotActive" 只在空闲时递增。
 
-**浏览器注意**　2026 年 Chrome、Firefox、Safari 均原生渲染 SMIL，本场景不需要任何 polyfill，右侧铭牌用运行时特性检测把这一结论写在画面上。真实差异有四处。其一，`<discard>` 只有 Chrome 与 Safari 17+ 实现，Firefox 直接忽略，因此运输固定夹同时挂 `set opacity=0`，视觉一致而 DOM 结论不同，验收分引擎写。其二，向后 seek 时被跳过的 begin/end 事件在 Safari 与 Firefox 上不保证补发，所以事件日志的行文本来自与 SMIL 同源的预计算调度表，实时事件只负责点亮 `data-fired`；导出前先以真实时间跑到 T0=7.40s 让事件真正发生，再 `pauseAnimations()` + `setCurrentTime(7.40)` 定帧，既确定又不依赖 seek 的事件补发。其三，Firefox 对 `beginElementAt()` 与 `x.repeat(n)` 实例时间偶有一帧偏差，打点释放因此同时给出 `silence-lever.click` 这条手动 begin 实例，界面不会因差一帧而卡住；Safari 早期版本对 `mpath` + `keyPoints` 的弧长插值精度略差，故内联 `path` 的报时锤与 `mpath` 的凸轮从动件各用一套写法互为佐证。其四，`attributeType=\"CSS\"` 的属性名在 Safari 上必须小写，且 SMIL 覆盖 CSS 的动画三明治顺序在三家一致，HUD 会把 CSS 声明值与动画呈现值并排打印以便当场核对。`prefers-reduced-motion` 依赖系统设置，Playwright 用 `reducedMotion: 'reduce'` 复现，默认截图跑在 no-preference 下。网络被封锁，全部文字使用 system-ui / 等宽系统字体栈，不外链字体，也不引用任何位图。
+**实现复审**
+
+- 已检查源模块、catalog 元数据、DOM 特性、浏览器行为与渲染产物；原始定量验收未逐条全部自动化，详见验收记录。
+- 当前 Chrome 152 忽略 discard，演示以实际检测结果显示 set 兜底；原验收 #4 的 Chrome 删除 DOM 结论不能套用于本机。原点校准图已移入透明边距。
+
+**浏览器注意**
+
+- 2026 年 Chrome、Firefox、Safari 均原生渲染 SMIL，本场景不需要任何 polyfill，右侧铭牌用运行时特性检测把这一结论写在画面上。真实差异有四处。其一，`<discard>` 只有 Chrome 与 Safari 17+ 实现，Firefox 直接忽略，因此运输固定夹同时挂 `set opacity=0`，视觉一致而 DOM 结论不同，验收分引擎写。其二，向后 seek 时被跳过的 begin/end 事件在 Safari 与 Firefox 上不保证补发，所以事件日志的行文本来自与 SMIL 同源的预计算调度表，实时事件只负责点亮 `data-fired`；导出前先以真实时间跑到 T0=7.40s 让事件真正发生，再 `pauseAnimations()` + `setCurrentTime(7.40)` 定帧，既确定又不依赖 seek 的事件补发。其三，Firefox 对 `beginElementAt()` 与 `x.repeat(n)` 实例时间偶有一帧偏差，打点释放因此同时给出 `silence-lever.click` 这条手动 begin 实例，界面不会因差一帧而卡住；Safari 早期版本对 `mpath` + `keyPoints` 的弧长插值精度略差，故内联 `path` 的报时锤与 `mpath` 的凸轮从动件各用一套写法互为佐证。其四，`attributeType=\"CSS\"` 的属性名在 Safari 上必须小写，且 SMIL 覆盖 CSS 的动画三明治顺序在三家一致，HUD 会把 CSS 声明值与动画呈现值并排打印以便当场核对。`prefers-reduced-motion` 依赖系统设置，Playwright 用 `reducedMotion: 'reduce'` 复现，默认截图跑在 no-preference 下。网络被封锁，全部文字使用 system-ui / 等宽系统字体栈，不外链字体，也不引用任何位图。
 
 ### 3.15 `core-sample-stratigraphy` — 岩芯地层揭示台
 
@@ -886,20 +909,17 @@
 
 **主打特性**
 
-- `el:mask` — mask element（全平台）：A rect painted with a white-to-black mask: white areas show the content fully, black areas hide it, greys are semi-transparent.
-- `pr:mask-type` — mask-type property (luminance default vs alpha)（全平台）：An opaque red shape in a luminance mask reveals content only dimly while white reveals fully; the same mask with alpha reveals red and black fully.
-- `concept:gradient-feathered-mask` — Gradient-feathered mask edges (soft fade, vignette)（全平台）：An image fades to transparent at one edge via a white-to-black linearGradient in the mask; a radialGradient version produces a vignette.
-- `concept:animated-clippath-reveal` — SMIL-animated clipPath geometry (reveal/wipe)（全平台）：A rect inside the clipPath animates its width from 0 to full, wiping an image or text into view from left to right.
-- `concept:effect-order-filter-clip-mask-opacity` — Processing order: filter, clip, mask, opacity（全平台）：A blurred, clipped, masked, half-opaque shape shows a hard clip edge on top of blur, and a fade on top of that.
-- `concept:clipped-hit-testing` — Pointer events respect clip-path（全平台）：Hovering the clipped-away part of a rect does not change its colour or fire events; hovering inside the clip window does.
-- `concept:masked-hit-testing` — Pointer events ignore mask transparency（全平台）：A fully masked-out (invisible) region of a rect still highlights on hover and blocks clicks to shapes below it.
+- `el:mask` — mask element
+- `pr:mask-type` — mask-type property (luminance default vs alpha)
+- `concept:gradient-feathered-mask` — Gradient-feathered mask edges (soft fade, vignette)
+- `concept:animated-clippath-reveal` — SMIL-animated clipPath geometry (reveal/wipe)
+- `concept:effect-order-filter-clip-mask-opacity` — Processing order: filter, clip, mask, opacity
+- `concept:clipped-hit-testing` — Pointer events respect clip-path
+- `concept:masked-hit-testing` — Pointer events ignore mask transparency
 
-**辅助特性**（64 项，按领域）
+**辅助特性**
 
-- 裁剪与遮罩：`el:clipPath`、`at:clipPath.clipPathUnits`、`av:clipPath.clipPathUnits=objectBoundingBox`、`av:clipPath.clipPathUnits=userSpaceOnUse`˚、`api:SVGClipPathElement.clipPathUnits`˚、`at:clipPath.transform`、`pr:clip-rule`、`pv:clip-rule=evenodd`˚、`concept:nested-clippath`、`concept:clip-path-on-clippath-children`、`concept:use-in-clippath`、`concept:clip-group-vs-children`、`pr:clip-path`、`pv:clip-path=none`˚、`concept:clippath-union-of-children`˚、`concept:clippath-ignores-paint`˚、`concept:clippath-child-display-none`˚、`concept:clippath-disallowed-children`˚、`concept:empty-clippath`˚、`concept:objectboundingbox-zero-bbox-trap`˚、`concept:clip-follows-target-transform`˚、`concept:invalid-clip-reference`˚、`concept:getbbox-ignores-clip`˚、`at:mask.x`、`at:mask.y`˚、`at:mask.width`、`at:mask.height`˚、`at:mask.maskUnits`、`av:mask.maskUnits=userSpaceOnUse`˚、`at:mask.maskContentUnits`、`av:mask.maskContentUnits=objectBoundingBox`、`pv:mask-type=luminance`˚、`pv:mask-type=alpha`˚、`concept:mask-luminance-colorspace`˚、`concept:mask-content-opacity`˚、`concept:nested-mask`˚、`concept:mask-smil-animation`、`concept:mask-on-group-vs-element`、`pr:mask`、`concept:invalid-mask-reference`˚、`concept:clip-after-blur-via-group`˚、`concept:mask-and-clip-combined`˚
-- 滤镜：区域、连线、合成与颜色原语：`av:feGaussianBlur.in=SourceAlpha`、`av:feColorMatrix.type=luminanceToAlpha`
-- SMIL 动画：`av:animate.fill=freeze`、`av:animate.fill=remove`˚、`at:animate.from`、`at:animate.to`˚
-- 交互与无障碍：`pr:pointer-events`、`pv:pointer-events=none`、`pv:pointer-events=bounding-box`、`pv:pointer-events=visiblePainted`˚、`pv:pointer-events=visibleFill`˚、`pv:pointer-events=visibleStroke`˚、`pv:pointer-events=visible`˚、`pv:pointer-events=painted`˚、`pv:pointer-events=fill`˚、`pv:pointer-events=stroke`˚、`pv:pointer-events=all`˚、`pv:pointer-events=auto`˚、`concept:hidden-elements-hit-testing`˚、`concept:hit-test-transparent-fill`、`concept:hit-test-overlay-rect`˚、`concept:hit-test-invisible-stroke`
+`el:clipPath`、`at:clipPath.clipPathUnits`、`av:clipPath.clipPathUnits=objectBoundingBox`、`av:clipPath.clipPathUnits=userSpaceOnUse`、`api:SVGClipPathElement.clipPathUnits`、`at:clipPath.transform`、`pr:clip-rule`、`pv:clip-rule=evenodd`、`concept:nested-clippath`、`concept:clip-path-on-clippath-children`、`concept:use-in-clippath`、`concept:clip-group-vs-children`、`pr:clip-path`、`pv:clip-path=none`、`concept:clippath-union-of-children`、`concept:clippath-ignores-paint`、`concept:clippath-child-display-none`、`concept:clippath-disallowed-children`、`concept:empty-clippath`、`concept:objectboundingbox-zero-bbox-trap`、`concept:clip-follows-target-transform`、`concept:invalid-clip-reference`、`concept:getbbox-ignores-clip`、`at:mask.x`、`at:mask.y`、`at:mask.width`、`at:mask.height`、`at:mask.maskUnits`、`av:mask.maskUnits=userSpaceOnUse`、`at:mask.maskContentUnits`、`av:mask.maskContentUnits=objectBoundingBox`、`pv:mask-type=luminance`、`pv:mask-type=alpha`、`concept:mask-luminance-colorspace`、`concept:mask-content-opacity`、`concept:nested-mask`、`concept:mask-smil-animation`、`concept:mask-on-group-vs-element`、`pr:mask`、`concept:invalid-mask-reference`、`concept:clip-after-blur-via-group`、`concept:mask-and-clip-combined`、`av:feGaussianBlur.in=SourceAlpha`、`av:feColorMatrix.type=luminanceToAlpha`、`av:animate.fill=freeze`、`av:animate.fill=remove`、`at:animate.from`、`at:animate.to`、`pr:pointer-events`、`pv:pointer-events=none`、`pv:pointer-events=bounding-box`、`pv:pointer-events=visiblePainted`、`pv:pointer-events=visibleFill`、`pv:pointer-events=visibleStroke`、`pv:pointer-events=visible`、`pv:pointer-events=painted`、`pv:pointer-events=fill`、`pv:pointer-events=stroke`、`pv:pointer-events=all`、`pv:pointer-events=auto`、`concept:hidden-elements-hit-testing`、`concept:hit-test-transparent-fill`、`concept:hit-test-overlay-rect`、`concept:hit-test-invisible-stroke`
 
 **构造要点**
 
@@ -923,16 +943,25 @@
 
 **验收要点**
 
-- [ ] DOM：stage.querySelectorAll('clipPath').length ≥ 14 且 mask 元素 ≥ 12；除刻意的 #missing-core 与 #nope 两处反例外，所有 clip-path / mask 的 url(#…) 都能在文档内解析到同名元素。
-- [ ] DOM：四个处理顺序格的命中缩略图都带 data-hit-ratio；含裁切的格 ≤ 0.62，纯掩码格 ≥ 0.97 —— 被裁掉的采样点未命中、被遮罩淡到不可见的采样点仍然命中。
-- [ ] PNG：P2 的 0% 采取率段（空 clipPath，约 x 200–400 / y 485–500）像素 alpha 全为 0；紧邻的 clip-path="none" 对照段在同一扫描行 alpha > 200。
-- [ ] PNG：P4 亮度/透明度对照两格在红斑的同一相对位置上，luminance 格的合成 alpha 落在 0.18–0.25（实测参考 54/255），alpha 格 ≥ 0.98。
-- [ ] PNG：P5 揭开锋面 —— y = 560 一行自 x 1038 起连续有像素，直到 x 落在 1230–1260 之间中断、其右为透明，证明前四段已冻结完成而第五段停在动画中途。
-- [ ] 交互：指针移到 (672,468) 后读数文本含「未命中」，移到 (756,414) 后含「仍命中」，且两次移动后 window.__INTERACTION_COUNT__ 均增加。
-- [ ] DOM：stage.getCurrentTime() === 3.2 且 stage.animationsPaused() === true，window.__VIS_READY__ === true（顺序错误时 getCurrentTime 会停在 0，可直接判失败）。
-- [ ] PNG：整幅透明像素 ≥ 8%、可见像素 ≥ 3.5%、彩色像素 ≥ 2500（沿用仓库既有导出阈值）；P3 行3 零 bbox 那格除标注文字外无岩芯像素。
+1. DOM：stage.querySelectorAll('clipPath').length ≥ 14 且 mask 元素 ≥ 12；除刻意的 #missing-core 与 #nope 两处反例外，所有 clip-path / mask 的 url(#…) 都能在文档内解析到同名元素。
+2. DOM：四个处理顺序格的命中缩略图都带 data-hit-ratio；含裁切的格 ≤ 0.62，纯掩码格 ≥ 0.97 —— 被裁掉的采样点未命中、被遮罩淡到不可见的采样点仍然命中。
+3. PNG：P2 的 0% 采取率段（空 clipPath，约 x 200–400 / y 485–500）像素 alpha 全为 0；紧邻的 clip-path="none" 对照段在同一扫描行 alpha > 200。
+4. PNG：P4 亮度/透明度对照两格在红斑的同一相对位置上，luminance 格的合成 alpha 落在 0.18–0.25（实测参考 54/255），alpha 格 ≥ 0.98。
+5. PNG：P5 揭开锋面 —— y = 560 一行自 x 1038 起连续有像素，直到 x 落在 1230–1260 之间中断、其右为透明，证明前四段已冻结完成而第五段停在动画中途。
+6. 交互：指针移到 (672,468) 后读数文本含「未命中」，移到 (756,414) 后含「仍命中」，且两次移动后 window.__INTERACTION_COUNT__ 均增加。
+7. DOM：stage.getCurrentTime() === 3.2 且 stage.animationsPaused() === true，window.__VIS_READY__ === true（顺序错误时 getCurrentTime 会停在 0，可直接判失败）。
+8. PNG：整幅透明像素 ≥ 8%、可见像素 ≥ 3.5%、彩色像素 ≥ 2500（沿用仓库既有导出阈值）；P3 行3 零 bbox 那格除标注文字外无岩芯像素。
 
-**浏览器注意**　实测环境为 headless Chromium 152.0.7977.64 与 Firefox 155.0.1（file:// 本地页、网络断开），本场景用到的裁切、遮罩、滤镜与命中行为两者逐像素一致（差异 ≤ 1/255），下列差异都是跨引擎的真实缺口。（1）pointer-events: bounding-box：Chromium / Edge / Firefox 支持（实测星形空角可命中），Safari/WebKit 至今未实现；回退用 CSS.supports('pointer-events','bounding-box') 检测，不支持时在星形下补一块 fill=\"transparent\" 的 bbox 覆盖矩形，并把该片标签改写为「Safari 兜底」，虚线 bbox 提示两种情况下都画。（2）遮罩亮度的色彩空间：CSS Masking 规定按 sRGB 计权，Chromium / Firefox 实测纯红透出 54/255 = 0.212（Rec.709 的 0.2126）；WebKit 历史上按 SVG 1.1 在 linearRGB 下计算，会把同一块红读得更暗。因此红斑格的标签写的是运行时实测值而不是硬编码常数，跨引擎不会说谎。（3）CSS 写法：mask: url(#m) 简写、mask-image: url(#m) 长写与 mask 属性在 Chromium / Firefox 上实测等价；Safari 对 HTML 元素仍需 -webkit-mask-*，对 SVG 元素用标准 mask。CSS 那一格用 @supports (mask-image: url(#x)) 包裹，并在运行时把 getComputedStyle(el).maskImage 打进标签——引擎若没吃下这条声明，标签会直接显示 none。（4）无效引用：clip-path=\"url(#不存在)\" 与 mask=\"url(#不存在)\" 在 Chromium 152 / Firefox 155 都按 CSS Masking 处理成「不裁切 / 不遮罩、元素照常渲染」（实测为原色），而 SVG 1.1 的旧措辞是「视为错误、元素不渲染」，旧版 WebKit 可能仍按不渲染处理；场景把这两格标注为「行为依引擎而定」，并且不让它们进入验收像素断言。（5）与之相反，空的 <clipPath/>（无子元素）和 <use> 指向 <g> 的裁切在两引擎都判定裁切区为空、目标整块不可见（实测 alpha = 0）；这三种结局排在一起，正是场景要讲的「空 ≠ 无效」。（6）SMIL：Chromium / Firefox / Safari 均可用，但 setCurrentTime() 必须在时间线启动之后调用——实测在解析期同步调用会被静默忽略、getCurrentTime() 仍为 0，因此导出路径固定为「两帧 rAF → setCurrentTime → pauseAnimations」。另设 ?static=1 分支（也用于 prefers-reduced-motion）：不插入任何 <animate>，直接把终值写成静态属性，静帧与冻结帧一致。（7）命中采样依赖 document.elementFromPoint，它对视口外坐标返回 null；导出视口固定 1400×900、body{margin:0}、舞台无滚动条，所以 SVG 用户坐标可直接当 client 坐标用；若嵌进有滚动的宿主页面，需加上 getBoundingClientRect() 的偏移。（8）不加载任何 webfont，文字走系统字体栈，构图不依赖测量文本宽度，字体替换只改字形不改版面；唯一位图是页面内 <canvas>.toDataURL() 生成的岩芯柱面 PNG，以 data: URI 内联，捕获时网络可全程断开。
+**实现复审**
+
+- missing-core 与 nope 是刻意展示的无效引用；引用门禁只对本场景允许这两个 id。
+- 截图在3.2 s冻结；四个网格独立调用 elementFromPoint，裁切格约0.43、遮罩格约0.97。
+- 密集说明缩短到面板范围内，完整语义保留在构造说明。
+- 亮度遮罩必须隔离不透明底板测 alpha：实测红斑 54/255，alpha 掩码为 1。扫描 y=560 的第五段锋面为 x=1238。
+
+**浏览器注意**
+
+- 实测环境为 headless Chromium 152.0.7977.64 与 Firefox 155.0.1（file:// 本地页、网络断开），本场景用到的裁切、遮罩、滤镜与命中行为两者逐像素一致（差异 ≤ 1/255），下列差异都是跨引擎的真实缺口。（1）pointer-events: bounding-box：Chromium / Edge / Firefox 支持（实测星形空角可命中），Safari/WebKit 至今未实现；回退用 CSS.supports('pointer-events','bounding-box') 检测，不支持时在星形下补一块 fill=\"transparent\" 的 bbox 覆盖矩形，并把该片标签改写为「Safari 兜底」，虚线 bbox 提示两种情况下都画。（2）遮罩亮度的色彩空间：CSS Masking 规定按 sRGB 计权，Chromium / Firefox 实测纯红透出 54/255 = 0.212（Rec.709 的 0.2126）；WebKit 历史上按 SVG 1.1 在 linearRGB 下计算，会把同一块红读得更暗。因此红斑格的标签写的是运行时实测值而不是硬编码常数，跨引擎不会说谎。（3）CSS 写法：mask: url(#m) 简写、mask-image: url(#m) 长写与 mask 属性在 Chromium / Firefox 上实测等价；Safari 对 HTML 元素仍需 -webkit-mask-*，对 SVG 元素用标准 mask。CSS 那一格用 @supports (mask-image: url(#x)) 包裹，并在运行时把 getComputedStyle(el).maskImage 打进标签——引擎若没吃下这条声明，标签会直接显示 none。（4）无效引用：clip-path=\"url(#不存在)\" 与 mask=\"url(#不存在)\" 在 Chromium 152 / Firefox 155 都按 CSS Masking 处理成「不裁切 / 不遮罩、元素照常渲染」（实测为原色），而 SVG 1.1 的旧措辞是「视为错误、元素不渲染」，旧版 WebKit 可能仍按不渲染处理；场景把这两格标注为「行为依引擎而定」，并且不让它们进入验收像素断言。（5）与之相反，空的 <clipPath/>（无子元素）和 <use> 指向 <g> 的裁切在两引擎都判定裁切区为空、目标整块不可见（实测 alpha = 0）；这三种结局排在一起，正是场景要讲的「空 ≠ 无效」。（6）SMIL：Chromium / Firefox / Safari 均可用，但 setCurrentTime() 必须在时间线启动之后调用——实测在解析期同步调用会被静默忽略、getCurrentTime() 仍为 0，因此导出路径固定为「两帧 rAF → setCurrentTime → pauseAnimations」。另设 ?static=1 分支（也用于 prefers-reduced-motion）：不插入任何 <animate>，直接把终值写成静态属性，静帧与冻结帧一致。（7）命中采样依赖 document.elementFromPoint，它对视口外坐标返回 null；导出视口固定 1400×900、body{margin:0}、舞台无滚动条，所以 SVG 用户坐标可直接当 client 坐标用；若嵌进有滚动的宿主页面，需加上 getBoundingClientRect() 的偏移。（8）不加载任何 webfont，文字走系统字体栈，构图不依赖测量文本宽度，字体替换只改字形不改版面；唯一位图是页面内 <canvas>.toDataURL() 生成的岩芯柱面 PNG，以 data: URI 内联，捕获时网络可全程断开。
 
 ### 3.16 `seismic-drum-console` — 地震记录鼓控制台
 
@@ -944,21 +973,17 @@
 
 **主打特性**
 
-- `concept:mouse-to-svg-coordinates` — Screen to user space via getScreenCTM().inverse() and DOMPoint（全平台）：Clicking anywhere on a panned, zoomed and rotated canvas places a marker precisely under the cursor.
-- `api:SVGGraphicsElement.getScreenCTM` — getScreenCTM（全平台）：Draggable shapes follow the mouse correctly inside a scaled viewBox by inverting getScreenCTM.
-- `concept:wheel-zoom` — wheel event driven zoom/pan of the viewBox（全平台）：Scrolling the wheel over the map zooms toward the cursor; the page does not scroll.
-- `api:DOMMatrix` — DOMMatrix construction and multiplication（全平台）：A matrix built by chaining translate/rotate/scale is applied as transform attribute string to a shape.
-- `api:SVGAnimatedRect.baseVal` — viewBox.baseVal scripted pan and zoom（全平台）：Wheel and drag modify viewBox.baseVal.x/y/width producing smooth zoom and pan of the scene.
-- `pr:offset-path` — offset-path: path() motion path（全平台）：A dot travels along a visible curved path using CSS only; no animateMotion element present.
-- `api:Window.requestAnimationFrame` — requestAnimationFrame-driven attribute updates（全平台）：A polygon's points attribute is rewritten each frame producing a wobbling shape impossible with declarative animation.
+- `concept:mouse-to-svg-coordinates` — Screen to user space via getScreenCTM().inverse() and DOMPoint
+- `api:SVGGraphicsElement.getScreenCTM` — getScreenCTM
+- `concept:wheel-zoom` — wheel event driven zoom/pan of the viewBox
+- `api:DOMMatrix` — DOMMatrix construction and multiplication
+- `api:SVGAnimatedRect.baseVal` — viewBox.baseVal scripted pan and zoom
+- `pr:offset-path` — offset-path: path() motion path
+- `api:Window.requestAnimationFrame` — requestAnimationFrame-driven attribute updates
 
-**辅助特性**（45 项，按领域）
+**辅助特性**
 
-- 文档结构与复用：`api:SVGSVGElement.viewBox`、`api:SVGSVGElement.currentScale`
-- 填充、描边与合成属性：`pr:overflow`、`concept:line-drawing-dash-animation`、`pr:cursor`、`pv:overflow=scroll`˚
-- CSS 动画、CSS 变换与脚本 API：`concept:pointer-to-user-space`、`api:SVGGraphicsElement.getCTM`、`api:DOMPoint.matrixTransform`、`api:SVGTransformList`、`api:SVGSVGElement.checkIntersection`、`api:SVGElement.dataset`、`api:ResizeObserver.observe`、`api:IntersectionObserver.observe`、`css:animation-timeline-scroll`、`pr:offset-distance`、`pr:offset-rotate`、`api:Element.animate`、`api:SVGSVGElement.createSVGPoint`˚、`api:SVGSVGElement.createSVGRect`˚、`api:SVGSVGElement.createSVGTransformFromMatrix`˚、`api:SVGTransform.setRotate`˚、`api:SVGMatrix`˚、`api:SVGGraphicsElement.nearestViewportElement`˚、`api:Animation.playbackRate`˚、`api:Document.getAnimations`˚、`concept:waapi-non-css-attribute-animation`˚
-- 变换与坐标系：`concept:viewbox-camera-zoom`、`concept:viewbox-camera-pan`、`concept:viewbox-negative-origin`、`concept:nested-svg-viewport`、`av:svg.preserveAspectRatio=slice`、`concept:nearest-viewport-percentage-resolution`、`concept:percentage-diagonal-formula`、`api:SVGAnimatedTransformList.baseVal`、`api:DOMMatrixReadOnly.inverse`˚、`api:SVGSVGElement.createSVGMatrix`˚、`api:SVGTransformList.consolidate`˚
-- 交互与无障碍：`concept:pointer-events-api`、`concept:touch-events`、`pr:touch-action`、`api:MouseEvent.offsetX`˚、`api:PointerEvent.getCoalescedEvents`˚、`concept:multi-touch-gesture`˚、`pv:touch-action=none`˚
+`api:SVGSVGElement.viewBox`、`api:SVGSVGElement.currentScale`、`concept:viewbox-camera-zoom`、`concept:viewbox-camera-pan`、`concept:viewbox-negative-origin`、`concept:nested-svg-viewport`、`av:svg.preserveAspectRatio=slice`、`pr:overflow`、`concept:nearest-viewport-percentage-resolution`、`concept:percentage-diagonal-formula`、`concept:pointer-to-user-space`、`api:SVGGraphicsElement.getCTM`、`api:DOMPoint.matrixTransform`、`api:SVGTransformList`、`api:SVGAnimatedTransformList.baseVal`、`api:SVGSVGElement.checkIntersection`、`api:SVGElement.dataset`、`api:ResizeObserver.observe`、`api:IntersectionObserver.observe`、`css:animation-timeline-scroll`、`concept:line-drawing-dash-animation`、`pr:offset-distance`、`pr:offset-rotate`、`api:Element.animate`、`concept:pointer-events-api`、`concept:touch-events`、`pr:cursor`、`pr:touch-action`、`api:DOMMatrixReadOnly.inverse`、`api:SVGSVGElement.createSVGPoint`、`api:SVGSVGElement.createSVGMatrix`、`api:SVGSVGElement.createSVGRect`、`api:SVGSVGElement.createSVGTransformFromMatrix`、`api:SVGTransform.setRotate`、`api:SVGTransformList.consolidate`、`api:SVGMatrix`、`api:MouseEvent.offsetX`、`api:SVGGraphicsElement.nearestViewportElement`、`api:Animation.playbackRate`、`api:Document.getAnimations`、`concept:waapi-non-css-attribute-animation`、`api:PointerEvent.getCoalescedEvents`、`concept:multi-touch-gesture`、`pv:touch-action=none`、`pv:overflow=scroll`
 
 **构造要点**
 
@@ -981,1607 +1006,1614 @@
 
 **验收要点**
 
-- [ ] 相机窗左右各有约 34.3 px 的信箱暗条、上下无空隙；总览窗上下各被裁掉约 22.7；DOM 中两者 `preserveAspectRatio` 分别为 `xMidYMid meet` 与 `xMidYMid slice`。
-- [ ] 读数条链 A/B/C 三行走时文本逐字符相同，校验灯 `data-verdict="match"`；脚本连续执行一次滚轮缩放（deltaY=-300）与一次 120 px 拖拽平移后重取，仍逐字符相同且失配计数为 0；天真 offsetX 行 `data-verdict="drift"` 且显示误差 > 1 s。
-- [ ] `document.getAnimations().length >= 2` 且其中包含 09 行的 CSS 动画与 10 行的 WAAPI 动画，11 行的 rAF 笔不在列表中；PNG 中 09/10/11 三行的已显影长度互不相同（09 行满行且笔在行上方的回程弧上）。
-- [ ] 标定条内 `circle[r="50%"]` 的 `getBBox().width` 约 291.5（r≈145.8），且圆被 400×100 的嵌套视口裁成弧带；旁注文字给出 145.8 / 50 / 200 三个数。
-- [ ] 溢出三联中 `overflow:hidden` 与 `overflow:scroll` 两格的圆被裁在框线内、无滚动条，`overflow:visible` 一格的圆明显溢出到框外（PNG 可直接判读）。
-- [ ] 拖动台面宽度滑轨改写相机 `width` 后，`ResizeObserver` 回调至少触发一次，时标尺子元素数量随之变化且相邻刻度间距 ≥26 px，尺端文本与 `contentRect` 的宽高一致。
-- [ ] 在舞台上做 `pointermove` 后 `window.__INTERACTION_COUNT__` 增加，且采样十字中心经三链回算得到的记录纸坐标与指针位置往返误差 < 0.01 记录纸单位。
-- [ ] Shift 框选后命中的道带上 `data-select="intersect"`（黄）或 `"enclose"`（绿）；在未实现 `checkIntersection` 的引擎上改为 `data-fallback="bbox"` 且着色结果一致。
+1. 相机窗左右各有约 34.3 px 的信箱暗条、上下无空隙；总览窗上下各被裁掉约 22.7；DOM 中两者 `preserveAspectRatio` 分别为 `xMidYMid meet` 与 `xMidYMid slice`。
+2. 读数条链 A/B/C 三行走时文本逐字符相同，校验灯 `data-verdict="match"`；脚本连续执行一次滚轮缩放（deltaY=-300）与一次 120 px 拖拽平移后重取，仍逐字符相同且失配计数为 0；天真 offsetX 行 `data-verdict="drift"` 且显示误差 > 1 s。
+3. `document.getAnimations().length >= 2` 且其中包含 09 行的 CSS 动画与 10 行的 WAAPI 动画，11 行的 rAF 笔不在列表中；PNG 中 09/10/11 三行的已显影长度互不相同（09 行满行且笔在行上方的回程弧上）。
+4. 标定条内 `circle[r="50%"]` 的 `getBBox().width` 约 291.5（r≈145.8），且圆被 400×100 的嵌套视口裁成弧带；旁注文字给出 145.8 / 50 / 200 三个数。
+5. 溢出三联中 `overflow:hidden` 与 `overflow:scroll` 两格的圆被裁在框线内、无滚动条，`overflow:visible` 一格的圆明显溢出到框外（PNG 可直接判读）。
+6. 拖动台面宽度滑轨改写相机 `width` 后，`ResizeObserver` 回调至少触发一次，时标尺子元素数量随之变化且相邻刻度间距 ≥26 px，尺端文本与 `contentRect` 的宽高一致。
+7. 在舞台上做 `pointermove` 后 `window.__INTERACTION_COUNT__` 增加，且采样十字中心经三链回算得到的记录纸坐标与指针位置往返误差 < 0.01 记录纸单位。
+8. Shift 框选后命中的道带上 `data-select="intersect"`（黄）或 `"enclose"`（绿）；在未实现 `checkIntersection` 的引擎上改为 `data-fallback="bbox"` 且着色结果一致。
 
-**浏览器注意**　currentScale / currentTranslate 只对独立 SVG 文档的最外层 svg 生效：Chrome 与 Firefox 对 HTML 内联的根 svg 直接忽略写入（读回仍为 1），Safari 历史上表现不一致，可能真的缩放。场景因此把它做成显式负对照行，生效与否由写入前后 `getScreenCTM().a` 实测判定并据实改写文案，真实缩放一律由 viewBox 承担，静帧在任一引擎下都可读。scroll 驱动动画（`animation-timeline: scroll()`）在 Chrome 115+ 与 Safari 26+ 可用，Firefox 仍需开关，用 `CSS.supports()` 探测后退回 scroll 事件直写 `stroke-dashoffset`，视觉一致并标 `data-fallback`。`checkIntersection` / `checkEnclosure` 在 Firefox 未实现，Chrome 与 Safari 的实现基于 bbox 而非真实几何（细描边的弯曲道会“过度命中”），场景据此只用它做粗筛并标注该限制，Firefox 走 `getBBox()` 加变换求交的回退。SVG 元素上的 `offset-path` 参考框在各引擎间曾有 border-box / view-box 之争，故显式声明 `transform-box: view-box; transform-origin: 0 0;`；`offset-rotate: reverse` 需要 Safari 16+，更旧版本回退成 `auto 180deg`。`ResizeObserver` 观察 SVG 元素时 Chrome / Firefox 报告 bbox，部分 Safari 版本对 SVG 目标不触发，故同时观察 HTML 宿主 `div#stage`，取先到的回调。触摸事件在无触摸屏的桌面 Safari / Firefox 完全不派发，Chrome 需开触摸模拟，因此主交互链路是 Pointer Events，触点面板在无触摸环境下显示录制回放并标注「回放」。`getScreenCTM()` 在页面存在 CSS transform 或页面缩放时各引擎处理有差异，场景不给舞台加任何 CSS transform，并用 `stage.getBoundingClientRect()` 作为手算链的唯一屏幕锚点，使三链在 devicePixelRatio ≠ 1 时依然同值。`overflow: scroll` 在三个引擎里都不会给 SVG 视口生成滚动条，等同 hidden，格内文字直接写出这条实测结论。抓图环境禁网，不加载任何 webfont：数字全部使用 `ui-monospace, \"DejaVu Sans Mono\", monospace` 等宽回退栈，保证三链读数逐位对齐可比。
+**实现复审**
+
+- createSVGTransformFromMatrix 在 Chrome 152 仍要求旧 SVGMatrix；显式复制 DOMMatrix 的6个分量。
+- SVGMatrix 与 DOMMatrix 并非运行时别名，说明栏显示实测结果。
+- 三条坐标链以记录纸坐标误差 <0.001（优于原往返0.01要求）检查；SVGMatrix 路径存在单精度舍入，不能用时间差1e-6秒断言。
+- 缩短控制面板与矩阵读数文字，ResizeObserver 的完整观测值保留在 DOM dataset；固定截图内不再越过右边界。
+
+**浏览器注意**
+
+- currentScale / currentTranslate 只对独立 SVG 文档的最外层 svg 生效：Chrome 与 Firefox 对 HTML 内联的根 svg 直接忽略写入（读回仍为 1），Safari 历史上表现不一致，可能真的缩放。场景因此把它做成显式负对照行，生效与否由写入前后 `getScreenCTM().a` 实测判定并据实改写文案，真实缩放一律由 viewBox 承担，静帧在任一引擎下都可读。scroll 驱动动画（`animation-timeline: scroll()`）在 Chrome 115+ 与 Safari 26+ 可用，Firefox 仍需开关，用 `CSS.supports()` 探测后退回 scroll 事件直写 `stroke-dashoffset`，视觉一致并标 `data-fallback`。`checkIntersection` / `checkEnclosure` 在 Firefox 未实现，Chrome 与 Safari 的实现基于 bbox 而非真实几何（细描边的弯曲道会“过度命中”），场景据此只用它做粗筛并标注该限制，Firefox 走 `getBBox()` 加变换求交的回退。SVG 元素上的 `offset-path` 参考框在各引擎间曾有 border-box / view-box 之争，故显式声明 `transform-box: view-box; transform-origin: 0 0;`；`offset-rotate: reverse` 需要 Safari 16+，更旧版本回退成 `auto 180deg`。`ResizeObserver` 观察 SVG 元素时 Chrome / Firefox 报告 bbox，部分 Safari 版本对 SVG 目标不触发，故同时观察 HTML 宿主 `div#stage`，取先到的回调。触摸事件在无触摸屏的桌面 Safari / Firefox 完全不派发，Chrome 需开触摸模拟，因此主交互链路是 Pointer Events，触点面板在无触摸环境下显示录制回放并标注「回放」。`getScreenCTM()` 在页面存在 CSS transform 或页面缩放时各引擎处理有差异，场景不给舞台加任何 CSS transform，并用 `stage.getBoundingClientRect()` 作为手算链的唯一屏幕锚点，使三链在 devicePixelRatio ≠ 1 时依然同值。`overflow: scroll` 在三个引擎里都不会给 SVG 视口生成滚动条，等同 hidden，格内文字直接写出这条实测结论。抓图环境禁网，不加载任何 webfont：数字全部使用 `ui-monospace, \"DejaVu Sans Mono\", monospace` 等宽回退栈，保证三链读数逐位对齐可比。
 
 ## 4. 明确排除项
 
-以下特性已从 SVG 2 或浏览器中移除、或尚无任何浏览器实现，因此不作为覆盖目标；演示中如有涉及，只作为回退或对照出现。
+| 特性 | 状态 | 原因 |
+|---|---|---|
+| `api:SVGSVGElement.useCurrentView` | none | Removed in SVG 2; not implemented |
+| `api:SVGUseElement.instanceRoot` | none | Removed from Chrome; never in Firefox or Safari |
+| `at:a.xlink:title` | deprecated | xlink:title/type/role/arcrole/show/actuate removed in SVG 2; Chrome and Safari ignore, Firefox once tooltipped |
+| `at:svg.baseProfile` | deprecated | Removed in SVG 2; ignored by all browsers |
+| `at:svg.contentScriptType` | deprecated | Removed in SVG 2; ignored by all browsers |
+| `at:svg.externalResourcesRequired` | deprecated | Removed in SVG 2; never implemented by any browser |
+| `at:svg.playbackorder` | none | No browser implements |
+| `at:svg.version` | deprecated | Removed in SVG 2; ignored by all browsers |
+| `at:svg.xml:base` | deprecated | Removed from SVG 2; Chrome and Safari never resolved it, Firefox dropped it |
+| `at:svg.xmlns:xlink` | deprecated | Only needed for xlink:href in XML; unnecessary with SVG 2 href |
+| `at:svg.zoomAndPan` | deprecated | Deprecated in SVG 2; effectively ignored on standalone SVG in current Chrome, Firefox and Safari |
+| `at:switch.requiredFeatures` | deprecated | Removed in SVG 2; modern browsers ignore it (treated as passing) |
+| `at:use.xlink:href` | deprecated | Still rendered by all browsers; deprecated in SVG 2, href wins when both present |
+| `at:view.viewTarget` | none | Removed in SVG 2; no browser highlights the target |
+| `av:g.xml:space=preserve` | deprecated | Deprecated in SVG 2 but still honoured by all browsers |
+| `concept:svgview-viewtarget` | none | Removed; no browser implements |
+| `concept:svgview-zoomandpan` | deprecated | Deprecated with zoomAndPan; ignored by Chrome and Safari |
+| `el:unknown` | none | No browser implements SVGUnknownElement; unrecognised tags become plain SVGElement and render nothing |
+| `at:a.xlink:arcrole` | deprecated | ignored by all browsers |
+| `at:a.xlink:show` | deprecated | ignored by all browsers; target attribute replaces it |
+| `at:a.xlink:type` | deprecated | ignored by all browsers |
+| `at:svg.focusable` | deprecated | only legacy IE/Edge honoured it; ignored by all modern browsers |
+| `av:a.target=_replace` | deprecated | removed in SVG 2; browsers treat as a named window |
+| `concept:media-fragments-spatial` | none | no browser applies #xywh= to raster or SVG resources |
+| `concept:xlink-href-legacy` | deprecated | still rendered by all browsers; deprecated in SVG 2; xmlns:xlink declaration required in XML |
+| `el:audio` | none | no browser implements SVG-namespace audio |
+| `el:canvas` | none | no browser implements SVG-namespace canvas |
+| `el:iframe` | none | no browser implements SVG-namespace iframe |
+| `el:video` | none | no browser implements SVG-namespace video; use foreignObject with HTML video |
+| `pv:image-rendering=optimizeSpeed` | deprecated | legacy keywords mapped to pixelated/auto or ignored; removed from SVG 2 in favour of CSS values |
+| `api:SVGPathElement.getPathData` | none | No browser ships it; polyfill only |
+| `api:SVGPathElement.getPathSegAtLength` | deprecated | Still in Chrome, Firefox and Safari but removed from SVG 2 |
+| `api:SVGPathElement.pathSegList` | deprecated | Removed from Chrome 48 and WebKit; Firefox retains; dropped from SVG 2 |
+| `av:path.d=B` | none | Dropped from SVG 2 candidate; no browser |
+| `av:path.d=R` | none | Removed from SVG 2 draft; no browser |
+| `concept:multiple-fill-layers` | none | rolled back from SVG 2 Fill & Stroke drafts; no browser implements |
+| `el:color-profile` | deprecated | removed in SVG 2; Chrome dropped it, Firefox and Safari never implemented |
+| `el:cursor` | deprecated | removed in SVG 2; never implemented by browsers |
+| `el:solidcolor` | deprecated | from SVG Tiny 1.2, dropped from SVG 2 CR; no browser support |
+| `pr:buffered-rendering` | deprecated | removed in SVG 2; Chrome dropped it, WebKit still parses; will-change replaces it |
+| `pr:color-rendering` | deprecated | removed in SVG 2; no visible effect in browsers |
+| `pr:enable-background` | deprecated | removed in SVG 2; never implemented by browsers; isolation replaces it |
+| `pr:stroke-alignment` | none | moved from SVG 2 into SVG Strokes module; no browser implements |
+| `pr:stroke-dashcorner` | none | SVG Strokes module; no browser implements |
+| `pr:z-index` | none | deferred out of SVG 2; no browser reorders SVG by z-index |
+| `pv:fill=child` | none | deferred from SVG 2; no browser implements |
+| `pv:fill=icc-color()` | deprecated | removed in SVG 2; never implemented by browsers |
+| `pv:stroke-linejoin=arcs` | none | no browser implements; treated as invalid, renders miter |
+| `pv:vector-effect=fixed-position` | none | no browser implements; at-risk in spec |
+| `pv:vector-effect=non-rotation` | none | no browser implements; at-risk in spec |
+| `pv:vector-effect=non-scaling-size` | none | no browser implements; at-risk in spec |
+| `pv:vector-effect=non-scaling-stroke-viewport` | none | no browser parses the viewport/screen keywords; value becomes invalid |
+| `at:linearGradient.xlink:href` | deprecated | Still rendered by all browsers; deprecated in SVG 2 in favour of plain href |
+| `concept:pattern-overflow-visible` | none | All browsers clip tile content to the tile rectangle regardless of overflow |
+| `css:fill-css-gradient-image` | none | No browser accepts CSS image gradients in fill/stroke; only url(#id) paint servers |
+| `el:hatch` | none | Deferred from SVG 2 CR; no browser implements; Inkscape only |
+| `el:meshgradient` | none | Deferred from SVG 2 CR; Firefox prototype removed; Inkscape only |
+| `api:SVGTextContentElement.selectSubString` | deprecated | removed in SVG 2; no-op in Chrome, Firefox and Safari |
+| `at:text.xml:space` | deprecated | deprecated in SVG 2 in favour of white-space; still honoured by all browsers |
+| `at:textPath.spacing` | none | parsed but no browser distinguishes exact from auto |
+| `at:textPath.xlink:href` | deprecated | deprecated in SVG 2 but still honoured by all browsers |
+| `av:textPath.method=stretch` | none | no browser implements stretch; all fall back to align |
+| `concept:svg-as-image-external-font-blocked` | none | all browsers block external resources in SVG-as-image; only data URIs work |
+| `css:vertical-align-svg-text` | none | no browser applies vertical-align to SVG tspans |
+| `el:altGlyph` | deprecated | removed in SVG 2; WebKit dropped it, Chrome and Firefox never implemented |
+| `el:altGlyphDef` | deprecated | removed in SVG 2; no browser |
+| `el:altGlyphItem` | deprecated | removed in SVG 2; no browser |
+| `el:definition-src` | deprecated | SVG 1.0 only, removed in SVG 1.1; no browser |
+| `el:font` | deprecated | removed in SVG 2; Chrome 38 and WebKit dropped, Firefox never implemented |
+| `el:font-face` | deprecated | removed in SVG 2; no browser |
+| `el:font-face-format` | deprecated | removed in SVG 2; no browser |
+| `el:font-face-name` | deprecated | removed in SVG 2; no browser |
+| `el:font-face-src` | deprecated | removed in SVG 2; no browser |
+| `el:font-face-uri` | deprecated | removed in SVG 2; no browser |
+| `el:glyph` | deprecated | removed in SVG 2; no current browser |
+| `el:glyphRef` | deprecated | removed in SVG 2; no browser |
+| `el:hkern` | deprecated | removed in SVG 2; no current browser |
+| `el:missing-glyph` | deprecated | removed in SVG 2; no current browser |
+| `el:tbreak` | deprecated | SVG Tiny 1.2 only; no current browser |
+| `el:textArea` | deprecated | SVG Tiny 1.2 only; Opera Presto historically; no current browser |
+| `el:tref` | deprecated | removed in SVG 2; Chrome never implemented, Firefox and WebKit dropped it |
+| `el:vkern` | deprecated | removed in SVG 2; no current browser |
+| `pr:glyph-orientation-horizontal` | deprecated | removed in SVG 2; no browser implements |
+| `pr:glyph-orientation-vertical` | deprecated | removed in SVG 2; Chrome and Safari map 0/90 only, Firefox ignores |
+| `pr:inline-size` | none | no browser implements SVG text wrapping |
+| `pr:kerning` | deprecated | removed in SVG 2; ignored by all browsers, use font-kerning |
+| `pr:shape-inside` | none | no browser implements |
+| `pr:text-decoration-fill` | none | no browser implements |
+| `pr:text-overflow` | none | no browser applies text-overflow to SVG text |
+| `pv:dominant-baseline=text-before-edge` | deprecated | dropped from CSS Inline; Chrome and Safari still render, Firefox maps loosely |
+| `pv:writing-mode=tb` | deprecated | SVG 1.1 keywords still mapped to vertical-rl/horizontal-tb by all browsers |
+| `css:mask-border` | none | Not applicable to SVG elements; only -webkit-mask-box-image on HTML in Chromium/WebKit |
+| `pr:clip` | deprecated | Removed in SVG 2 and CSS Masking; Chrome and Firefox ignore it on SVG, use clip-path inset() |
+| `at:marker.position` | none | SVG 2 draft attribute removed with marker-pattern; no browser |
+| `at:marker.transform` | none | marker is not a transformable element; transform attribute ignored in all browsers |
+| `av:marker.refX=center` | none | No browser accepts the keywords; treated as invalid (0) in Chrome, Firefox, Safari |
+| `concept:markers-on-basic-shapes` | none | Chrome, Firefox and Safari draw markers only on path, line, polyline, polygon |
+| `pr:marker-knockout-left` | none | Dropped from SVG 2; no browser |
+| `pr:marker-pattern` | none | Proposed in SVG 2 drafts then removed; no browser |
+| `pr:marker-segment` | none | Removed from SVG 2; no browser |
+| `at:feGaussianBlur.edgeMode` | none | No shipping Chrome, Firefox or Safari applies edgeMode on feGaussianBlur; all behave as none |
+| `at:feImage.xlink:href` | deprecated | Still works everywhere but deprecated by SVG 2 in favor of href |
+| `at:filter.filterRes` | deprecated | Removed in Filter Effects 1; Chrome dropped it, Firefox and Safari never honored it |
+| `at:filter.href` | deprecated | Dropped in Filter Effects 1; no browser implements inheritance |
+| `av:feGaussianBlur.in=BackgroundAlpha` | deprecated | Removed in Filter Effects 1; no browser support |
+| `av:feGaussianBlur.in=BackgroundImage` | deprecated | Removed in Filter Effects 1; only old IE/Opera implemented; use CSS backdrop-filter |
+| `av:feGaussianBlur.in=FillPaint` | deprecated | Removed in Filter Effects 1; browsers treat as transparent black |
+| `av:feGaussianBlur.in=StrokePaint` | deprecated | Removed in Filter Effects 1; browsers treat as transparent black |
+| `at:feConvolveMatrix.kernelUnitLength` | none | no shipping browser implements; kernel always samples device pixels |
+| `at:feDiffuseLighting.kernelUnitLength` | none | no shipping browser implements for feDiffuseLighting or feSpecularLighting |
+| `api:TimeEvent` | deprecated | removed from SVG 2; browsers dispatch plain Event/TimeEvent inconsistently |
+| `at:animate.attributeType` | deprecated | dropped from SVG 2; browsers still parse it as a hint |
+| `at:animateMotion.origin` | none | no browser implements; always behaves as default |
+| `at:svg.timelinebegin` | none | no browser implements |
+| `av:animate.begin=wallclock` | none | no browser implements wallclock timing |
+| `av:animate.dur=media` | none | no browser implements media duration |
+| `concept:view-element-animations` | none | no browser runs animations declared as children of <view> |
+| `el:animateColor` | deprecated | removed from SVG 2 and all browsers; Firefox never supported |
+| `el:animation` | deprecated | SVG Tiny 1.2 only; no current browser |
+| `el:prefetch` | deprecated | SVG Tiny 1.2 only; no current browser |
+| `api:SVGElement.getPresentationAttribute` | deprecated | Removed from SVG 2; Chrome and Firefox dropped, Safari retains SVGPaint |
+| `api:SVGElementInstance` | deprecated | Removed in SVG 2; Chrome dropped in 2016, Firefox and Safari never exposed it |
+| `api:SVGGraphicsElement.getTransformToElement` | deprecated | Removed from SVG 2, Chrome 48 and Firefox; Safari still exposes |
+| `api:SVGGraphicsElement.nearestViewportElement` | deprecated | Deprecated in SVG 2; still exposed by browsers |
+| `api:SVGMatrix` | deprecated | Aliased to DOMMatrix/DOMPoint/DOMRect in all browsers; names retained |
+| `api:SVGSVGElement.currentView` | deprecated | Removed from SVG 2 and from browsers |
+| `api:SVGSVGElement.suspendRedraw` | deprecated | Kept as no-ops or removed; no rendering effect anywhere |
+| `api:SVGUnknownElement` | none | No browser exposes SVGUnknownElement; unknown svg-namespace elements are plain SVGElement |
+| `api:SVGZoomEvent` | deprecated | Removed in SVG 2 and from all browsers |
+| `at:svg.contentStyleType` | deprecated | Removed in SVG 2; ignored by all browsers |
+| `concept:waapi-non-css-attribute-animation` | none | points, viewBox, x1/y1, dx are not CSS properties; no engine animates them via animate() |
+| `concept:xlink-namespace-setattribute` | deprecated | xlink:href deprecated in SVG 2; plain href works everywhere |
+| `pv:transform-style=preserve-3d` | none | No browser creates 3D contexts for SVG descendants; always flattened |
+| `api:SVGSVGElement.createSVGMatrix` | deprecated | SVGMatrix and SVGPoint replaced by DOMMatrix and DOMPoint in SVG 2; still shipping as aliases |
+| `av:svg.preserveAspectRatio=defer` | deprecated | removed in SVG 2; browsers ignore defer |
+| `concept:transform-on-tspan-ignored` | none | no browser applies transform to tspan; use text-level transform or the rotate attribute |
+| `at:a.xlink:href` | deprecated | Still honoured by all browsers but deprecated in SVG 2 |
+| `concept:svg-1.1-dom-events` | deprecated | Dropped in SVG 2; browsers only fire plain load/resize/scroll/focusin; mutation events removed from Chrome 127 |
+| `el:handler` | deprecated | SVG Tiny 1.2 only; no current browser |
+| `el:listener` | deprecated | SVG Tiny 1.2 only; no current browser |
 
-| 特性键 | 名称 | 规范 | 状态 | 说明 |
+## 5. 验证命令
+
+```bash
+npm run plan
+npm run plan:check
+npm test
+SCENES=core-sample-stratigraphy npm run render
+```
+
+## 6. 完整特性清单
+
+### 文档结构与复用
+
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
 |---|---|---|---|---|
-| `api:SVGElement.getPresentationAttribute` | getPresentationAttribute, SVGPaint, SVGColor removed | Deprecated | 已废弃 | Removed from SVG 2; Chrome and Firefox dropped, Safari retains SVGPaint |
-| `api:SVGElementInstance` | SVGElementInstance / SVGElementInstanceList removed | Deprecated | 已废弃 | Removed in SVG 2; Chrome dropped in 2016, Firefox and Safari never exposed it |
-| `api:SVGGraphicsElement.getTransformToElement` | getTransformToElement removed | Deprecated | 已废弃 | Removed from SVG 2, Chrome 48 and Firefox; Safari still exposes |
-| `api:SVGGraphicsElement.nearestViewportElement` | nearestViewportElement / farthestViewportElement | Deprecated | 已废弃 | Deprecated in SVG 2; still exposed by browsers |
-| `api:SVGMatrix` | SVGMatrix / SVGPoint / SVGRect legacy interfaces | Deprecated | 已废弃 | Aliased to DOMMatrix/DOMPoint/DOMRect in all browsers; names retained |
-| `api:SVGPathElement.getPathSegAtLength` | getPathSegAtLength() | Deprecated | 已废弃 | Still in Chrome, Firefox and Safari but removed from SVG 2 |
-| `api:SVGPathElement.pathSegList` | pathSegList / SVGPathSeg interfaces | Deprecated | 已废弃 | Removed from Chrome 48 and WebKit; Firefox retains; dropped from SVG 2 |
-| `api:SVGSVGElement.createSVGMatrix` | createSVGMatrix / createSVGTransform / createSVGPoint legacy factories | Deprecated | 已废弃 | SVGMatrix and SVGPoint replaced by DOMMatrix and DOMPoint in SVG 2; still shipping as aliases |
-| `api:SVGSVGElement.currentView` | currentView / useCurrentView / SVGViewSpec / pixelUnitToMillimeterX | Deprecated | 已废弃 | Removed from SVG 2 and from browsers |
-| `api:SVGSVGElement.suspendRedraw` | suspendRedraw / unsuspendRedraw / forceRedraw / deselectAll | Deprecated | 已废弃 | Kept as no-ops or removed; no rendering effect anywhere |
-| `api:SVGTextContentElement.selectSubString` | selectSubString | Deprecated | 已废弃 | removed in SVG 2; no-op in Chrome, Firefox and Safari |
-| `api:SVGZoomEvent` | SVGZoomEvent removed | Deprecated | 已废弃 | Removed in SVG 2 and from all browsers |
-| `api:TimeEvent` | TimeEvent interface (detail) | Deprecated | 已废弃 | removed from SVG 2; browsers dispatch plain Event/TimeEvent inconsistently |
-| `at:a.xlink:arcrole` | xlink:arcrole / xlink:role | Deprecated | 已废弃 | ignored by all browsers |
-| `at:a.xlink:href` | a xlink:href (legacy) | Deprecated | 已废弃 | Still honoured by all browsers but deprecated in SVG 2 |
-| `at:a.xlink:show` | xlink:show | Deprecated | 已废弃 | ignored by all browsers; target attribute replaces it |
-| `at:a.xlink:title` | xlink:title and other xlink:* attributes | Deprecated | 已废弃 | xlink:title/type/role/arcrole/show/actuate removed in SVG 2; Chrome and Safari ignore, Firefox once tooltipped |
-| `at:a.xlink:type` | xlink:type / xlink:actuate | Deprecated | 已废弃 | ignored by all browsers |
-| `at:animate.attributeType` | attributeType CSS / XML / auto | Deprecated | 已废弃 | dropped from SVG 2; browsers still parse it as a hint |
-| `at:feImage.xlink:href` | feImage xlink:href | Deprecated | 已废弃 | Still works everywhere but deprecated by SVG 2 in favor of href |
-| `at:filter.filterRes` | filterRes intermediate resolution | Deprecated | 已废弃 | Removed in Filter Effects 1; Chrome dropped it, Firefox and Safari never honored it |
-| `at:filter.href` | filter href inheritance from another filter | Deprecated | 已废弃 | Dropped in Filter Effects 1; no browser implements inheritance |
-| `at:linearGradient.xlink:href` | xlink:href on gradients and patterns | Deprecated | 已废弃 | Still rendered by all browsers; deprecated in SVG 2 in favour of plain href |
-| `at:svg.baseProfile` | baseProfile attribute | Deprecated | 已废弃 | Removed in SVG 2; ignored by all browsers |
-| `at:svg.contentScriptType` | contentScriptType / contentStyleType | Deprecated | 已废弃 | Removed in SVG 2; ignored by all browsers |
-| `at:svg.contentStyleType` | contentStyleType | Deprecated | 已废弃 | Removed in SVG 2; ignored by all browsers |
-| `at:svg.externalResourcesRequired` | externalResourcesRequired | Deprecated | 已废弃 | Removed in SVG 2; never implemented by any browser |
-| `at:svg.focusable` | focusable attribute (SVG Tiny 1.2 / IE) | Deprecated | 已废弃 | only legacy IE/Edge honoured it; ignored by all modern browsers |
-| `at:svg.version` | version attribute | Deprecated | 已废弃 | Removed in SVG 2; ignored by all browsers |
-| `at:svg.xml:base` | xml:base removed | Deprecated | 已废弃 | Removed from SVG 2; Chrome and Safari never resolved it, Firefox dropped it |
-| `at:svg.xmlns:xlink` | xmlns:xlink declaration | Deprecated | 已废弃 | Only needed for xlink:href in XML; unnecessary with SVG 2 href |
-| `at:svg.zoomAndPan` | zoomAndPan magnify/disable | Deprecated | 已废弃 | Deprecated in SVG 2; effectively ignored on standalone SVG in current Chrome, Firefox and Safari |
-| `at:switch.requiredFeatures` | requiredFeatures conditional attribute | Deprecated | 已废弃 | Removed in SVG 2; modern browsers ignore it (treated as passing) |
-| `at:text.xml:space` | xml:space=preserve whitespace handling | Deprecated | 已废弃 | deprecated in SVG 2 in favour of white-space; still honoured by all browsers |
-| `at:textPath.xlink:href` | textPath xlink:href (legacy) | Deprecated | 已废弃 | deprecated in SVG 2 but still honoured by all browsers |
-| `at:use.xlink:href` | xlink:href legacy reference | Deprecated | 已废弃 | Still rendered by all browsers; deprecated in SVG 2, href wins when both present |
-| `av:a.target=_replace` | a target _replace | Deprecated | 已废弃 | removed in SVG 2; browsers treat as a named window |
-| `av:feGaussianBlur.in=BackgroundAlpha` | BackgroundAlpha keyword | Deprecated | 已废弃 | Removed in Filter Effects 1; no browser support |
-| `av:feGaussianBlur.in=BackgroundImage` | BackgroundImage keyword | Deprecated | 已废弃 | Removed in Filter Effects 1; only old IE/Opera implemented; use CSS backdrop-filter |
-| `av:feGaussianBlur.in=FillPaint` | FillPaint keyword | Deprecated | 已废弃 | Removed in Filter Effects 1; browsers treat as transparent black |
-| `av:feGaussianBlur.in=StrokePaint` | StrokePaint keyword | Deprecated | 已废弃 | Removed in Filter Effects 1; browsers treat as transparent black |
-| `av:g.xml:space=preserve` | xml:space=preserve whitespace handling | Deprecated | 已废弃 | Deprecated in SVG 2 but still honoured by all browsers |
-| `av:svg.preserveAspectRatio=defer` | preserveAspectRatio defer keyword removed | Deprecated | 已废弃 | removed in SVG 2; browsers ignore defer |
-| `concept:svg-1.1-dom-events` | SVG 1.1 events (SVGZoom, SVGScroll, SVGResize, DOMActivate, DOMFocusIn, mutation events, onzoom) | Deprecated | 已废弃 | Dropped in SVG 2; browsers only fire plain load/resize/scroll/focusin; mutation events removed from Chrome 127 |
-| `concept:svgview-zoomandpan` | svgView(zoomAndPan(...)) fragment | Deprecated | 已废弃 | Deprecated with zoomAndPan; ignored by Chrome and Safari |
-| `concept:xlink-href-legacy` | xlink:href and xmlns:xlink namespace | Deprecated | 已废弃 | still rendered by all browsers; deprecated in SVG 2; xmlns:xlink declaration required in XML |
-| `concept:xlink-namespace-setattribute` | setAttributeNS with the xlink namespace for href | Deprecated | 已废弃 | xlink:href deprecated in SVG 2; plain href works everywhere |
-| `el:altGlyph` | <altGlyph> alternate glyph selection | Deprecated | 已废弃 | removed in SVG 2; WebKit dropped it, Chrome and Firefox never implemented |
-| `el:altGlyphDef` | <altGlyphDef> | Deprecated | 已废弃 | removed in SVG 2; no browser |
-| `el:altGlyphItem` | <altGlyphItem> | Deprecated | 已废弃 | removed in SVG 2; no browser |
-| `el:animateColor` | animateColor element | Deprecated | 已废弃 | removed from SVG 2 and all browsers; Firefox never supported |
-| `el:animation` | nested SVG animation element (SVG Tiny 1.2) | Deprecated | 已废弃 | SVG Tiny 1.2 only; no current browser |
-| `el:color-profile` | <color-profile> element and color-profile property | Deprecated | 已废弃 | removed in SVG 2; Chrome dropped it, Firefox and Safari never implemented |
-| `el:cursor` | <cursor> element | Deprecated | 已废弃 | removed in SVG 2; never implemented by browsers |
-| `el:definition-src` | <definition-src> (SVG 1.0) | Deprecated | 已废弃 | SVG 1.0 only, removed in SVG 1.1; no browser |
-| `el:font` | <font> SVG font container | Deprecated | 已废弃 | removed in SVG 2; Chrome 38 and WebKit dropped, Firefox never implemented |
-| `el:font-face` | <font-face> SVG font descriptor | Deprecated | 已废弃 | removed in SVG 2; no browser |
-| `el:font-face-format` | <font-face-format> | Deprecated | 已废弃 | removed in SVG 2; no browser |
-| `el:font-face-name` | <font-face-name> | Deprecated | 已废弃 | removed in SVG 2; no browser |
-| `el:font-face-src` | <font-face-src> | Deprecated | 已废弃 | removed in SVG 2; no browser |
-| `el:font-face-uri` | <font-face-uri> | Deprecated | 已废弃 | removed in SVG 2; no browser |
-| `el:glyph` | <glyph> SVG font glyph | Deprecated | 已废弃 | removed in SVG 2; no current browser |
-| `el:glyphRef` | <glyphRef> | Deprecated | 已废弃 | removed in SVG 2; no browser |
-| `el:handler` | <handler> element (SVG Tiny 1.2) | Deprecated | 已废弃 | SVG Tiny 1.2 only; no current browser |
-| `el:hkern` | <hkern> horizontal kerning pair | Deprecated | 已废弃 | removed in SVG 2; no current browser |
-| `el:listener` | <listener> element (SVG Tiny 1.2) | Deprecated | 已废弃 | SVG Tiny 1.2 only; no current browser |
-| `el:missing-glyph` | <missing-glyph> fallback | Deprecated | 已废弃 | removed in SVG 2; no current browser |
-| `el:prefetch` | prefetch resource element (SVG Tiny 1.2) | Deprecated | 已废弃 | SVG Tiny 1.2 only; no current browser |
-| `el:solidcolor` | <solidcolor> paint server (solid-color / solid-opacity) | Deprecated | 已废弃 | from SVG Tiny 1.2, dropped from SVG 2 CR; no browser support |
-| `el:tbreak` | <tbreak> line break (SVG Tiny 1.2) | Deprecated | 已废弃 | SVG Tiny 1.2 only; no current browser |
-| `el:textArea` | <textArea> wrapped text (SVG Tiny 1.2) | Deprecated | 已废弃 | SVG Tiny 1.2 only; Opera Presto historically; no current browser |
-| `el:tref` | <tref> text reference | Deprecated | 已废弃 | removed in SVG 2; Chrome never implemented, Firefox and WebKit dropped it |
-| `el:vkern` | <vkern> vertical kerning pair | Deprecated | 已废弃 | removed in SVG 2; no current browser |
-| `pr:buffered-rendering` | buffered-rendering (removed; use will-change) | Deprecated | 已废弃 | removed in SVG 2; Chrome dropped it, WebKit still parses; will-change replaces it |
-| `pr:clip` | clip property with rect() on viewports (deprecated) | Deprecated | 已废弃 | Removed in SVG 2 and CSS Masking; Chrome and Firefox ignore it on SVG, use clip-path inset() |
-| `pr:color-rendering` | color-rendering hint | Deprecated | 已废弃 | removed in SVG 2; no visible effect in browsers |
-| `pr:enable-background` | enable-background / BackgroundImage | Deprecated | 已废弃 | removed in SVG 2; never implemented by browsers; isolation replaces it |
-| `pr:glyph-orientation-horizontal` | glyph-orientation-horizontal (legacy) | Deprecated | 已废弃 | removed in SVG 2; no browser implements |
-| `pr:glyph-orientation-vertical` | glyph-orientation-vertical (legacy) | Deprecated | 已废弃 | removed in SVG 2; Chrome and Safari map 0/90 only, Firefox ignores |
-| `pr:kerning` | kerning property / attribute (legacy) | Deprecated | 已废弃 | removed in SVG 2; ignored by all browsers, use font-kerning |
-| `pv:dominant-baseline=text-before-edge` | dominant-baseline text-before-edge / text-after-edge | Deprecated | 已废弃 | dropped from CSS Inline; Chrome and Safari still render, Firefox maps loosely |
-| `pv:fill=icc-color()` | icc-color() ICC profile paint | Deprecated | 已废弃 | removed in SVG 2; never implemented by browsers |
-| `pv:image-rendering=optimizeSpeed` | SVG 1.1 optimizeSpeed/optimizeQuality keywords | Deprecated | 已废弃 | legacy keywords mapped to pixelated/auto or ignored; removed from SVG 2 in favour of CSS values |
-| `pv:writing-mode=tb` | legacy writing-mode tb / tb-rl / rl / lr | Deprecated | 已废弃 | SVG 1.1 keywords still mapped to vertical-rl/horizontal-tb by all browsers |
-| `api:SVGPathElement.getPathData` | getPathData()/setPathData() path data API | SVG 2 | 未实现 | No browser ships it; polyfill only |
-| `api:SVGSVGElement.useCurrentView` | useCurrentView / currentView | Deprecated | 未实现 | Removed in SVG 2; not implemented |
-| `api:SVGUnknownElement` | SVGUnknownElement interface | SVG 2 | 未实现 | No browser exposes SVGUnknownElement; unknown svg-namespace elements are plain SVGElement |
-| `api:SVGUseElement.instanceRoot` | SVGUseElement.instanceRoot | DOM | 未实现 | Removed from Chrome; never in Firefox or Safari |
-| `at:animateMotion.origin` | animateMotion origin attribute | SMIL | 未实现 | no browser implements; always behaves as default |
-| `at:feConvolveMatrix.kernelUnitLength` | kernelUnitLength (convolution) | SVG 1.1 | 未实现 | no shipping browser implements; kernel always samples device pixels |
-| `at:feDiffuseLighting.kernelUnitLength` | kernelUnitLength (lighting) | SVG 1.1 | 未实现 | no shipping browser implements for feDiffuseLighting or feSpecularLighting |
-| `at:feGaussianBlur.edgeMode` | edgeMode on feGaussianBlur (none/duplicate/wrap) | SVG 2 | 未实现 | No shipping Chrome, Firefox or Safari applies edgeMode on feGaussianBlur; all behave as none |
-| `at:marker.position` | marker position attribute (draft) | Deprecated | 未实现 | SVG 2 draft attribute removed with marker-pattern; no browser |
-| `at:marker.transform` | transform on marker element | SVG 2 | 未实现 | marker is not a transformable element; transform attribute ignored in all browsers |
-| `at:svg.playbackorder` | playbackorder / timelinebegin | SVG 2 | 未实现 | No browser implements |
-| `at:svg.timelinebegin` | timelinebegin | SVG 2 | 未实现 | no browser implements |
-| `at:textPath.spacing` | spacing auto / exact | SVG 1.1 | 未实现 | parsed but no browser distinguishes exact from auto |
-| `at:view.viewTarget` | view viewTarget | Deprecated | 未实现 | Removed in SVG 2; no browser highlights the target |
-| `av:animate.begin=wallclock` | wallclock() begin | SMIL | 未实现 | no browser implements wallclock timing |
-| `av:animate.dur=media` | dur media | SMIL | 未实现 | no browser implements media duration |
-| `av:marker.refX=center` | refX/refY keywords left\|center\|right, top\|center\|bottom | SVG 2 | 未实现 | No browser accepts the keywords; treated as invalid (0) in Chrome, Firefox, Safari |
-| `av:path.d=B` | bearing commands B/b | SVG 2 | 未实现 | Dropped from SVG 2 candidate; no browser |
-| `av:path.d=R` | Catmull-Rom commands R/r | SVG 2 | 未实现 | Removed from SVG 2 draft; no browser |
-| `av:textPath.method=stretch` | method=stretch (warp glyph outlines) | SVG 1.1 | 未实现 | no browser implements stretch; all fall back to align |
-| `concept:markers-on-basic-shapes` | SVG 2 markers on rect, circle, ellipse | SVG 2 | 未实现 | Chrome, Firefox and Safari draw markers only on path, line, polyline, polygon |
-| `concept:media-fragments-spatial` | spatial media fragments (#xywh=) on image resources | SVG 2 | 未实现 | no browser applies #xywh= to raster or SVG resources |
-| `concept:multiple-fill-layers` | Multiple comma-separated fill/stroke paint layers (rolled back) | SVG 2 | 未实现 | rolled back from SVG 2 Fill & Stroke drafts; no browser implements |
-| `concept:pattern-overflow-visible` | overflow:visible on pattern tiles | SVG 1.1 | 未实现 | All browsers clip tile content to the tile rectangle regardless of overflow |
-| `concept:svg-as-image-external-font-blocked` | External fonts blocked in SVG used as <img> | CSS | 未实现 | all browsers block external resources in SVG-as-image; only data URIs work |
-| `concept:svgview-viewtarget` | svgView(viewTarget(...)) fragment | Deprecated | 未实现 | Removed; no browser implements |
-| `concept:transform-on-tspan-ignored` | transform on <tspan> is ignored | SVG 2 | 未实现 | no browser applies transform to tspan; use text-level transform or the rotate attribute |
-| `concept:view-element-animations` | animation elements inside view | SVG 2 | 未实现 | no browser runs animations declared as children of <view> |
-| `concept:waapi-non-css-attribute-animation` | WAAPI cannot animate non-CSS SVG attributes | DOM | 未实现 | points, viewBox, x1/y1, dx are not CSS properties; no engine animates them via animate() |
-| `css:fill-css-gradient-image` | CSS linear-gradient() as SVG fill | CSS | 未实现 | No browser accepts CSS image gradients in fill/stroke; only url(#id) paint servers |
-| `css:mask-border` | mask-border on SVG elements | CSS | 未实现 | Not applicable to SVG elements; only -webkit-mask-box-image on HTML in Chromium/WebKit |
-| `css:vertical-align-svg-text` | vertical-align shorthand replacing baseline props | SVG 2 | 未实现 | no browser applies vertical-align to SVG tspans |
-| `el:audio` | SVG-namespace audio element | SVG 2 | 未实现 | no browser implements SVG-namespace audio |
-| `el:canvas` | SVG-namespace canvas element | SVG 2 | 未实现 | no browser implements SVG-namespace canvas |
-| `el:hatch` | hatch / hatchpath paint server | SVG 2 | 未实现 | Deferred from SVG 2 CR; no browser implements; Inkscape only |
-| `el:iframe` | SVG-namespace iframe element | SVG 2 | 未实现 | no browser implements SVG-namespace iframe |
-| `el:meshgradient` | meshgradient / meshrow / meshpatch (and draft mesh alias) | SVG 2 | 未实现 | Deferred from SVG 2 CR; Firefox prototype removed; Inkscape only |
-| `el:unknown` | unknown element placeholder | SVG 2 | 未实现 | No browser implements SVGUnknownElement; unrecognised tags become plain SVGElement and render nothing |
-| `el:video` | SVG-namespace video element | SVG 2 | 未实现 | no browser implements SVG-namespace video; use foreignObject with HTML video |
-| `pr:inline-size` | inline-size auto line wrapping | SVG 2 | 未实现 | no browser implements SVG text wrapping |
-| `pr:marker-knockout-left` | marker-knockout-left / marker-knockout-right | Deprecated | 未实现 | Dropped from SVG 2; no browser |
-| `pr:marker-pattern` | marker-pattern (repeating markers along path) | Deprecated | 未实现 | Proposed in SVG 2 drafts then removed; no browser |
-| `pr:marker-segment` | marker-segment (per-segment midpoint marker) | Deprecated | 未实现 | Removed from SVG 2; no browser |
-| `pr:shape-inside` | shape-inside / shape-subtract / shape-padding text wrapping | SVG 2 | 未实现 | no browser implements |
-| `pr:stroke-alignment` | stroke-alignment inner/outer | SVG 2 | 未实现 | moved from SVG 2 into SVG Strokes module; no browser implements |
-| `pr:stroke-dashcorner` | stroke-dashcorner / stroke-dash-justify | SVG 2 | 未实现 | SVG Strokes module; no browser implements |
-| `pr:text-decoration-fill` | text-decoration-fill / text-decoration-stroke | SVG 2 | 未实现 | no browser implements |
-| `pr:text-overflow` | text-overflow on SVG text | SVG 2 | 未实现 | no browser applies text-overflow to SVG text |
-| `pr:z-index` | z-index (dropped from SVG 2) | Deprecated | 未实现 | deferred out of SVG 2; no browser reorders SVG by z-index |
-| `pv:fill=child` | child / child(n) paint values (deferred) | SVG 2 | 未实现 | deferred from SVG 2; no browser implements |
-| `pv:stroke-linejoin=arcs` | arcs join | SVG 2 | 未实现 | no browser implements; treated as invalid, renders miter |
-| `pv:transform-style=preserve-3d` | transform-style: preserve-3d inside SVG | CSS | 未实现 | No browser creates 3D contexts for SVG descendants; always flattened |
-| `pv:vector-effect=fixed-position` | vector-effect: fixed-position | SVG 2 | 未实现 | no browser implements; at-risk in spec |
-| `pv:vector-effect=non-rotation` | vector-effect: non-rotation | SVG 2 | 未实现 | no browser implements; at-risk in spec |
-| `pv:vector-effect=non-scaling-size` | vector-effect: non-scaling-size | SVG 2 | 未实现 | no browser implements; at-risk in spec |
-| `pv:vector-effect=non-scaling-stroke-viewport` | vector-effect viewport / screen reference modifiers | SVG 2 | 未实现 | no browser parses the viewport/screen keywords; value becomes invalid |
+| `api:Document.createElementNS` | createElementNS with SVG namespace | core | broad | mycelium-culture-chamber |
+| `api:SVGSVGElement.currentScale` | currentScale / currentTranslate | core | partial | seismic-drum-console |
+| `api:SVGSVGElement.viewBox` | viewBox.baseVal scripting | core | broad | seismic-drum-console |
+| `at:a.href` | a href (including in-document #view links) | core | broad | celestial-astrolabe-cabinet |
+| `at:g.id` | id attribute (any element) | core | broad | celestial-astrolabe-cabinet |
+| `at:svg.lang` | lang / xml:lang attribute | core | broad | stele-rubbing-hall |
+| `at:svg.preserveAspectRatio` | preserveAspectRatio align + meet/slice | core | broad | celestial-astrolabe-cabinet |
+| `at:svg.transform` | transform on svg element | core | partial | celestial-astrolabe-cabinet |
+| `at:svg.viewBox` | viewBox user coordinate system | core | broad | celestial-astrolabe-cabinet |
+| `at:svg.width` | svg width/height viewport size | core | broad | museum-label-panel |
+| `at:svg.xmlns` | xmlns namespace declaration | core | broad | museum-label-panel |
+| `at:switch.systemLanguage` | systemLanguage conditional attribute | core | broad | stele-rubbing-hall |
+| `at:symbol.refX` | symbol refX/refY anchor point | core | partial | celestial-astrolabe-cabinet |
+| `at:symbol.viewBox` | symbol viewBox | core | broad | celestial-astrolabe-cabinet |
+| `at:use.href` | href without xlink prefix (use and all referencing elements) | core | broad | celestial-astrolabe-cabinet |
+| `at:use.width` | use width/height override for symbol/svg targets | core | broad | celestial-astrolabe-cabinet |
+| `at:use.x` | use x/y translation | core | broad | celestial-astrolabe-cabinet |
+| `av:svg.preserveAspectRatio=none` | preserveAspectRatio none (non-uniform stretch) | core | broad | celestial-astrolabe-cabinet |
+| `av:svg.preserveAspectRatio=xMidYMid-slice` | preserveAspectRatio xMidYMid slice (cover) | core | broad | celestial-astrolabe-cabinet |
+| `concept:fragment-identifier-viewid` | #viewId fragment identifier | core | broad | celestial-astrolabe-cabinet |
+| `concept:nested-svg` | Nested svg viewport | core | broad | celestial-astrolabe-cabinet |
+| `concept:nested-viewport-clipping` | Nested svg clips to viewport by default | core | broad | celestial-astrolabe-cabinet |
+| `concept:painting-order-document` | Document order defines stacking (no z-index) | core | broad | celestial-astrolabe-cabinet |
+| `concept:script-cdata` | CDATA wrapping for script/style in XML SVG | core | broad | mycelium-culture-chamber |
+| `concept:sprite-sheet` | Symbol sprite sheet | core | broad | celestial-astrolabe-cabinet |
+| `concept:svg-auto-sizing` | width/height auto and intrinsic aspect ratio | core | broad | museum-label-panel |
+| `concept:svgview-fragment-identifier` | SVG fragment identifiers (#id, #svgView(viewBox(...))) | core | partial | celestial-astrolabe-cabinet |
+| `concept:svgview-viewbox` | svgView(viewBox(...)) fragment sprite crop | core | broad | celestial-astrolabe-cabinet |
+| `concept:use-css-custom-properties-passthrough` | CSS custom properties passed into use instance | core | broad | celestial-astrolabe-cabinet |
+| `concept:use-currentcolor-passthrough` | currentColor passed through use | core | broad | celestial-astrolabe-cabinet |
+| `concept:use-external-fragment` | use referencing external file fragment (symbol library) | core | broad | celestial-astrolabe-cabinet |
+| `concept:use-inherited-fill-override` | Per-instance colour via inherited properties | core | broad | celestial-astrolabe-cabinet |
+| `concept:use-of-use` | Nested use-of-use instancing | core | broad | celestial-astrolabe-cabinet |
+| `concept:use-shadow-tree-styling` | use shadow tree: selectors cannot reach inside | core | broad | celestial-astrolabe-cabinet |
+| `concept:xml-stylesheet-pi` | xml-stylesheet processing instruction | core | broad | letterpress-type-specimen |
+| `el:a` | a hyperlink element | core | broad | celestial-astrolabe-cabinet |
+| `el:defs` | defs definitions container | core | broad | celestial-astrolabe-cabinet |
+| `el:desc` | desc long description | core | broad | museum-label-panel |
+| `el:g` | g group container | core | broad | celestial-astrolabe-cabinet |
+| `el:metadata` | metadata element | core | broad | museum-label-panel |
+| `el:script` | script element inside SVG | core | broad | mycelium-culture-chamber |
+| `el:style` | style element inside SVG | core | broad | letterpress-type-specimen |
+| `el:svg` | svg root element | core | broad | celestial-astrolabe-cabinet |
+| `el:switch` | switch conditional processing | core | broad | stele-rubbing-hall |
+| `el:symbol` | symbol reusable template | core | broad | celestial-astrolabe-cabinet |
+| `el:title` | title element (tooltip and accessible name) | core | broad | museum-label-panel |
+| `el:use` | use element instancing | core | broad | celestial-astrolabe-cabinet |
+| `el:view` | view predefined viewport | core | broad | celestial-astrolabe-cabinet |
+| `pv:overflow=visible` | overflow: visible on nested viewport | core | broad | celestial-astrolabe-cabinet |
+| `pv:white-space=pre` | white-space CSS replacement for xml:space | core | broad | letterpress-type-specimen |
+| `api:SVGElement.viewportElement` | ownerSVGElement / viewportElement | detail / `concept:nested-svg` | broad | celestial-astrolabe-cabinet |
+| `api:SVGSVGElement.getElementById` | SVGSVGElement.getElementById | detail / `at:g.id` | broad | celestial-astrolabe-cabinet |
+| `api:SVGSVGElement.getIntersectionList` | getIntersectionList / getEnclosureList / checkIntersection | detail / `api:SVGSVGElement.viewBox` | partial | seismic-drum-console (via api:SVGSVGElement.viewBox) |
+| `api:SVGSVGElement.preserveAspectRatio` | preserveAspectRatio.baseVal scripting | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `api:SVGSVGElement.useCurrentView` | useCurrentView / currentView | detail / `el:view` | none | celestial-astrolabe-cabinet (via el:view) |
+| `api:SVGUseElement.instanceRoot` | SVGUseElement.instanceRoot | detail / `concept:use-shadow-tree-styling` | none | celestial-astrolabe-cabinet |
+| `at:a.download` | a download/rel/hreflang/type/ping (HTML-aligned) | detail / `el:a` | partial | celestial-astrolabe-cabinet (via el:a) |
+| `at:a.target` | a target | detail / `el:a` | broad | celestial-astrolabe-cabinet |
+| `at:a.xlink:title` | xlink:title and other xlink:* attributes | detail / `el:a` | deprecated | celestial-astrolabe-cabinet (via el:a) |
+| `at:g.class` | class attribute (any element) | detail / `el:style` | broad | letterpress-type-specimen |
+| `at:g.data-*` | custom data-* attributes on SVG elements | detail / `at:g.id` | broad | celestial-astrolabe-cabinet (via at:g.id) |
+| `at:g.style` | style attribute (any element) | detail / `el:style` | broad | letterpress-type-specimen (via el:style) |
+| `at:script.href` | script href external file | detail / `el:script` | broad | mycelium-culture-chamber (via el:script) |
+| `at:style.media` | style media attribute | detail / `el:style` | broad | letterpress-type-specimen (via el:style) |
+| `at:svg.baseProfile` | baseProfile attribute | detail / `el:svg` | deprecated | celestial-astrolabe-cabinet (via el:svg) |
+| `at:svg.contentScriptType` | contentScriptType / contentStyleType | detail / `el:svg` | deprecated | celestial-astrolabe-cabinet (via el:svg) |
+| `at:svg.externalResourcesRequired` | externalResourcesRequired | detail / `el:svg` | deprecated | celestial-astrolabe-cabinet (via el:svg) |
+| `at:svg.playbackorder` | playbackorder / timelinebegin | detail / `el:svg` | none | celestial-astrolabe-cabinet (via el:svg) |
+| `at:svg.version` | version attribute | detail / `el:svg` | deprecated | celestial-astrolabe-cabinet (via el:svg) |
+| `at:svg.x` | svg x/y position (nested only) | detail / `concept:nested-svg` | broad | celestial-astrolabe-cabinet |
+| `at:svg.xml:base` | xml:base removed | detail / `el:svg` | deprecated | celestial-astrolabe-cabinet (via el:svg) |
+| `at:svg.xmlns:xlink` | xmlns:xlink declaration | detail / `at:svg.xmlns` | deprecated | museum-label-panel |
+| `at:svg.zoomAndPan` | zoomAndPan magnify/disable | detail / `el:svg` | deprecated | celestial-astrolabe-cabinet (via el:svg) |
+| `at:switch.requiredExtensions` | requiredExtensions conditional attribute | detail / `el:switch` | broad | stele-rubbing-hall |
+| `at:switch.requiredFeatures` | requiredFeatures conditional attribute | detail / `el:switch` | deprecated | stele-rubbing-hall (via el:switch) |
+| `at:symbol.preserveAspectRatio` | symbol preserveAspectRatio | detail / `el:symbol` | broad | celestial-astrolabe-cabinet (via el:symbol) |
+| `at:symbol.x` | symbol x/y/width/height geometry | detail / `el:symbol` | partial | celestial-astrolabe-cabinet (via el:symbol) |
+| `at:use.xlink:href` | xlink:href legacy reference | detail / `at:use.href` | deprecated | celestial-astrolabe-cabinet |
+| `at:view.preserveAspectRatio` | view preserveAspectRatio | detail / `el:view` | broad | celestial-astrolabe-cabinet (via el:view) |
+| `at:view.viewBox` | view viewBox | detail / `el:view` | broad | celestial-astrolabe-cabinet |
+| `at:view.viewTarget` | view viewTarget | detail / `el:view` | none | celestial-astrolabe-cabinet (via el:view) |
+| `av:g.xml:space=preserve` | xml:space=preserve whitespace handling | detail / `pv:white-space=pre` | deprecated | letterpress-type-specimen |
+| `av:svg.preserveAspectRatio=xMaxYMax-meet` | preserveAspectRatio xMaxYMax meet | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMaxYMax-slice` | preserveAspectRatio xMaxYMax slice | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMaxYMid-meet` | preserveAspectRatio xMaxYMid meet | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMaxYMid-slice` | preserveAspectRatio xMaxYMid slice | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMaxYMin-meet` | preserveAspectRatio xMaxYMin meet | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMaxYMin-slice` | preserveAspectRatio xMaxYMin slice | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMidYMax-meet` | preserveAspectRatio xMidYMax meet | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMidYMax-slice` | preserveAspectRatio xMidYMax slice | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMidYMid-meet` | preserveAspectRatio xMidYMid meet (default) | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMidYMin-meet` | preserveAspectRatio xMidYMin meet | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMidYMin-slice` | preserveAspectRatio xMidYMin slice | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMinYMax-meet` | preserveAspectRatio xMinYMax meet | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMinYMax-slice` | preserveAspectRatio xMinYMax slice | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMinYMid-meet` | preserveAspectRatio xMinYMid meet | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMinYMid-slice` | preserveAspectRatio xMinYMid slice | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMinYMin-meet` | preserveAspectRatio xMinYMin meet | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMinYMin-slice` | preserveAspectRatio xMinYMin slice | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `concept:conditional-attrs-outside-switch` | Conditional attributes hide elements outside switch | detail / `el:switch` | broad | stele-rubbing-hall |
+| `concept:defs-anywhere` | defs and forward references anywhere in document | detail / `el:defs` | broad | celestial-astrolabe-cabinet |
+| `concept:duplicate-id-first-wins` | Duplicate ids resolve to the first element | detail / `at:g.id` | broad | celestial-astrolabe-cabinet (via at:g.id) |
+| `concept:g-property-inheritance` | Presentation property inheritance through g | detail / `el:g` | broad | celestial-astrolabe-cabinet |
+| `concept:geometry-min-max-constraints` | min/max-width and height constraining root svg sizing | detail / `el:svg` | partial | celestial-astrolabe-cabinet (via el:svg) |
+| `concept:list-syntax-whitespace-tolerance` | Whitespace and comma tolerance in attribute lists | detail / `at:svg.viewBox` | broad | celestial-astrolabe-cabinet |
+| `concept:nested-percentage-lengths` | Percentages resolve against nearest viewport | detail / `concept:nested-svg` | broad | celestial-astrolabe-cabinet (via concept:nested-svg) |
+| `concept:script-anywhere` | script allowed as child of any element | detail / `el:script` | broad | mycelium-culture-chamber (via el:script) |
+| `concept:script-blocked-in-img` | Scripts not executed in img/background/use | detail / `el:script` | broad | mycelium-culture-chamber |
+| `concept:svg-media-queries-in-img` | Media queries inside SVG respond to its own viewport | detail / `el:style` | broad | letterpress-type-specimen (via el:style) |
+| `concept:svgview-preserveaspectratio` | svgView(preserveAspectRatio(...)) fragment | detail / `concept:svgview-viewbox` | partial | celestial-astrolabe-cabinet (via concept:svgview-viewbox) |
+| `concept:svgview-transform` | svgView(transform(...)) fragment | detail / `concept:svgview-viewbox` | partial | celestial-astrolabe-cabinet (via concept:svgview-viewbox) |
+| `concept:svgview-viewtarget` | svgView(viewTarget(...)) fragment | detail / `concept:svgview-viewbox` | none | celestial-astrolabe-cabinet (via concept:svgview-viewbox) |
+| `concept:svgview-zoomandpan` | svgView(zoomAndPan(...)) fragment | detail / `concept:svgview-viewbox` | deprecated | celestial-astrolabe-cabinet (via concept:svgview-viewbox) |
+| `concept:switch-style-script-still-processed` | switch does not affect script/style processing | detail / `el:switch` | broad | stele-rubbing-hall (via el:switch) |
+| `concept:symbol-not-rendered-directly` | symbol never renders without use | detail / `el:symbol` | broad | celestial-astrolabe-cabinet |
+| `concept:title-placement-first-child` | title/desc must be first children | detail / `el:title` | broad | museum-label-panel |
+| `concept:use-cross-inline-svg` | use across separate inline svgs in one HTML page | detail / `concept:sprite-sheet` | broad | celestial-astrolabe-cabinet (via concept:sprite-sheet) |
+| `concept:use-cyclic-reference` | Cyclic use references render nothing | detail / `concept:use-of-use` | broad | celestial-astrolabe-cabinet (via concept:use-of-use) |
+| `concept:use-external-whole-document` | use referencing an external document without fragment | detail / `concept:use-external-fragment` | partial | celestial-astrolabe-cabinet (via concept:use-external-fragment) |
+| `concept:use-shadow-tree` | use instances as Shadow DOM with event retargeting | detail / `concept:use-shadow-tree-styling` | broad | celestial-astrolabe-cabinet |
+| `concept:use-symbol-default-100pct-size` | use of symbol defaults to 100% size | detail / `at:use.width` | broad | celestial-astrolabe-cabinet |
+| `concept:viewbox-pan` | viewBox origin offset (pan/crop) | detail / `at:svg.viewBox` | broad | celestial-astrolabe-cabinet |
+| `concept:viewport-overflow-scroll` | overflow: auto/scroll on svg viewports | detail / `pv:overflow=visible` | partial | celestial-astrolabe-cabinet (via pv:overflow=visible) |
+| `css:html-cascade-into-inline-svg` | HTML page stylesheet styles inline SVG | detail / `el:style` | broad | letterpress-type-specimen (via el:style) |
+| `el:unknown` | unknown element placeholder | detail / `el:svg` | none | celestial-astrolabe-cabinet (via el:svg) |
 
-## 5. 实现路线建议
+### 嵌入、外来内容与语义
 
-1. 新建 `src/svg/<id>.ts`（或 `.svg`），每个演示导出一个 `render(stage: SVGSVGElement)`；`main.ts` 根据 `?scene=` 分发，并保留 `window.__VIS_READY__` 与 pointer 计数钩子，现有 `scripts/capture.mjs` 的流程无需改动。
-2. 先做主打特性最“重”的演示（滤镜、SMIL、文本），因为它们决定截图管线的稳定性（滤镜区域、动画静帧、字体内嵌）。
-3. 在 `catalog.json` 中为每个演示新增条目（字段已在 `docs/svg-feature-demos.json` 中给出），并把该 JSON 的 `features[].demos` 作为测试断言：每个核心特性键至少出现在一个演示的 DOM 里（可用 `querySelector` / 属性检查自动验证）。
-4. 部分支持的特性在实现时加 `@supports` 或脚本探测的回退，验收截图以 Chromium 为准，Firefox / Safari 差异记录在演示的 `browser_notes` 中。
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `at:g.aria-hidden` | aria-hidden / role=presentation on decorative groups | core | broad | museum-label-panel |
+| `at:image.href` | image href (SVG 2 unprefixed) | core | broad | jacquard-loom-draft |
+| `at:image.preserveAspectRatio` | image preserveAspectRatio (meet alignment) | core | broad | jacquard-loom-draft |
+| `at:svg.aria-label` | aria-label on SVG elements | core | broad | museum-label-panel |
+| `av:svg.role=img` | role=img on svg root | core | broad | museum-label-panel |
+| `concept:foreignobject-css-grid-flex` | CSS grid/flex layout inside foreignObject | core | broad | museum-label-panel |
+| `concept:foreignobject-filter-clip-mask` | filter/clip-path/mask on foreignObject | core | partial | museum-label-panel |
+| `concept:foreignobject-form-controls` | Interactive HTML form controls inside SVG | core | broad | museum-label-panel |
+| `concept:foreignobject-html-text-wrapping` | Flowing, wrapping HTML text via foreignObject | core | broad | museum-label-panel |
+| `concept:foreignobject-mathml` | MathML formula inside foreignObject | core | broad | museum-label-panel |
+| `concept:foreignobject-transform` | Transforms applied to foreignObject | core | partial | museum-label-panel |
+| `concept:foreignobject-video` | HTML video/canvas/iframe inside foreignObject | core | partial | museum-label-panel |
+| `concept:image-data-uri` | data: URI raster embedding | core | broad | jacquard-loom-draft |
+| `concept:image-nested-svg-document` | SVG file referenced by image (secure static mode) | core | broad | jacquard-loom-draft |
+| `concept:inline-svg-in-html` | Inline SVG in an HTML document | core | broad | neon-sign-workshop |
+| `concept:intrinsic-sizing-of-embedded-svg` | Intrinsic size rules for embedded SVG | core | broad | museum-label-panel |
+| `concept:presentation-attribute-specificity` | Presentation attribute vs CSS cascade (specificity 0) | core | broad | letterpress-type-specimen |
+| `concept:standalone-svg-document` | Standalone SVG XML document | core | broad | celestial-astrolabe-cabinet, museum-label-panel, mycelium-culture-chamber |
+| `concept:style-attribute` | Inline style attribute on SVG elements | core | broad | letterpress-type-specimen |
+| `concept:svg-as-css-background-image` | SVG as CSS background-image / mask-image | core | broad | neon-sign-workshop |
+| `concept:svg-as-img-restrictions` | SVG in HTML img / picture (secure static mode) | core | broad | museum-label-panel |
+| `concept:svg-as-object-embed-iframe` | SVG via object/embed/iframe (scripts enabled) | core | broad | museum-label-panel |
+| `concept:tabindex-focusable-svg-elements` | tabindex on SVG elements and :focus styling | core | broad | museum-label-panel |
+| `concept:use-inheritance` | Property inheritance from use into its shadow tree | core | broad | celestial-astrolabe-cabinet |
+| `css:custom-properties` | CSS custom properties and var() in presentation properties | core | broad | museum-label-panel |
+| `css:forced-colors` | @media (forced-colors) and system colors | core | partial | museum-label-panel |
+| `css:media-print` | @media print inside SVG | core | broad | museum-label-panel |
+| `css:media-width-in-standalone-svg` | @media (width) responsive SVG in img/object | core | broad | museum-label-panel |
+| `css:prefers-color-scheme` | @media (prefers-color-scheme: dark) | core | broad | museum-label-panel |
+| `css:prefers-reduced-motion` | @media (prefers-reduced-motion) | core | broad | escapement-chronometer |
+| `el:foreignObject` | foreignObject element | core | broad | museum-label-panel |
+| `el:image` | image element | core | broad | jacquard-loom-draft |
+| `pr:image-rendering` | image-rendering property | core | broad | jacquard-loom-draft |
+| `pv:fill=currentcolor` | currentColor for icons inheriting HTML color | core | broad | museum-label-panel |
+| `api:HTMLObjectElement.contentDocument` | Accessing embedded SVG DOM via contentDocument | detail / `concept:svg-as-object-embed-iframe` | broad | museum-label-panel |
+| `api:SVGElement.style` | SVGElement.style CSSStyleDeclaration | detail / `el:style` | broad | letterpress-type-specimen |
+| `api:SVGImageElement.decode` | SVGImageElement.decode() | detail / `el:image` | partial | jacquard-loom-draft |
+| `at:a.rel` | a rel / referrerpolicy / hreflang / type | detail / `el:a` | partial | celestial-astrolabe-cabinet (via el:a) |
+| `at:a.xlink:arcrole` | xlink:arcrole / xlink:role | detail / `el:a` | deprecated | celestial-astrolabe-cabinet (via el:a) |
+| `at:a.xlink:show` | xlink:show | detail / `el:a` | deprecated | celestial-astrolabe-cabinet (via el:a) |
+| `at:a.xlink:type` | xlink:type / xlink:actuate | detail / `el:a` | deprecated | celestial-astrolabe-cabinet (via el:a) |
+| `at:foreignObject.width` | foreignObject width/height | detail / `el:foreignObject` | broad | museum-label-panel |
+| `at:foreignObject.x` | foreignObject x/y | detail / `el:foreignObject` | broad | museum-label-panel |
+| `at:image.crossorigin` | image crossorigin attribute | detail / `el:image` | broad | jacquard-loom-draft (via el:image) |
+| `at:image.decoding` | image decoding hint (sync/async) | detail / `el:image` | partial | jacquard-loom-draft |
+| `at:image.fetchpriority` | image fetchpriority hint | detail / `el:image` | partial | jacquard-loom-draft (via el:image) |
+| `at:image.width` | image width/height (explicit or auto from intrinsic size) | detail / `el:image` | broad | jacquard-loom-draft (via el:image) |
+| `at:image.x` | image x/y position | detail / `el:image` | broad | jacquard-loom-draft (via el:image) |
+| `at:svg.aria-describedby` | aria-describedby referencing desc | detail / `el:desc` | broad | museum-label-panel |
+| `at:svg.aria-labelledby` | aria-labelledby referencing title/text ids | detail / `at:svg.aria-label` | broad | museum-label-panel |
+| `at:svg.focusable` | focusable attribute (SVG Tiny 1.2 / IE) | detail / `concept:tabindex-focusable-svg-elements` | deprecated | museum-label-panel (via concept:tabindex-focusable-svg-elements) |
+| `av:a.target=_blank` | a target values (_blank/_self/_top/_parent) | detail / `el:a` | broad | celestial-astrolabe-cabinet |
+| `av:a.target=_replace` | a target _replace | detail / `el:a` | deprecated | celestial-astrolabe-cabinet (via el:a) |
+| `av:g.role=group` | role=group with aria-label on subdiagrams | detail / `av:svg.role=img` | broad | museum-label-panel |
+| `av:g.role=list` | role=list/listitem structure on groups | detail / `av:svg.role=img` | broad | museum-label-panel |
+| `av:image.preserveAspectRatio=none` | preserveAspectRatio none (non-uniform stretch) | detail / `at:image.preserveAspectRatio` | broad | jacquard-loom-draft |
+| `av:image.preserveAspectRatio=xMidYMid slice` | preserveAspectRatio slice (cover/crop) | detail / `at:image.preserveAspectRatio` | broad | jacquard-loom-draft (via at:image.preserveAspectRatio) |
+| `av:svg.role=graphics-document` | WAI-ARIA Graphics roles (graphics-document/object/symbol) | detail / `av:svg.role=img` | partial | museum-label-panel |
+| `concept:animated-raster-in-image` | animated GIF/APNG/WebP inside image | detail / `el:image` | broad | jacquard-loom-draft (via el:image) |
+| `concept:foreign-namespace-attributes-ignored` | Unknown namespaced elements/attributes ignored (inkscape:, sodipodi:) | detail / `el:metadata` | broad | museum-label-panel |
+| `concept:foreignobject-canvas-rasterization` | Rasterising SVG+foreignObject via canvas drawImage | detail / `el:foreignObject` | partial | museum-label-panel |
+| `concept:foreignobject-overflow-clipping` | foreignObject overflow (UA default hidden) | detail / `el:foreignObject` | broad | museum-label-panel |
+| `concept:foreignobject-viewbox-scaling` | HTML scaled by viewBox in foreignObject | detail / `el:foreignObject` | broad | museum-label-panel |
+| `concept:foreignobject-xmlns-requirement` | XHTML namespace requirement in standalone SVG | detail / `el:foreignObject` | broad | museum-label-panel |
+| `concept:html-link-stylesheet-in-svg` | XHTML link rel=stylesheet inside SVG | detail / `concept:xml-stylesheet-pi` | partial | letterpress-type-specimen (via concept:xml-stylesheet-pi) |
+| `concept:html-parser-foreign-content` | HTML parser foreign-content rules (case fix-up, no namespace) | detail / `concept:inline-svg-in-html` | broad | neon-sign-workshop (via concept:inline-svg-in-html) |
+| `concept:inline-svg-baseline-gap` | Inline svg is display:inline (baseline gap) | detail / `concept:inline-svg-in-html` | broad | neon-sign-workshop (via concept:inline-svg-in-html) |
+| `concept:inline-svg-id-collisions` | Duplicate ids across several inline SVGs | detail / `concept:inline-svg-in-html` | broad | neon-sign-workshop |
+| `concept:inline-svg-style-leaks-globally` | style inside inline SVG applies to the whole HTML document | detail / `el:style` | broad | letterpress-type-specimen (via el:style) |
+| `concept:lang-dependent-glyph-selection` | Language-dependent font and glyph selection | detail / `at:svg.lang` | broad | stele-rubbing-hall |
+| `concept:media-fragments-spatial` | spatial media fragments (#xywh=) on image resources | detail / `el:image` | none | jacquard-loom-draft (via el:image) |
+| `concept:metadata-rdf-dublin-core` | RDF / Dublin Core inside metadata | detail / `el:metadata` | broad | museum-label-panel |
+| `concept:svg-data-uri-encoding` | Encoding SVG in data: URIs (utf8, # escaping) | detail / `concept:svg-as-css-background-image` | broad | neon-sign-workshop |
+| `concept:svg-favicon` | SVG favicon with embedded dark-mode CSS | detail / `concept:svg-as-img-restrictions` | partial | museum-label-panel (via concept:svg-as-img-restrictions) |
+| `concept:svg-text-accessibility-and-find` | SVG text exposed to find-in-page, selection and AT | detail / `av:svg.role=img` | broad | museum-label-panel |
+| `concept:ua-stylesheet-defaults` | SVG user-agent stylesheet defaults | detail / `concept:presentation-attribute-specificity` | broad | letterpress-type-specimen |
+| `concept:use-shadow-tree-selector-isolation` | Document selectors do not reach into use shadow trees; custom properties do | detail / `concept:use-inheritance` | broad | celestial-astrolabe-cabinet |
+| `concept:var-in-presentation-attribute` | var() inside presentation attributes | detail / `css:custom-properties` | partial | museum-label-panel |
+| `concept:xlink-href-legacy` | xlink:href and xmlns:xlink namespace | detail / `at:image.href` | deprecated | jacquard-loom-draft |
+| `concept:xml-entities-and-cdata` | XML entities, internal DTD entity definitions and CDATA sections | detail / `concept:standalone-svg-document` | broad | museum-label-panel |
+| `concept:xml-well-formedness-errors` | Strict XML parsing (well-formedness failures) | detail / `concept:standalone-svg-document` | broad | museum-label-panel |
+| `css:container-queries` | Container queries around/inside SVG | detail / `concept:foreignobject-css-grid-flex` | partial | museum-label-panel |
+| `css:hyphens-in-foreignobject` | hyphens:auto with lang in foreignObject text | detail / `at:svg.lang` | partial | stele-rubbing-hall (via at:svg.lang) |
+| `css:import-rule` | @import inside SVG style element | detail / `el:style` | broad | letterpress-type-specimen (via el:style) |
+| `css:important-override` | !important in SVG styling | detail / `concept:presentation-attribute-specificity` | broad | letterpress-type-specimen |
+| `css:lang-selector` | :lang() pseudo-class styling | detail / `at:svg.lang` | broad | stele-rubbing-hall |
+| `css:light-dark-function` | light-dark() with color-scheme | detail / `css:prefers-color-scheme` | broad | museum-label-panel |
+| `css:link-pseudo-classes-svg-a` | :link/:visited/:hover/:focus on SVG a | detail / `el:a` | broad | celestial-astrolabe-cabinet (via el:a) |
+| `css:prefers-contrast` | @media (prefers-contrast: more) | detail / `css:forced-colors` | broad | museum-label-panel |
+| `css:root-selector-scope` | :root theming scope (svg root vs html root) | detail / `css:custom-properties` | broad | museum-label-panel |
+| `css:supports-rule` | @supports feature queries | detail / `css:custom-properties` | broad | museum-label-panel |
+| `css:target-pseudo-class` | :target with fragment links inside SVG | detail / `at:a.href` | broad | celestial-astrolabe-cabinet (via at:a.href) |
+| `el:audio` | SVG-namespace audio element | detail / `concept:foreignobject-video` | none | museum-label-panel (via concept:foreignobject-video) |
+| `el:canvas` | SVG-namespace canvas element | detail / `concept:foreignobject-video` | none | museum-label-panel |
+| `el:iframe` | SVG-namespace iframe element | detail / `concept:foreignobject-video` | none | museum-label-panel |
+| `el:video` | SVG-namespace video element | detail / `concept:foreignobject-video` | none | museum-label-panel (via concept:foreignobject-video) |
+| `pv:image-rendering=crisp-edges` | image-rendering crisp-edges | detail / `pr:image-rendering` | partial | jacquard-loom-draft (via pr:image-rendering) |
+| `pv:image-rendering=optimizeSpeed` | SVG 1.1 optimizeSpeed/optimizeQuality keywords | detail / `pr:image-rendering` | deprecated | jacquard-loom-draft (via pr:image-rendering) |
+| `pv:image-rendering=pixelated` | image-rendering pixelated | detail / `pr:image-rendering` | broad | jacquard-loom-draft |
 
-## 附录 A. 特性清单与归属
+### 基本图形与路径语法
 
-每项列出所属演示（主打以 ★ 标记；细节特性若未被显式引用，则显示“经 父特性”）。
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `api:SVGAnimatedLength.baseVal` | animated length baseVal/animVal on geometry attributes | core | broad | ship-lofting-floor |
+| `api:SVGGeometryElement.getPointAtLength` | getPointAtLength() | core | broad | ship-lofting-floor |
+| `api:SVGGeometryElement.getTotalLength` | getTotalLength() | core | broad | ship-lofting-floor |
+| `api:SVGGeometryElement.isPointInFill` | isPointInFill() | core | broad | ship-lofting-floor |
+| `api:SVGGraphicsElement.getBBox` | getBBox() geometry bounding box | core | broad | letterpress-type-specimen |
+| `at:path.d` | path data attribute d | core | broad | ship-lofting-floor |
+| `at:path.pathLength` | pathLength normalisation | core | broad | ship-lofting-floor |
+| `at:polygon.points` | polygon points list parsing | core | broad | pipeline-mimic-board |
+| `at:rect.rx` | rect corner radius rx | core | broad | jacquard-loom-draft |
+| `av:ellipse.rx=auto` | ellipse rx/ry auto (circle fallback) | core | partial | guilloche-intaglio-plate |
+| `av:path.d=A` | elliptical arc A/a | core | broad | ship-lofting-floor |
+| `av:path.d=C` | cubic Bezier curveto C/c | core | broad | ship-lofting-floor |
+| `av:path.d=H` | horizontal lineto H/h | core | broad | ship-lofting-floor |
+| `av:path.d=L` | lineto L/l | core | broad | ship-lofting-floor |
+| `av:path.d=M` | moveto M/m | core | broad | ship-lofting-floor |
+| `av:path.d=Q` | quadratic Bezier curveto Q/q | core | broad | ship-lofting-floor |
+| `av:path.d=S` | smooth cubic curveto S/s | core | broad | ship-lofting-floor |
+| `av:path.d=T` | smooth quadratic curveto T/t | core | broad | ship-lofting-floor |
+| `av:path.d=V` | vertical lineto V/v | core | broad | ship-lofting-floor |
+| `av:path.d=Z` | closepath Z/z | core | broad | ship-lofting-floor |
+| `concept:arc-flag-combinations` | large-arc and sweep flags four combinations | core | broad | ship-lofting-floor |
+| `concept:arc-radius-scaling` | too-small arc radii scaled up | core | broad | ship-lofting-floor |
+| `concept:implicit-repeated-commands` | implicit command repetition (M implies L) | core | broad | ship-lofting-floor |
+| `concept:multiple-subpaths` | multiple subpaths in one path | core | broad | ship-lofting-floor |
+| `concept:relative-vs-absolute-commands` | lowercase relative vs uppercase absolute coordinates | core | broad | ship-lofting-floor |
+| `concept:smooth-cubic-reflection` | S reflects previous C/S second control point | core | broad | ship-lofting-floor |
+| `concept:smooth-quadratic-reflection` | T reflects previous Q/T control point | core | broad | ship-lofting-floor |
+| `concept:zero-length-subpath-round-cap-dot` | zero-length segment with round cap renders dot | core | broad | ship-lofting-floor |
+| `css:d-property` | path d as CSS property | core | broad | ship-lofting-floor |
+| `el:circle` | circle element | core | broad | guilloche-intaglio-plate |
+| `el:ellipse` | ellipse element | core | broad | guilloche-intaglio-plate |
+| `el:line` | line element | core | broad | pipeline-mimic-board |
+| `el:path` | path element | core | broad | ship-lofting-floor |
+| `el:polygon` | polygon element | core | broad | pipeline-mimic-board |
+| `el:polyline` | polyline element | core | broad | pipeline-mimic-board |
+| `el:rect` | rect element | core | broad | jacquard-loom-draft |
+| `pr:fill-rule` | fill-rule property | core | broad | ship-lofting-floor |
+| `pr:shape-rendering` | shape-rendering property | core | broad | four-colour-press-check |
+| `api:SVGGeometryElement.isPointInStroke` | isPointInStroke() | detail / `api:SVGGeometryElement.isPointInFill` | broad | ship-lofting-floor |
+| `api:SVGGeometryElement.pathLength` | pathLength animated number | detail / `at:path.pathLength` | broad | ship-lofting-floor |
+| `api:SVGPathElement.getPathData` | getPathData()/setPathData() path data API | detail / `at:path.d` | none | ship-lofting-floor |
+| `api:SVGPathElement.getPathSegAtLength` | getPathSegAtLength() | detail / `api:SVGGeometryElement.getPointAtLength` | deprecated | ship-lofting-floor (via api:SVGGeometryElement.getPointAtLength) |
+| `api:SVGPathElement.pathSegList` | pathSegList / SVGPathSeg interfaces | detail / `at:path.d` | deprecated | ship-lofting-floor |
+| `api:SVGPointList` | polygon.points SVGPointList manipulation | detail / `at:polygon.points` | broad | pipeline-mimic-board |
+| `at:circle.cx` | circle cx/cy centre | detail / `el:circle` | broad | guilloche-intaglio-plate (via el:circle) |
+| `at:circle.r` | circle radius r | detail / `el:circle` | broad | guilloche-intaglio-plate |
+| `at:ellipse.cx` | ellipse cx/cy centre | detail / `el:ellipse` | broad | guilloche-intaglio-plate (via el:ellipse) |
+| `at:ellipse.rx` | ellipse horizontal radius rx | detail / `el:ellipse` | broad | guilloche-intaglio-plate |
+| `at:ellipse.ry` | ellipse vertical radius ry | detail / `el:ellipse` | broad | guilloche-intaglio-plate |
+| `at:line.x1` | line x1/y1/x2/y2 endpoints | detail / `el:line` | broad | pipeline-mimic-board |
+| `at:polyline.points` | polyline points list | detail / `el:polyline` | broad | pipeline-mimic-board |
+| `at:rect.ry` | rect vertical corner radius ry | detail / `at:rect.rx` | broad | jacquard-loom-draft |
+| `at:rect.width` | rect width/height size | detail / `el:rect` | broad | jacquard-loom-draft (via el:rect) |
+| `at:rect.x` | rect x/y position | detail / `el:rect` | broad | jacquard-loom-draft (via el:rect) |
+| `av:path.d=B` | bearing commands B/b | detail / `at:path.d` | none | ship-lofting-floor (via at:path.d) |
+| `av:path.d=R` | Catmull-Rom commands R/r | detail / `at:path.d` | none | ship-lofting-floor (via at:path.d) |
+| `av:rect.rx=auto` | rect rx/ry auto keyword | detail / `at:rect.rx` | broad | jacquard-loom-draft (via at:rect.rx) |
+| `concept:absolute-length-units-in-geometry` | CSS units (mm, cm, in, em) in geometry attributes | detail / `el:rect` | broad | jacquard-loom-draft (via el:rect) |
+| `concept:arc-coincident-endpoints-omitted` | arc with equal endpoints is skipped | detail / `av:path.d=A` | broad | ship-lofting-floor (via av:path.d=A) |
+| `concept:arc-flag-compact-parsing` | arc flags parsed without separators | detail / `av:path.d=A` | broad | ship-lofting-floor |
+| `concept:arc-negative-radius-absolute` | negative arc radii use absolute value | detail / `av:path.d=A` | broad | ship-lofting-floor (via av:path.d=A) |
+| `concept:arc-x-axis-rotation` | arc x-axis-rotation parameter | detail / `av:path.d=A` | broad | ship-lofting-floor |
+| `concept:arc-zero-radius-line` | zero arc radius degenerates to line | detail / `av:path.d=A` | broad | ship-lofting-floor |
+| `concept:bbox-excludes-stroke-and-control-points` | bbox ignores stroke and off-curve control points | detail / `api:SVGGraphicsElement.getBBox` | broad | letterpress-type-specimen |
+| `concept:closepath-join-vs-cap` | Z joins stroke ends, open path gets caps | detail / `av:path.d=Z` | broad | ship-lofting-floor |
+| `concept:empty-d-not-rendered` | empty or missing d/points disables rendering | detail / `at:path.d` | broad | ship-lofting-floor |
+| `concept:fill-closes-open-subpaths` | fill implicitly closes unclosed subpaths | detail / `av:path.d=Z` | broad | ship-lofting-floor |
+| `concept:line-has-no-fill-area` | line ignores fill | detail / `el:line` | broad | pipeline-mimic-board |
+| `concept:negative-length-error` | negative width/height/r treated as zero | detail / `el:rect` | broad | jacquard-loom-draft (via el:rect) |
+| `concept:path-error-partial-render` | path data error renders up to error | detail / `at:path.d` | broad | ship-lofting-floor |
+| `concept:path-must-start-with-moveto` | path data must begin with M/m | detail / `at:path.d` | broad | ship-lofting-floor |
+| `concept:path-number-syntax` | compact number syntax in path data | detail / `at:path.d` | broad | ship-lofting-floor |
+| `concept:pathlength-on-basic-shapes` | pathLength on rect/circle/ellipse/line/polyline/polygon | detail / `at:path.pathLength` | broad | ship-lofting-floor (via at:path.pathLength) |
+| `concept:points-odd-coordinate-count` | odd coordinate count drops trailing value | detail / `at:polygon.points` | broad | pipeline-mimic-board |
+| `concept:points-parse-error-partial-render` | points parse error renders prefix | detail / `at:polygon.points` | broad | pipeline-mimic-board |
+| `concept:polygon-vs-path-equivalence` | basic shapes as equivalent paths | detail / `el:path` | broad | ship-lofting-floor |
+| `concept:polyline-fill-implicit-close` | polyline fill closes area but stroke stays open | detail / `el:polyline` | broad | pipeline-mimic-board |
+| `concept:radius-percentage-normalized-diagonal` | percentage r resolves against normalized diagonal | detail / `el:circle` | broad | guilloche-intaglio-plate |
+| `concept:rect-corner-radius-clamp` | rx/ry clamped to half size | detail / `at:rect.rx` | broad | jacquard-loom-draft (via at:rect.rx) |
+| `concept:rect-percentage-geometry` | percentage x/y/width/height on rect | detail / `el:rect` | broad | jacquard-loom-draft (via el:rect) |
+| `concept:relative-moveto-after-closepath` | relative m after Z is relative to subpath start | detail / `av:path.d=M` | broad | ship-lofting-floor |
+| `concept:smooth-command-without-predecessor` | S/T after non-curve uses current point as control | detail / `concept:smooth-cubic-reflection` | broad | ship-lofting-floor |
+| `concept:stroke-dash-start-position-on-shapes` | dash pattern origin per basic shape | detail / `at:path.pathLength` | broad | ship-lofting-floor (via at:path.pathLength) |
+| `concept:winding-direction-holes` | subpath winding direction creates holes under nonzero | detail / `pr:fill-rule` | broad | ship-lofting-floor |
+| `concept:zero-length-subpath-square-cap` | zero-length segment with square cap renders square | detail / `concept:zero-length-subpath-round-cap-dot` | broad | ship-lofting-floor |
+| `concept:zero-size-shape-not-rendered` | zero width/height/r disables rendering | detail / `el:rect` | broad | jacquard-loom-draft (via el:rect) |
+| `css:custom-properties-in-geometry` | var() in geometry properties | detail / `css:geometry-properties` | broad | ship-lofting-floor |
+| `css:d-property-transition` | CSS transition between path() values | detail / `css:d-property` | broad | ship-lofting-floor |
+| `css:geometry-percentage-in-css` | percentage geometry values via CSS | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `css:geometry-properties-transition` | CSS transitions/animations on geometry properties | detail / `css:geometry-properties` | broad | ship-lofting-floor |
+| `pr:cx` | cx geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pr:cy` | cy geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pr:height` | height geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pr:r` | r geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pr:rx` | rx geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pr:ry` | ry geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pr:width` | width geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pr:x` | x geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pr:y` | y geometry property | detail / `css:geometry-properties` | broad | ship-lofting-floor (via css:geometry-properties) |
+| `pv:fill-rule=evenodd` | fill-rule evenodd | detail / `pr:fill-rule` | broad | ship-lofting-floor |
+| `pv:fill-rule=nonzero` | fill-rule nonzero | detail / `pr:fill-rule` | broad | ship-lofting-floor |
+| `pv:shape-rendering=auto` | shape-rendering auto | detail / `pr:shape-rendering` | broad | four-colour-press-check |
+| `pv:shape-rendering=crispEdges` | shape-rendering crispEdges | detail / `pr:shape-rendering` | broad | four-colour-press-check |
+| `pv:shape-rendering=geometricPrecision` | shape-rendering geometricPrecision | detail / `pr:shape-rendering` | broad | four-colour-press-check |
+| `pv:shape-rendering=optimizeSpeed` | shape-rendering optimizeSpeed | detail / `pr:shape-rendering` | partial | four-colour-press-check |
 
-### 文档结构与复用（`structure`，核心 50 项 / 细节 75 项）
+### 填充、描边与合成属性
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:Document.createElementNS` | createElementNS with SVG namespace | 核心 | DOM | 全平台 | mycelium-culture-chamber |
-| `api:SVGSVGElement.currentScale` | currentScale / currentTranslate | 核心 | DOM | 部分支持 | seismic-drum-console |
-| `api:SVGSVGElement.viewBox` | viewBox.baseVal scripting | 核心 | DOM | 全平台 | seismic-drum-console |
-| `at:a.href` | a href (including in-document #view links) | 核心 | SVG 2 | 全平台 | celestial-astrolabe-cabinet |
-| `at:g.id` | id attribute (any element) | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `at:svg.lang` | lang / xml:lang attribute | 核心 | SVG 2 | 全平台 | stele-rubbing-hall |
-| `at:svg.preserveAspectRatio` | preserveAspectRatio align + meet/slice | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `at:svg.transform` | transform on svg element | 核心 | SVG 2 | 部分支持 | celestial-astrolabe-cabinet |
-| `at:svg.viewBox` | viewBox user coordinate system | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `at:svg.width` | svg width/height viewport size | 核心 | SVG 1.1 | 全平台 | museum-label-panel |
-| `at:svg.xmlns` | xmlns namespace declaration | 核心 | SVG 1.1 | 全平台 | museum-label-panel |
-| `at:switch.systemLanguage` | systemLanguage conditional attribute | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `at:symbol.refX` | symbol refX/refY anchor point | 核心 | SVG 2 | 部分支持 | celestial-astrolabe-cabinet |
-| `at:symbol.viewBox` | symbol viewBox | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `at:use.href` | href without xlink prefix (use and all referencing elements) | 核心 | SVG 2 | 全平台 | celestial-astrolabe-cabinet |
-| `at:use.width` | use width/height override for symbol/svg targets | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `at:use.x` | use x/y translation | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `av:svg.preserveAspectRatio=none` | preserveAspectRatio none (non-uniform stretch) | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `av:svg.preserveAspectRatio=xMidYMid-slice` | preserveAspectRatio xMidYMid slice (cover) | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:fragment-identifier-viewid` | #viewId fragment identifier | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:nested-svg` | Nested svg viewport | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:nested-viewport-clipping` | Nested svg clips to viewport by default | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:painting-order-document` | Document order defines stacking (no z-index) | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:script-cdata` | CDATA wrapping for script/style in XML SVG | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:sprite-sheet` | Symbol sprite sheet | 核心 | SVG 1.1 | 全平台 | ★celestial-astrolabe-cabinet |
-| `concept:svg-auto-sizing` | width/height auto and intrinsic aspect ratio | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:svgview-fragment-identifier` | SVG fragment identifiers (#id, #svgView(viewBox(...))) | 核心 | SVG 1.1 | 部分支持 | celestial-astrolabe-cabinet |
-| `concept:svgview-viewbox` | svgView(viewBox(...)) fragment sprite crop | 核心 | SVG 1.1 | 全平台 | ★celestial-astrolabe-cabinet |
-| `concept:use-css-custom-properties-passthrough` | CSS custom properties passed into use instance | 核心 | CSS | 全平台 | ★celestial-astrolabe-cabinet |
-| `concept:use-currentcolor-passthrough` | currentColor passed through use | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:use-external-fragment` | use referencing external file fragment (symbol library) | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:use-inherited-fill-override` | Per-instance colour via inherited properties | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:use-of-use` | Nested use-of-use instancing | 核心 | SVG 1.1 | 全平台 | ★celestial-astrolabe-cabinet |
-| `concept:use-shadow-tree-styling` | use shadow tree: selectors cannot reach inside | 核心 | SVG 2 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:xml-stylesheet-pi` | xml-stylesheet processing instruction | 核心 | CSS | 全平台 | letterpress-type-specimen |
-| `el:a` | a hyperlink element | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `el:defs` | defs definitions container | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `el:desc` | desc long description | 核心 | SVG 1.1 | 全平台 | museum-label-panel |
-| `el:g` | g group container | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `el:metadata` | metadata element | 核心 | SVG 1.1 | 全平台 | museum-label-panel |
-| `el:script` | script element inside SVG | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `el:style` | style element inside SVG | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `el:svg` | svg root element | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `el:switch` | switch conditional processing | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `el:symbol` | symbol reusable template | 核心 | SVG 1.1 | 全平台 | ★celestial-astrolabe-cabinet |
-| `el:title` | title element (tooltip and accessible name) | 核心 | SVG 1.1 | 全平台 | museum-label-panel |
-| `el:use` | use element instancing | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `el:view` | view predefined viewport | 核心 | SVG 1.1 | 全平台 | ★celestial-astrolabe-cabinet |
-| `pv:overflow=visible` | overflow: visible on nested viewport | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `pv:white-space=pre` | white-space CSS replacement for xml:space | 核心 | SVG 2 | 全平台 | letterpress-type-specimen |
-| `api:SVGElement.viewportElement` | ownerSVGElement / viewportElement | 细节（父 `concept:nested-svg`） | DOM | 全平台 | celestial-astrolabe-cabinet |
-| `api:SVGSVGElement.getElementById` | SVGSVGElement.getElementById | 细节（父 `at:g.id`） | DOM | 全平台 | celestial-astrolabe-cabinet |
-| `api:SVGSVGElement.getIntersectionList` | getIntersectionList / getEnclosureList / checkIntersection | 细节（父 `api:SVGSVGElement.viewBox`） | DOM | 部分支持 | 经 `api:SVGSVGElement.viewBox` |
-| `api:SVGSVGElement.preserveAspectRatio` | preserveAspectRatio.baseVal scripting | 细节（父 `at:svg.preserveAspectRatio`） | DOM | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `api:SVGSVGElement.useCurrentView` | useCurrentView / currentView | 细节（父 `el:view`） | Deprecated | 未实现 | 经 `el:view` |
-| `api:SVGUseElement.instanceRoot` | SVGUseElement.instanceRoot | 细节（父 `concept:use-shadow-tree-styling`） | DOM | 未实现 | celestial-astrolabe-cabinet |
-| `at:a.download` | a download/rel/hreflang/type/ping (HTML-aligned) | 细节（父 `el:a`） | SVG 2 | 部分支持 | 经 `el:a` |
-| `at:a.target` | a target | 细节（父 `el:a`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `at:a.xlink:title` | xlink:title and other xlink:* attributes | 细节（父 `el:a`） | Deprecated | 已废弃 | 经 `el:a` |
-| `at:g.class` | class attribute (any element) | 细节（父 `el:style`） | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `at:g.data-*` | custom data-* attributes on SVG elements | 细节（父 `at:g.id`） | SVG 2 | 全平台 | 经 `at:g.id` |
-| `at:g.style` | style attribute (any element) | 细节（父 `el:style`） | SVG 1.1 | 全平台 | 经 `el:style` |
-| `at:script.href` | script href external file | 细节（父 `el:script`） | SVG 2 | 全平台 | 经 `el:script` |
-| `at:style.media` | style media attribute | 细节（父 `el:style`） | SVG 1.1 | 全平台 | 经 `el:style` |
-| `at:svg.baseProfile` | baseProfile attribute | 细节（父 `el:svg`） | Deprecated | 已废弃 | 经 `el:svg` |
-| `at:svg.contentScriptType` | contentScriptType / contentStyleType | 细节（父 `el:svg`） | Deprecated | 已废弃 | 经 `el:svg` |
-| `at:svg.externalResourcesRequired` | externalResourcesRequired | 细节（父 `el:svg`） | Deprecated | 已废弃 | 经 `el:svg` |
-| `at:svg.playbackorder` | playbackorder / timelinebegin | 细节（父 `el:svg`） | SVG 2 | 未实现 | 经 `el:svg` |
-| `at:svg.version` | version attribute | 细节（父 `el:svg`） | Deprecated | 已废弃 | 经 `el:svg` |
-| `at:svg.x` | svg x/y position (nested only) | 细节（父 `concept:nested-svg`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `at:svg.xml:base` | xml:base removed | 细节（父 `el:svg`） | Deprecated | 已废弃 | 经 `el:svg` |
-| `at:svg.xmlns:xlink` | xmlns:xlink declaration | 细节（父 `at:svg.xmlns`） | Deprecated | 已废弃 | museum-label-panel |
-| `at:svg.zoomAndPan` | zoomAndPan magnify/disable | 细节（父 `el:svg`） | Deprecated | 已废弃 | 经 `el:svg` |
-| `at:switch.requiredExtensions` | requiredExtensions conditional attribute | 细节（父 `el:switch`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `at:switch.requiredFeatures` | requiredFeatures conditional attribute | 细节（父 `el:switch`） | Deprecated | 已废弃 | 经 `el:switch` |
-| `at:symbol.preserveAspectRatio` | symbol preserveAspectRatio | 细节（父 `el:symbol`） | SVG 1.1 | 全平台 | 经 `el:symbol` |
-| `at:symbol.x` | symbol x/y/width/height geometry | 细节（父 `el:symbol`） | SVG 2 | 部分支持 | 经 `el:symbol` |
-| `at:use.xlink:href` | xlink:href legacy reference | 细节（父 `at:use.href`） | Deprecated | 已废弃 | celestial-astrolabe-cabinet |
-| `at:view.preserveAspectRatio` | view preserveAspectRatio | 细节（父 `el:view`） | SVG 1.1 | 全平台 | 经 `el:view` |
-| `at:view.viewBox` | view viewBox | 细节（父 `el:view`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `at:view.viewTarget` | view viewTarget | 细节（父 `el:view`） | Deprecated | 未实现 | 经 `el:view` |
-| `av:g.xml:space=preserve` | xml:space=preserve whitespace handling | 细节（父 `pv:white-space=pre`） | Deprecated | 已废弃 | letterpress-type-specimen |
-| `av:svg.preserveAspectRatio=xMaxYMax-meet` | preserveAspectRatio xMaxYMax meet | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMaxYMax-slice` | preserveAspectRatio xMaxYMax slice | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMaxYMid-meet` | preserveAspectRatio xMaxYMid meet | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMaxYMid-slice` | preserveAspectRatio xMaxYMid slice | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMaxYMin-meet` | preserveAspectRatio xMaxYMin meet | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMaxYMin-slice` | preserveAspectRatio xMaxYMin slice | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMidYMax-meet` | preserveAspectRatio xMidYMax meet | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMidYMax-slice` | preserveAspectRatio xMidYMax slice | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMidYMid-meet` | preserveAspectRatio xMidYMid meet (default) | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMidYMin-meet` | preserveAspectRatio xMidYMin meet | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMidYMin-slice` | preserveAspectRatio xMidYMin slice | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMinYMax-meet` | preserveAspectRatio xMinYMax meet | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMinYMax-slice` | preserveAspectRatio xMinYMax slice | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMinYMid-meet` | preserveAspectRatio xMinYMid meet | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMinYMid-slice` | preserveAspectRatio xMinYMid slice | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMinYMin-meet` | preserveAspectRatio xMinYMin meet | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMinYMin-slice` | preserveAspectRatio xMinYMin slice | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `concept:conditional-attrs-outside-switch` | Conditional attributes hide elements outside switch | 细节（父 `el:switch`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:defs-anywhere` | defs and forward references anywhere in document | 细节（父 `el:defs`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:duplicate-id-first-wins` | Duplicate ids resolve to the first element | 细节（父 `at:g.id`） | SVG 1.1 | 全平台 | 经 `at:g.id` |
-| `concept:g-property-inheritance` | Presentation property inheritance through g | 细节（父 `el:g`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:geometry-min-max-constraints` | min/max-width and height constraining root svg sizing | 细节（父 `el:svg`） | SVG 2 | 部分支持 | 经 `el:svg` |
-| `concept:list-syntax-whitespace-tolerance` | Whitespace and comma tolerance in attribute lists | 细节（父 `at:svg.viewBox`） | SVG 2 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:nested-percentage-lengths` | Percentages resolve against nearest viewport | 细节（父 `concept:nested-svg`） | SVG 1.1 | 全平台 | 经 `concept:nested-svg` |
-| `concept:script-anywhere` | script allowed as child of any element | 细节（父 `el:script`） | SVG 2 | 全平台 | 经 `el:script` |
-| `concept:script-blocked-in-img` | Scripts not executed in img/background/use | 细节（父 `el:script`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:svg-media-queries-in-img` | Media queries inside SVG respond to its own viewport | 细节（父 `el:style`） | CSS | 全平台 | 经 `el:style` |
-| `concept:svgview-preserveaspectratio` | svgView(preserveAspectRatio(...)) fragment | 细节（父 `concept:svgview-viewbox`） | SVG 1.1 | 部分支持 | 经 `concept:svgview-viewbox` |
-| `concept:svgview-transform` | svgView(transform(...)) fragment | 细节（父 `concept:svgview-viewbox`） | SVG 1.1 | 部分支持 | 经 `concept:svgview-viewbox` |
-| `concept:svgview-viewtarget` | svgView(viewTarget(...)) fragment | 细节（父 `concept:svgview-viewbox`） | Deprecated | 未实现 | 经 `concept:svgview-viewbox` |
-| `concept:svgview-zoomandpan` | svgView(zoomAndPan(...)) fragment | 细节（父 `concept:svgview-viewbox`） | Deprecated | 已废弃 | 经 `concept:svgview-viewbox` |
-| `concept:switch-style-script-still-processed` | switch does not affect script/style processing | 细节（父 `el:switch`） | SVG 2 | 全平台 | 经 `el:switch` |
-| `concept:symbol-not-rendered-directly` | symbol never renders without use | 细节（父 `el:symbol`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:title-placement-first-child` | title/desc must be first children | 细节（父 `el:title`） | SVG 2 | 全平台 | museum-label-panel |
-| `concept:use-cross-inline-svg` | use across separate inline svgs in one HTML page | 细节（父 `concept:sprite-sheet`） | SVG 1.1 | 全平台 | 经 `concept:sprite-sheet` |
-| `concept:use-cyclic-reference` | Cyclic use references render nothing | 细节（父 `concept:use-of-use`） | SVG 1.1 | 全平台 | 经 `concept:use-of-use` |
-| `concept:use-external-whole-document` | use referencing an external document without fragment | 细节（父 `concept:use-external-fragment`） | SVG 2 | 部分支持 | 经 `concept:use-external-fragment` |
-| `concept:use-shadow-tree` | use instances as Shadow DOM with event retargeting | 细节（父 `concept:use-shadow-tree-styling`） | SVG 2 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:use-symbol-default-100pct-size` | use of symbol defaults to 100% size | 细节（父 `at:use.width`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:viewbox-pan` | viewBox origin offset (pan/crop) | 细节（父 `at:svg.viewBox`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:viewport-overflow-scroll` | overflow: auto/scroll on svg viewports | 细节（父 `pv:overflow=visible`） | SVG 2 | 部分支持 | 经 `pv:overflow=visible` |
-| `css:html-cascade-into-inline-svg` | HTML page stylesheet styles inline SVG | 细节（父 `el:style`） | CSS | 全平台 | 经 `el:style` |
-| `el:unknown` | unknown element placeholder | 细节（父 `el:svg`） | SVG 2 | 未实现 | 经 `el:svg` |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `concept:line-drawing-dash-animation` | Line-drawing effect with dasharray = path length | core | broad | seismic-drum-console |
+| `concept:paint-server-fallback` | url() paint with fallback colour or none | core | broad | auroral-spectrograph |
+| `css:css-color-paint` | CSS Color syntaxes as paint (rgb/hsl, #rrggbbaa, oklch, lab, color()) | core | broad | guilloche-intaglio-plate |
+| `pr:color` | color property (currentColor source) | core | broad | guilloche-intaglio-plate |
+| `pr:color-interpolation` | color-interpolation sRGB/linearRGB | core | partial | four-colour-press-check |
+| `pr:cursor` | cursor property on SVG elements | core | broad | seismic-drum-console |
+| `pr:display` | display: none vs visibility | core | broad | escapement-chronometer |
+| `pr:fill` | fill paint property | core | broad | guilloche-intaglio-plate |
+| `pr:fill-opacity` | fill-opacity | core | broad | guilloche-intaglio-plate |
+| `pr:isolation` | isolation: isolate | core | broad | neon-sign-workshop |
+| `pr:mix-blend-mode` | mix-blend-mode on SVG elements | core | broad | neon-sign-workshop |
+| `pr:opacity` | opacity (group compositing vs per-element) | core | broad | guilloche-intaglio-plate |
+| `pr:overflow` | overflow on nested viewports | core | broad | seismic-drum-console |
+| `pr:paint-order` | paint-order | core | broad | guilloche-intaglio-plate |
+| `pr:stroke` | stroke paint property | core | broad | guilloche-intaglio-plate |
+| `pr:stroke-dasharray` | stroke-dasharray lengths | core | broad | guilloche-intaglio-plate |
+| `pr:stroke-dashoffset` | stroke-dashoffset (incl. negative) | core | broad | guilloche-intaglio-plate |
+| `pr:stroke-linecap` | stroke-linecap butt/round/square | core | broad | ship-lofting-floor |
+| `pr:stroke-linejoin` | stroke-linejoin miter/round/bevel | core | broad | ship-lofting-floor |
+| `pr:stroke-miterlimit` | stroke-miterlimit | core | broad | ship-lofting-floor |
+| `pr:stroke-opacity` | stroke-opacity | core | broad | guilloche-intaglio-plate |
+| `pr:stroke-width` | stroke-width in user units | core | broad | ship-lofting-floor |
+| `pr:text-rendering` | text-rendering hint | core | partial | letterpress-type-specimen |
+| `pr:visibility` | visibility hidden vs visible | core | broad | escapement-chronometer |
+| `pv:fill=context-fill` | context-fill paint (markers) | core | broad | pipeline-mimic-board |
+| `pv:fill=context-stroke` | Cross-using context paints (fill=context-stroke) | core | broad | pipeline-mimic-board |
+| `pv:fill=currentColor` | currentColor paint keyword | core | broad | guilloche-intaglio-plate |
+| `pv:fill=none` | fill: none (unfilled) | core | broad | guilloche-intaglio-plate |
+| `pv:fill=url()` | Paint server reference url(#id) | core | broad | auroral-spectrograph |
+| `pv:paint-order=markers` | paint-order with markers first | core | broad | pipeline-mimic-board |
+| `pv:stroke=context-stroke` | context-stroke paint (markers) | core | broad | pipeline-mimic-board |
+| `pv:vector-effect=non-scaling-stroke` | vector-effect: non-scaling-stroke | core | broad | guilloche-intaglio-plate |
+| `concept:closepath-join-vs-caps` | Closepath Z produces a join instead of caps | detail / `pr:stroke-linejoin` | broad | ship-lofting-floor (via pr:stroke-linejoin) |
+| `concept:context-paint-in-use` | context-fill/context-stroke inside <use> references | detail / `pv:fill=context-fill` | partial | pipeline-mimic-board |
+| `concept:currentcolor-icon-theming` | Recolouring <use> icons via CSS color | detail / `pv:fill=currentColor` | broad | guilloche-intaglio-plate |
+| `concept:dash-caps-overlap` | Caps applied to each dash | detail / `pr:stroke-dasharray` | broad | guilloche-intaglio-plate (via pr:stroke-dasharray) |
+| `concept:default-paint-values` | Initial values fill black, stroke none | detail / `pr:fill` | broad | guilloche-intaglio-plate (via pr:fill) |
+| `concept:dotted-line-round-caps` | Dotted line via zero dashes and round caps | detail / `pr:stroke-dasharray` | broad | guilloche-intaglio-plate |
+| `concept:half-pixel-crisp-lines` | Half-pixel offset for crisp 1px strokes | detail / `pr:shape-rendering` | broad | four-colour-press-check |
+| `concept:inner-outer-stroke-simulation` | Simulating inside/outside strokes | detail / `pr:paint-order` | broad | guilloche-intaglio-plate |
+| `concept:marching-ants` | Marching-ants selection outline | detail / `pr:stroke-dashoffset` | broad | guilloche-intaglio-plate |
+| `concept:multiple-fill-layers` | Multiple comma-separated fill/stroke paint layers (rolled back) | detail / `pr:fill` | none | guilloche-intaglio-plate (via pr:fill) |
+| `concept:odd-dash-repetition` | Odd-count dasharray doubled | detail / `pr:stroke-dasharray` | broad | guilloche-intaglio-plate |
+| `concept:opacity-zero-still-hit-testable` | opacity 0 keeps hit-testing unlike visibility hidden | detail / `pr:opacity` | broad | guilloche-intaglio-plate |
+| `concept:progress-ring` | Circular progress ring via dash on circle | detail / `pr:stroke-dasharray` | broad | guilloche-intaglio-plate (via pr:stroke-dasharray) |
+| `concept:stroke-over-fill-transparency` | Translucent stroke shows fill beneath its inner half | detail / `pr:stroke-opacity` | broad | guilloche-intaglio-plate |
+| `concept:stroke-paint-server` | Gradient or pattern on stroke | detail / `pr:stroke` | broad | guilloche-intaglio-plate (via pr:stroke) |
+| `concept:stroke-width-under-nonuniform-scale` | Stroke distorted by non-uniform transforms | detail / `pv:vector-effect=non-scaling-stroke` | broad | guilloche-intaglio-plate |
+| `concept:svg-blend-with-html-backdrop` | Blending inline SVG content against HTML backdrop | detail / `pr:mix-blend-mode` | broad | neon-sign-workshop |
+| `concept:visibility-child-override` | Child re-enabling visibility inside hidden parent | detail / `pr:visibility` | broad | escapement-chronometer |
+| `concept:zero-length-subpath-caps` | Zero-length subpaths render dots with round/square caps | detail / `pr:stroke-linecap` | broad | ship-lofting-floor (via pr:stroke-linecap) |
+| `el:color-profile` | <color-profile> element and color-profile property | detail / `css:css-color-paint` | deprecated | guilloche-intaglio-plate (via css:css-color-paint) |
+| `el:cursor` | <cursor> element | detail / `pr:cursor` | deprecated | seismic-drum-console (via pr:cursor) |
+| `el:solidcolor` | <solidcolor> paint server (solid-color / solid-opacity) | detail / `pv:fill=url()` | deprecated | auroral-spectrograph (via pv:fill=url()) |
+| `pr:buffered-rendering` | buffered-rendering (removed; use will-change) | detail / `pr:opacity` | deprecated | guilloche-intaglio-plate (via pr:opacity) |
+| `pr:color-rendering` | color-rendering hint | detail / `pr:color-interpolation` | deprecated | four-colour-press-check (via pr:color-interpolation) |
+| `pr:enable-background` | enable-background / BackgroundImage | detail / `pr:isolation` | deprecated | neon-sign-workshop (via pr:isolation) |
+| `pr:stroke-alignment` | stroke-alignment inner/outer | detail / `pr:stroke` | none | guilloche-intaglio-plate (via pr:stroke) |
+| `pr:stroke-dashcorner` | stroke-dashcorner / stroke-dash-justify | detail / `pr:stroke-dasharray` | none | guilloche-intaglio-plate (via pr:stroke-dasharray) |
+| `pr:z-index` | z-index (dropped from SVG 2) | detail / `pr:paint-order` | none | guilloche-intaglio-plate (via pr:paint-order) |
+| `pv:cursor=url()` | Custom image cursor via url() | detail / `pr:cursor` | broad | seismic-drum-console (via pr:cursor) |
+| `pv:fill=child` | child / child(n) paint values (deferred) | detail / `pr:fill` | none | guilloche-intaglio-plate (via pr:fill) |
+| `pv:fill=color-mix()` | color-mix() as paint | detail / `css:css-color-paint` | broad | guilloche-intaglio-plate |
+| `pv:fill=icc-color()` | icc-color() ICC profile paint | detail / `css:css-color-paint` | deprecated | guilloche-intaglio-plate (via css:css-color-paint) |
+| `pv:fill=inherit` | Explicit inherit of paint | detail / `pr:fill` | broad | guilloche-intaglio-plate (via pr:fill) |
+| `pv:fill=light-dark()` | light-dark() paint for colour schemes | detail / `css:css-color-paint` | broad | guilloche-intaglio-plate (via css:css-color-paint) |
+| `pv:fill=rgba()` | Alpha colour syntaxes (rgba, hsla, #rrggbbaa) | detail / `css:css-color-paint` | broad | guilloche-intaglio-plate |
+| `pv:fill=system-color` | System colour keywords (Canvas, CanvasText, Highlight, AccentColor) | detail / `css:css-color-paint` | broad | guilloche-intaglio-plate (via css:css-color-paint) |
+| `pv:fill=transparent` | transparent colour keyword as paint | detail / `pv:fill=none` | broad | guilloche-intaglio-plate (via pv:fill=none) |
+| `pv:mix-blend-mode=difference` | difference / exclusion blend | detail / `pr:mix-blend-mode` | broad | neon-sign-workshop (via pr:mix-blend-mode) |
+| `pv:mix-blend-mode=luminosity` | Non-separable blends (hue, saturation, color, luminosity) | detail / `pr:mix-blend-mode` | broad | neon-sign-workshop (via pr:mix-blend-mode) |
+| `pv:mix-blend-mode=screen` | Additive blend modes (screen, lighten, plus-lighter) | detail / `pr:mix-blend-mode` | broad | neon-sign-workshop |
+| `pv:overflow=scroll` | overflow: scroll / auto behave as hidden in SVG | detail / `pr:overflow` | broad | seismic-drum-console |
+| `pv:paint-order=stroke` | paint-order: stroke on text (outline behind fill) | detail / `pr:paint-order` | broad | guilloche-intaglio-plate |
+| `pv:stroke-dasharray=percentage` | Percentage dash lengths | detail / `pr:stroke-dasharray` | broad | guilloche-intaglio-plate (via pr:stroke-dasharray) |
+| `pv:stroke-linecap=round` | Round caps | detail / `pr:stroke-linecap` | broad | ship-lofting-floor |
+| `pv:stroke-linecap=square` | Square caps | detail / `pr:stroke-linecap` | broad | ship-lofting-floor |
+| `pv:stroke-linejoin=arcs` | arcs join | detail / `pr:stroke-linejoin` | none | ship-lofting-floor (via pr:stroke-linejoin) |
+| `pv:stroke-linejoin=bevel` | Bevel joins | detail / `pr:stroke-linejoin` | broad | ship-lofting-floor |
+| `pv:stroke-linejoin=miter-clip` | miter-clip join | detail / `pr:stroke-linejoin` | partial | ship-lofting-floor (via pr:stroke-linejoin) |
+| `pv:stroke-linejoin=round` | Round joins | detail / `pr:stroke-linejoin` | broad | ship-lofting-floor |
+| `pv:stroke-width=0` | Zero stroke-width suppresses stroke | detail / `pr:stroke-width` | broad | ship-lofting-floor |
+| `pv:stroke-width=em` | stroke-width with CSS units (em, px, mm) | detail / `pr:stroke-width` | broad | ship-lofting-floor (via pr:stroke-width) |
+| `pv:stroke-width=percentage` | stroke-width as percentage of viewport diagonal | detail / `pr:stroke-width` | broad | ship-lofting-floor (via pr:stroke-width) |
+| `pv:stroke=none` | stroke: none (default) | detail / `pr:stroke` | broad | guilloche-intaglio-plate |
+| `pv:vector-effect=fixed-position` | vector-effect: fixed-position | detail / `pv:vector-effect=non-scaling-stroke` | none | guilloche-intaglio-plate (via pv:vector-effect=non-scaling-stroke) |
+| `pv:vector-effect=non-rotation` | vector-effect: non-rotation | detail / `pv:vector-effect=non-scaling-stroke` | none | guilloche-intaglio-plate (via pv:vector-effect=non-scaling-stroke) |
+| `pv:vector-effect=non-scaling-size` | vector-effect: non-scaling-size | detail / `pv:vector-effect=non-scaling-stroke` | none | guilloche-intaglio-plate (via pv:vector-effect=non-scaling-stroke) |
+| `pv:vector-effect=non-scaling-stroke-viewport` | vector-effect viewport / screen reference modifiers | detail / `pv:vector-effect=non-scaling-stroke` | none | guilloche-intaglio-plate (via pv:vector-effect=non-scaling-stroke) |
+| `pv:visibility=collapse` | visibility: collapse | detail / `pr:visibility` | broad | escapement-chronometer |
 
-### 嵌入、外来内容与语义（`embedding`，核心 34 项 / 细节 65 项）
+### 渐变与图案
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `at:g.aria-hidden` | aria-hidden / role=presentation on decorative groups | 核心 | DOM | 全平台 | museum-label-panel |
-| `at:image.href` | image href (SVG 2 unprefixed) | 核心 | SVG 2 | 全平台 | jacquard-loom-draft |
-| `at:image.preserveAspectRatio` | image preserveAspectRatio (meet alignment) | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `at:svg.aria-label` | aria-label on SVG elements | 核心 | DOM | 全平台 | museum-label-panel |
-| `av:svg.role=img` | role=img on svg root | 核心 | DOM | 全平台 | museum-label-panel |
-| `concept:foreignobject-css-grid-flex` | CSS grid/flex layout inside foreignObject | 核心 | CSS | 全平台 | museum-label-panel |
-| `concept:foreignobject-filter-clip-mask` | filter/clip-path/mask on foreignObject | 核心 | SVG 1.1 | 部分支持 | museum-label-panel |
-| `concept:foreignobject-form-controls` | Interactive HTML form controls inside SVG | 核心 | SVG 1.1 | 全平台 | ★museum-label-panel |
-| `concept:foreignobject-html-text-wrapping` | Flowing, wrapping HTML text via foreignObject | 核心 | SVG 1.1 | 全平台 | ★museum-label-panel |
-| `concept:foreignobject-mathml` | MathML formula inside foreignObject | 核心 | SVG 1.1 | 全平台 | museum-label-panel |
-| `concept:foreignobject-transform` | Transforms applied to foreignObject | 核心 | SVG 1.1 | 部分支持 | museum-label-panel |
-| `concept:foreignobject-video` | HTML video/canvas/iframe inside foreignObject | 核心 | SVG 1.1 | 部分支持 | museum-label-panel |
-| `concept:image-data-uri` | data: URI raster embedding | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:image-nested-svg-document` | SVG file referenced by image (secure static mode) | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:inline-svg-in-html` | Inline SVG in an HTML document | 核心 | SVG 2 | 全平台 | neon-sign-workshop |
-| `concept:intrinsic-sizing-of-embedded-svg` | Intrinsic size rules for embedded SVG | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:presentation-attribute-specificity` | Presentation attribute vs CSS cascade (specificity 0) | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `concept:standalone-svg-document` | Standalone SVG XML document | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet, ★museum-label-panel, mycelium-culture-chamber |
-| `concept:style-attribute` | Inline style attribute on SVG elements | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `concept:svg-as-css-background-image` | SVG as CSS background-image / mask-image | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `concept:svg-as-img-restrictions` | SVG in HTML img / picture (secure static mode) | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:svg-as-object-embed-iframe` | SVG via object/embed/iframe (scripts enabled) | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:tabindex-focusable-svg-elements` | tabindex on SVG elements and :focus styling | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:use-inheritance` | Property inheritance from use into its shadow tree | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `css:custom-properties` | CSS custom properties and var() in presentation properties | 核心 | CSS | 全平台 | museum-label-panel |
-| `css:forced-colors` | @media (forced-colors) and system colors | 核心 | CSS | 部分支持 | museum-label-panel |
-| `css:media-print` | @media print inside SVG | 核心 | CSS | 全平台 | ★museum-label-panel |
-| `css:media-width-in-standalone-svg` | @media (width) responsive SVG in img/object | 核心 | CSS | 全平台 | ★museum-label-panel |
-| `css:prefers-color-scheme` | @media (prefers-color-scheme: dark) | 核心 | CSS | 全平台 | museum-label-panel |
-| `css:prefers-reduced-motion` | @media (prefers-reduced-motion) | 核心 | CSS | 全平台 | escapement-chronometer |
-| `el:foreignObject` | foreignObject element | 核心 | SVG 1.1 | 全平台 | ★museum-label-panel |
-| `el:image` | image element | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `pr:image-rendering` | image-rendering property | 核心 | CSS | 全平台 | jacquard-loom-draft |
-| `pv:fill=currentcolor` | currentColor for icons inheriting HTML color | 核心 | CSS | 全平台 | museum-label-panel |
-| `api:HTMLObjectElement.contentDocument` | Accessing embedded SVG DOM via contentDocument | 细节（父 `concept:svg-as-object-embed-iframe`） | DOM | 全平台 | museum-label-panel |
-| `api:SVGElement.style` | SVGElement.style CSSStyleDeclaration | 细节（父 `el:style`） | DOM | 全平台 | letterpress-type-specimen |
-| `api:SVGImageElement.decode` | SVGImageElement.decode() | 细节（父 `el:image`） | DOM | 部分支持 | jacquard-loom-draft |
-| `at:a.rel` | a rel / referrerpolicy / hreflang / type | 细节（父 `el:a`） | SVG 2 | 部分支持 | 经 `el:a` |
-| `at:a.xlink:arcrole` | xlink:arcrole / xlink:role | 细节（父 `el:a`） | Deprecated | 已废弃 | 经 `el:a` |
-| `at:a.xlink:show` | xlink:show | 细节（父 `el:a`） | Deprecated | 已废弃 | 经 `el:a` |
-| `at:a.xlink:type` | xlink:type / xlink:actuate | 细节（父 `el:a`） | Deprecated | 已废弃 | 经 `el:a` |
-| `at:foreignObject.width` | foreignObject width/height | 细节（父 `el:foreignObject`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `at:foreignObject.x` | foreignObject x/y | 细节（父 `el:foreignObject`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `at:image.crossorigin` | image crossorigin attribute | 细节（父 `el:image`） | SVG 2 | 全平台 | 经 `el:image` |
-| `at:image.decoding` | image decoding hint (sync/async) | 细节（父 `el:image`） | DOM | 部分支持 | jacquard-loom-draft |
-| `at:image.fetchpriority` | image fetchpriority hint | 细节（父 `el:image`） | DOM | 部分支持 | 经 `el:image` |
-| `at:image.width` | image width/height (explicit or auto from intrinsic size) | 细节（父 `el:image`） | SVG 2 | 全平台 | 经 `el:image` |
-| `at:image.x` | image x/y position | 细节（父 `el:image`） | SVG 1.1 | 全平台 | 经 `el:image` |
-| `at:svg.aria-describedby` | aria-describedby referencing desc | 细节（父 `el:desc`） | DOM | 全平台 | museum-label-panel |
-| `at:svg.aria-labelledby` | aria-labelledby referencing title/text ids | 细节（父 `at:svg.aria-label`） | DOM | 全平台 | museum-label-panel |
-| `at:svg.focusable` | focusable attribute (SVG Tiny 1.2 / IE) | 细节（父 `concept:tabindex-focusable-svg-elements`） | Deprecated | 已废弃 | 经 `concept:tabindex-focusable-svg-elements` |
-| `av:a.target=_blank` | a target values (_blank/_self/_top/_parent) | 细节（父 `el:a`） | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `av:a.target=_replace` | a target _replace | 细节（父 `el:a`） | Deprecated | 已废弃 | 经 `el:a` |
-| `av:g.role=group` | role=group with aria-label on subdiagrams | 细节（父 `av:svg.role=img`） | DOM | 全平台 | museum-label-panel |
-| `av:g.role=list` | role=list/listitem structure on groups | 细节（父 `av:svg.role=img`） | DOM | 全平台 | museum-label-panel |
-| `av:image.preserveAspectRatio=none` | preserveAspectRatio none (non-uniform stretch) | 细节（父 `at:image.preserveAspectRatio`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `av:image.preserveAspectRatio=xMidYMid slice` | preserveAspectRatio slice (cover/crop) | 细节（父 `at:image.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:image.preserveAspectRatio` |
-| `av:svg.role=graphics-document` | WAI-ARIA Graphics roles (graphics-document/object/symbol) | 细节（父 `av:svg.role=img`） | DOM | 部分支持 | museum-label-panel |
-| `concept:animated-raster-in-image` | animated GIF/APNG/WebP inside image | 细节（父 `el:image`） | SVG 1.1 | 全平台 | 经 `el:image` |
-| `concept:foreign-namespace-attributes-ignored` | Unknown namespaced elements/attributes ignored (inkscape:, sodipodi:) | 细节（父 `el:metadata`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `concept:foreignobject-canvas-rasterization` | Rasterising SVG+foreignObject via canvas drawImage | 细节（父 `el:foreignObject`） | DOM | 部分支持 | museum-label-panel |
-| `concept:foreignobject-overflow-clipping` | foreignObject overflow (UA default hidden) | 细节（父 `el:foreignObject`） | SVG 2 | 全平台 | museum-label-panel |
-| `concept:foreignobject-viewbox-scaling` | HTML scaled by viewBox in foreignObject | 细节（父 `el:foreignObject`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `concept:foreignobject-xmlns-requirement` | XHTML namespace requirement in standalone SVG | 细节（父 `el:foreignObject`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `concept:html-link-stylesheet-in-svg` | XHTML link rel=stylesheet inside SVG | 细节（父 `concept:xml-stylesheet-pi`） | SVG 2 | 部分支持 | 经 `concept:xml-stylesheet-pi` |
-| `concept:html-parser-foreign-content` | HTML parser foreign-content rules (case fix-up, no namespace) | 细节（父 `concept:inline-svg-in-html`） | DOM | 全平台 | 经 `concept:inline-svg-in-html` |
-| `concept:inline-svg-baseline-gap` | Inline svg is display:inline (baseline gap) | 细节（父 `concept:inline-svg-in-html`） | CSS | 全平台 | 经 `concept:inline-svg-in-html` |
-| `concept:inline-svg-id-collisions` | Duplicate ids across several inline SVGs | 细节（父 `concept:inline-svg-in-html`） | DOM | 全平台 | neon-sign-workshop |
-| `concept:inline-svg-style-leaks-globally` | style inside inline SVG applies to the whole HTML document | 细节（父 `el:style`） | CSS | 全平台 | 经 `el:style` |
-| `concept:lang-dependent-glyph-selection` | Language-dependent font and glyph selection | 细节（父 `at:svg.lang`） | CSS | 全平台 | stele-rubbing-hall |
-| `concept:media-fragments-spatial` | spatial media fragments (#xywh=) on image resources | 细节（父 `el:image`） | SVG 2 | 未实现 | 经 `el:image` |
-| `concept:metadata-rdf-dublin-core` | RDF / Dublin Core inside metadata | 细节（父 `el:metadata`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `concept:svg-data-uri-encoding` | Encoding SVG in data: URIs (utf8, # escaping) | 细节（父 `concept:svg-as-css-background-image`） | CSS | 全平台 | neon-sign-workshop |
-| `concept:svg-favicon` | SVG favicon with embedded dark-mode CSS | 细节（父 `concept:svg-as-img-restrictions`） | CSS | 部分支持 | 经 `concept:svg-as-img-restrictions` |
-| `concept:svg-text-accessibility-and-find` | SVG text exposed to find-in-page, selection and AT | 细节（父 `av:svg.role=img`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `concept:ua-stylesheet-defaults` | SVG user-agent stylesheet defaults | 细节（父 `concept:presentation-attribute-specificity`） | SVG 2 | 全平台 | letterpress-type-specimen |
-| `concept:use-shadow-tree-selector-isolation` | Document selectors do not reach into use shadow trees; custom properties do | 细节（父 `concept:use-inheritance`） | SVG 2 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:var-in-presentation-attribute` | var() inside presentation attributes | 细节（父 `css:custom-properties`） | SVG 2 | 部分支持 | museum-label-panel |
-| `concept:xlink-href-legacy` | xlink:href and xmlns:xlink namespace | 细节（父 `at:image.href`） | Deprecated | 已废弃 | jacquard-loom-draft |
-| `concept:xml-entities-and-cdata` | XML entities, internal DTD entity definitions and CDATA sections | 细节（父 `concept:standalone-svg-document`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `concept:xml-well-formedness-errors` | Strict XML parsing (well-formedness failures) | 细节（父 `concept:standalone-svg-document`） | SVG 1.1 | 全平台 | museum-label-panel |
-| `css:container-queries` | Container queries around/inside SVG | 细节（父 `concept:foreignobject-css-grid-flex`） | CSS | 部分支持 | museum-label-panel |
-| `css:hyphens-in-foreignobject` | hyphens:auto with lang in foreignObject text | 细节（父 `at:svg.lang`） | CSS | 部分支持 | 经 `at:svg.lang` |
-| `css:import-rule` | @import inside SVG style element | 细节（父 `el:style`） | CSS | 全平台 | 经 `el:style` |
-| `css:important-override` | !important in SVG styling | 细节（父 `concept:presentation-attribute-specificity`） | CSS | 全平台 | letterpress-type-specimen |
-| `css:lang-selector` | :lang() pseudo-class styling | 细节（父 `at:svg.lang`） | CSS | 全平台 | stele-rubbing-hall |
-| `css:light-dark-function` | light-dark() with color-scheme | 细节（父 `css:prefers-color-scheme`） | CSS | 全平台 | museum-label-panel |
-| `css:link-pseudo-classes-svg-a` | :link/:visited/:hover/:focus on SVG a | 细节（父 `el:a`） | CSS | 全平台 | 经 `el:a` |
-| `css:prefers-contrast` | @media (prefers-contrast: more) | 细节（父 `css:forced-colors`） | CSS | 全平台 | museum-label-panel |
-| `css:root-selector-scope` | :root theming scope (svg root vs html root) | 细节（父 `css:custom-properties`） | CSS | 全平台 | museum-label-panel |
-| `css:supports-rule` | @supports feature queries | 细节（父 `css:custom-properties`） | CSS | 全平台 | museum-label-panel |
-| `css:target-pseudo-class` | :target with fragment links inside SVG | 细节（父 `at:a.href`） | CSS | 全平台 | 经 `at:a.href` |
-| `el:audio` | SVG-namespace audio element | 细节（父 `concept:foreignobject-video`） | SVG 2 | 未实现 | 经 `concept:foreignobject-video` |
-| `el:canvas` | SVG-namespace canvas element | 细节（父 `concept:foreignobject-video`） | SVG 2 | 未实现 | museum-label-panel |
-| `el:iframe` | SVG-namespace iframe element | 细节（父 `concept:foreignobject-video`） | SVG 2 | 未实现 | museum-label-panel |
-| `el:video` | SVG-namespace video element | 细节（父 `concept:foreignobject-video`） | SVG 2 | 未实现 | 经 `concept:foreignobject-video` |
-| `pv:image-rendering=crisp-edges` | image-rendering crisp-edges | 细节（父 `pr:image-rendering`） | CSS | 部分支持 | 经 `pr:image-rendering` |
-| `pv:image-rendering=optimizeSpeed` | SVG 1.1 optimizeSpeed/optimizeQuality keywords | 细节（父 `pr:image-rendering`） | Deprecated | 已废弃 | 经 `pr:image-rendering` |
-| `pv:image-rendering=pixelated` | image-rendering pixelated | 细节（父 `pr:image-rendering`） | CSS | 全平台 | jacquard-loom-draft |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `at:linearGradient.gradientTransform` | gradientTransform | core | broad | auroral-spectrograph |
+| `at:linearGradient.href` | href inheritance between gradients | core | broad | auroral-spectrograph |
+| `at:linearGradient.x1` | Gradient vector x1/y1/x2/y2 | core | broad | auroral-spectrograph |
+| `at:pattern.href` | Pattern href inheritance | core | broad | jacquard-loom-draft |
+| `at:pattern.patternTransform` | patternTransform rotates/scales the tile grid | core | broad | jacquard-loom-draft, four-colour-press-check |
+| `at:pattern.viewBox` | pattern viewBox scaling | core | broad | jacquard-loom-draft |
+| `at:pattern.width` | Tile size width/height | core | broad | jacquard-loom-draft |
+| `at:radialGradient.cx` | Radial centre and radius cx/cy/r | core | broad | auroral-spectrograph |
+| `at:radialGradient.fr` | Focal radius fr | core | partial | auroral-spectrograph |
+| `at:radialGradient.fx` | Focal point fx/fy | core | broad | auroral-spectrograph |
+| `at:stop.offset` | offset as number or percentage | core | broad | auroral-spectrograph |
+| `av:linearGradient.gradientUnits=userSpaceOnUse` | gradientUnits userSpaceOnUse | core | broad | auroral-spectrograph |
+| `av:linearGradient.spreadMethod=reflect` | spreadMethod reflect | core | broad | auroral-spectrograph |
+| `av:linearGradient.spreadMethod=repeat` | spreadMethod repeat | core | broad | auroral-spectrograph |
+| `av:pattern.patternContentUnits=objectBoundingBox` | patternContentUnits objectBoundingBox | core | broad | jacquard-loom-draft |
+| `av:pattern.patternUnits=userSpaceOnUse` | patternUnits userSpaceOnUse | core | broad | jacquard-loom-draft |
+| `av:radialGradient.spreadMethod=reflect` | Radial reflect with focal offset | core | broad | auroral-spectrograph |
+| `concept:animated-gradient-vector` | Animating gradient geometry or gradientTransform | core | broad | auroral-spectrograph |
+| `concept:animated-pattern` | Animating patternTransform or tile content | core | broad | jacquard-loom-draft |
+| `concept:conic-gradient-emulation` | Conic/angular gradient emulation | core | broad | auroral-spectrograph |
+| `concept:gradient-on-marker` | Gradient inside marker content | core | broad | pipeline-mimic-board |
+| `concept:gradient-on-stroke` | Gradient stroke | core | broad | auroral-spectrograph |
+| `concept:gradient-on-text` | Gradient-filled text | core | broad | auroral-spectrograph |
+| `concept:halftone-pattern` | Halftone dots via patterns | core | broad | four-colour-press-check |
+| `concept:hatching-pattern` | Hatching via line patterns | core | broad | jacquard-loom-draft |
+| `concept:mesh-gradient-emulation` | Mesh gradient emulation with blurred blobs | core | broad | mycelium-culture-chamber |
+| `concept:nested-pattern` | Pattern content filled with another pattern | core | broad | jacquard-loom-draft |
+| `concept:pattern-seams` | Tile seams and anti-aliasing artifacts | core | broad | jacquard-loom-draft |
+| `concept:pattern-with-image` | Raster image tiles in a pattern | core | broad | jacquard-loom-draft |
+| `concept:pattern-with-text` | Text inside pattern tiles | core | broad | jacquard-loom-draft |
+| `concept:smil-animated-stops` | SMIL animation of stop offset and colour | core | broad | auroral-spectrograph |
+| `css:gradient-stop-selectors` | CSS-styled stops via selectors and classes | core | broad | auroral-spectrograph |
+| `el:linearGradient` | linearGradient element | core | broad | auroral-spectrograph |
+| `el:pattern` | pattern element | core | broad | jacquard-loom-draft, four-colour-press-check |
+| `el:radialGradient` | radialGradient element | core | broad | auroral-spectrograph |
+| `el:stop` | stop element | core | broad | auroral-spectrograph |
+| `pr:stop-color` | stop-color property | core | broad | auroral-spectrograph |
+| `pr:stop-opacity` | stop-opacity property | core | broad | auroral-spectrograph |
+| `api:SVGGradientElement.gradientUnits` | SVGGradientElement gradientUnits/spreadMethod/gradientTransform animated attributes | detail / `av:linearGradient.gradientUnits=userSpaceOnUse` | broad | auroral-spectrograph (via av:linearGradient.gradientUnits=userSpaceOnUse) |
+| `api:SVGLinearGradientElement.x1` | SVGLinearGradientElement x1/y1/x2/y2 SVGAnimatedLength | detail / `at:linearGradient.x1` | broad | auroral-spectrograph (via at:linearGradient.x1) |
+| `api:SVGPatternElement.patternTransform` | SVGPatternElement animated attributes | detail / `at:pattern.patternTransform` | broad | jacquard-loom-draft |
+| `api:SVGRadialGradientElement.fx` | SVGRadialGradientElement cx/cy/r/fx/fy/fr SVGAnimatedLength | detail / `at:radialGradient.fx` | broad | auroral-spectrograph |
+| `api:SVGStopElement.offset` | SVGStopElement.offset SVGAnimatedNumber | detail / `at:stop.offset` | broad | auroral-spectrograph |
+| `at:linearGradient.xlink:href` | xlink:href on gradients and patterns | detail / `at:linearGradient.href` | deprecated | auroral-spectrograph (via at:linearGradient.href) |
+| `at:pattern.preserveAspectRatio` | pattern preserveAspectRatio | detail / `at:pattern.viewBox` | broad | jacquard-loom-draft |
+| `at:pattern.x` | Tile origin x/y offset | detail / `at:pattern.width` | broad | jacquard-loom-draft |
+| `av:linearGradient.gradientUnits=objectBoundingBox` | gradientUnits objectBoundingBox (default) | detail / `av:linearGradient.gradientUnits=userSpaceOnUse` | broad | auroral-spectrograph |
+| `av:linearGradient.spreadMethod=pad` | spreadMethod pad (default) | detail / `el:linearGradient` | broad | auroral-spectrograph |
+| `av:pattern.patternContentUnits=userSpaceOnUse` | patternContentUnits userSpaceOnUse (default) | detail / `av:pattern.patternContentUnits=objectBoundingBox` | broad | jacquard-loom-draft |
+| `av:pattern.patternUnits=objectBoundingBox` | patternUnits objectBoundingBox (default) | detail / `av:pattern.patternUnits=userSpaceOnUse` | broad | jacquard-loom-draft |
+| `av:radialGradient.spreadMethod=repeat` | Radial repeat with focal offset | detail / `av:radialGradient.spreadMethod=reflect` | broad | auroral-spectrograph |
+| `concept:bbox-gradient-diagonal-skew` | objectBoundingBox skews diagonal gradients | detail / `av:linearGradient.gradientUnits=userSpaceOnUse` | broad | auroral-spectrograph (via av:linearGradient.gradientUnits=userSpaceOnUse) |
+| `concept:bbox-zero-size-paint-server-disabled` | Zero-width/height bbox disables bbox paint servers | detail / `av:linearGradient.gradientUnits=userSpaceOnUse` | broad | auroral-spectrograph (via av:linearGradient.gradientUnits=userSpaceOnUse) |
+| `concept:checkerboard-pattern` | Checkerboard and transparency-grid tiles | detail / `el:pattern` | broad | jacquard-loom-draft |
+| `concept:cross-hatch-layering` | Cross-hatch by stacking two pattern fills | detail / `concept:hatching-pattern` | broad | jacquard-loom-draft |
+| `concept:elliptical-radial-gradient` | Elliptical radial via gradientTransform or bbox units | detail / `el:radialGradient` | broad | auroral-spectrograph (via el:radialGradient) |
+| `concept:external-gradient-reference` | Cross-document url(file.svg#grad) paint servers | detail / `at:linearGradient.href` | partial | auroral-spectrograph (via at:linearGradient.href) |
+| `concept:focal-point-outside-circle` | Focal point outside end circle (SVG 2 cone) | detail / `at:radialGradient.fx` | partial | auroral-spectrograph |
+| `concept:foreignobject-css-gradient` | CSS conic/repeating gradients via foreignObject | detail / `concept:conic-gradient-emulation` | partial | auroral-spectrograph (via concept:conic-gradient-emulation) |
+| `concept:gradient-banding-noise` | Banding and dither via feTurbulence noise overlay | detail / `pr:color-interpolation` | broad | four-colour-press-check |
+| `concept:gradient-href-chain` | Multi-level href chains and attribute override | detail / `at:linearGradient.href` | broad | auroral-spectrograph (via at:linearGradient.href) |
+| `concept:gradient-href-cross-type` | Linear referencing radial (stops only cross type) | detail / `at:linearGradient.href` | broad | auroral-spectrograph (via at:linearGradient.href) |
+| `concept:gradient-on-group-bbox-per-child` | Gradient fill inherited from <g> resolves bbox per child | detail / `av:linearGradient.gradientUnits=userSpaceOnUse` | broad | auroral-spectrograph (via av:linearGradient.gradientUnits=userSpaceOnUse) |
+| `concept:gradient-on-use-instances` | bbox gradients per <use> instance | detail / `el:linearGradient` | broad | auroral-spectrograph (via el:linearGradient) |
+| `concept:hard-stop-banding` | Duplicate offsets create hard edges | detail / `at:stop.offset` | broad | auroral-spectrograph |
+| `concept:layered-radial-gradients` | Stacking transparent radial gradients | detail / `concept:mesh-gradient-emulation` | broad | mycelium-culture-chamber (via concept:mesh-gradient-emulation) |
+| `concept:paint-server-reference-cycle` | Self/cyclic references are treated as errors | detail / `el:pattern` | broad | jacquard-loom-draft (via el:pattern), four-colour-press-check (via el:pattern) |
+| `concept:pattern-on-stroke` | Pattern-filled stroke | detail / `concept:gradient-on-stroke` | broad | auroral-spectrograph (via concept:gradient-on-stroke) |
+| `concept:pattern-on-text` | Pattern-filled text | detail / `concept:gradient-on-text` | broad | auroral-spectrograph (via concept:gradient-on-text) |
+| `concept:pattern-overflow-visible` | overflow:visible on pattern tiles | detail / `el:pattern` | none | jacquard-loom-draft |
+| `concept:pattern-tile-rasterization` | Tile rasterization resolution and blur | detail / `concept:pattern-seams` | partial | jacquard-loom-draft |
+| `concept:pattern-viewbox-overrides-contentunits` | viewBox overrides patternContentUnits | detail / `at:pattern.viewBox` | broad | jacquard-loom-draft |
+| `concept:pattern-with-filter` | Filtered content inside pattern tiles | detail / `el:pattern` | broad | jacquard-loom-draft (via el:pattern), four-colour-press-check (via el:pattern) |
+| `concept:pattern-with-gradient` | Gradient-filled content inside pattern | detail / `el:pattern` | broad | jacquard-loom-draft (via el:pattern), four-colour-press-check (via el:pattern) |
+| `concept:pattern-with-use` | Pattern tile built from <use> instances | detail / `el:pattern` | broad | jacquard-loom-draft |
+| `concept:pattern-zero-size-disabled` | Zero tile size disables the pattern | detail / `at:pattern.width` | broad | jacquard-loom-draft (via at:pattern.width) |
+| `concept:premultiplied-transparent-stop` | Transparent stops interpolate premultiplied | detail / `pr:stop-opacity` | broad | auroral-spectrograph |
+| `concept:single-or-zero-stop-gradient` | Zero stops = none, one stop = solid | detail / `el:stop` | broad | auroral-spectrograph (via el:stop) |
+| `concept:single-stop-gradient-as-solidcolor` | Single-stop gradient as reusable named colour | detail / `el:stop` | broad | auroral-spectrograph (via el:stop) |
+| `concept:stop-offset-clamping` | Offset clamping and monotonic ordering | detail / `at:stop.offset` | broad | auroral-spectrograph |
+| `concept:zero-length-gradient-vector` | Zero-length vector paints last stop colour | detail / `at:linearGradient.x1` | broad | auroral-spectrograph |
+| `css:custom-properties-in-gradients` | CSS custom properties driving stop colours | detail / `css:gradient-stop-selectors` | broad | auroral-spectrograph |
+| `css:fill-css-gradient-image` | CSS linear-gradient() as SVG fill | detail / `el:linearGradient` | none | auroral-spectrograph (via el:linearGradient) |
+| `css:modern-color-syntax-in-stops` | CSS Color 4 values (oklch, color-mix) in stop-color | detail / `pr:stop-color` | broad | auroral-spectrograph (via pr:stop-color) |
+| `css:stop-color-transition` | CSS transitions and animations on stop-color/stop-opacity | detail / `pr:stop-color` | broad | auroral-spectrograph (via pr:stop-color) |
+| `el:hatch` | hatch / hatchpath paint server | detail / `concept:hatching-pattern` | none | jacquard-loom-draft (via concept:hatching-pattern) |
+| `el:meshgradient` | meshgradient / meshrow / meshpatch (and draft mesh alias) | detail / `concept:mesh-gradient-emulation` | none | mycelium-culture-chamber (via concept:mesh-gradient-emulation) |
+| `pv:stop-color=currentcolor` | currentColor in stops | detail / `pr:stop-color` | broad | auroral-spectrograph |
 
-### 基本图形与路径语法（`shapes`，核心 38 项 / 细节 67 项）
+### 文本与排版
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:SVGAnimatedLength.baseVal` | animated length baseVal/animVal on geometry attributes | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `api:SVGGeometryElement.getPointAtLength` | getPointAtLength() | 核心 | SVG 2 | 全平台 | ship-lofting-floor |
-| `api:SVGGeometryElement.getTotalLength` | getTotalLength() | 核心 | SVG 2 | 全平台 | ship-lofting-floor |
-| `api:SVGGeometryElement.isPointInFill` | isPointInFill() | 核心 | SVG 2 | 全平台 | ship-lofting-floor |
-| `api:SVGGraphicsElement.getBBox` | getBBox() geometry bounding box | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `at:path.d` | path data attribute d | 核心 | SVG 1.1 | 全平台 | ★ship-lofting-floor |
-| `at:path.pathLength` | pathLength normalisation | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `at:polygon.points` | polygon points list parsing | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:rect.rx` | rect corner radius rx | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `av:ellipse.rx=auto` | ellipse rx/ry auto (circle fallback) | 核心 | SVG 2 | 部分支持 | guilloche-intaglio-plate |
-| `av:path.d=A` | elliptical arc A/a | 核心 | SVG 1.1 | 全平台 | ★ship-lofting-floor |
-| `av:path.d=C` | cubic Bezier curveto C/c | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `av:path.d=H` | horizontal lineto H/h | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `av:path.d=L` | lineto L/l | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `av:path.d=M` | moveto M/m | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `av:path.d=Q` | quadratic Bezier curveto Q/q | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `av:path.d=S` | smooth cubic curveto S/s | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `av:path.d=T` | smooth quadratic curveto T/t | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `av:path.d=V` | vertical lineto V/v | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `av:path.d=Z` | closepath Z/z | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:arc-flag-combinations` | large-arc and sweep flags four combinations | 核心 | SVG 1.1 | 全平台 | ★ship-lofting-floor |
-| `concept:arc-radius-scaling` | too-small arc radii scaled up | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:implicit-repeated-commands` | implicit command repetition (M implies L) | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:multiple-subpaths` | multiple subpaths in one path | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:relative-vs-absolute-commands` | lowercase relative vs uppercase absolute coordinates | 核心 | SVG 1.1 | 全平台 | ★ship-lofting-floor |
-| `concept:smooth-cubic-reflection` | S reflects previous C/S second control point | 核心 | SVG 1.1 | 全平台 | ★ship-lofting-floor |
-| `concept:smooth-quadratic-reflection` | T reflects previous Q/T control point | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:zero-length-subpath-round-cap-dot` | zero-length segment with round cap renders dot | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `css:d-property` | path d as CSS property | 核心 | SVG 2 | 全平台 | ship-lofting-floor |
-| `el:circle` | circle element | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `el:ellipse` | ellipse element | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `el:line` | line element | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `el:path` | path element | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `el:polygon` | polygon element | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `el:polyline` | polyline element | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `el:rect` | rect element | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `pr:fill-rule` | fill-rule property | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pr:shape-rendering` | shape-rendering property | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `api:SVGGeometryElement.isPointInStroke` | isPointInStroke() | 细节（父 `api:SVGGeometryElement.isPointInFill`） | SVG 2 | 全平台 | ship-lofting-floor |
-| `api:SVGGeometryElement.pathLength` | pathLength animated number | 细节（父 `at:path.pathLength`） | SVG 2 | 全平台 | ship-lofting-floor |
-| `api:SVGPathElement.getPathData` | getPathData()/setPathData() path data API | 细节（父 `at:path.d`） | SVG 2 | 未实现 | ship-lofting-floor |
-| `api:SVGPathElement.getPathSegAtLength` | getPathSegAtLength() | 细节（父 `api:SVGGeometryElement.getPointAtLength`） | Deprecated | 已废弃 | 经 `api:SVGGeometryElement.getPointAtLength` |
-| `api:SVGPathElement.pathSegList` | pathSegList / SVGPathSeg interfaces | 细节（父 `at:path.d`） | Deprecated | 已废弃 | ship-lofting-floor |
-| `api:SVGPointList` | polygon.points SVGPointList manipulation | 细节（父 `at:polygon.points`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:circle.cx` | circle cx/cy centre | 细节（父 `el:circle`） | SVG 1.1 | 全平台 | 经 `el:circle` |
-| `at:circle.r` | circle radius r | 细节（父 `el:circle`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `at:ellipse.cx` | ellipse cx/cy centre | 细节（父 `el:ellipse`） | SVG 1.1 | 全平台 | 经 `el:ellipse` |
-| `at:ellipse.rx` | ellipse horizontal radius rx | 细节（父 `el:ellipse`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `at:ellipse.ry` | ellipse vertical radius ry | 细节（父 `el:ellipse`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `at:line.x1` | line x1/y1/x2/y2 endpoints | 细节（父 `el:line`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:polyline.points` | polyline points list | 细节（父 `el:polyline`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:rect.ry` | rect vertical corner radius ry | 细节（父 `at:rect.rx`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `at:rect.width` | rect width/height size | 细节（父 `el:rect`） | SVG 1.1 | 全平台 | 经 `el:rect` |
-| `at:rect.x` | rect x/y position | 细节（父 `el:rect`） | SVG 1.1 | 全平台 | 经 `el:rect` |
-| `av:path.d=B` | bearing commands B/b | 细节（父 `at:path.d`） | SVG 2 | 未实现 | 经 `at:path.d` |
-| `av:path.d=R` | Catmull-Rom commands R/r | 细节（父 `at:path.d`） | SVG 2 | 未实现 | 经 `at:path.d` |
-| `av:rect.rx=auto` | rect rx/ry auto keyword | 细节（父 `at:rect.rx`） | SVG 2 | 全平台 | 经 `at:rect.rx` |
-| `concept:absolute-length-units-in-geometry` | CSS units (mm, cm, in, em) in geometry attributes | 细节（父 `el:rect`） | SVG 1.1 | 全平台 | 经 `el:rect` |
-| `concept:arc-coincident-endpoints-omitted` | arc with equal endpoints is skipped | 细节（父 `av:path.d=A`） | SVG 1.1 | 全平台 | 经 `av:path.d=A` |
-| `concept:arc-flag-compact-parsing` | arc flags parsed without separators | 细节（父 `av:path.d=A`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:arc-negative-radius-absolute` | negative arc radii use absolute value | 细节（父 `av:path.d=A`） | SVG 1.1 | 全平台 | 经 `av:path.d=A` |
-| `concept:arc-x-axis-rotation` | arc x-axis-rotation parameter | 细节（父 `av:path.d=A`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:arc-zero-radius-line` | zero arc radius degenerates to line | 细节（父 `av:path.d=A`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:bbox-excludes-stroke-and-control-points` | bbox ignores stroke and off-curve control points | 细节（父 `api:SVGGraphicsElement.getBBox`） | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `concept:closepath-join-vs-cap` | Z joins stroke ends, open path gets caps | 细节（父 `av:path.d=Z`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:empty-d-not-rendered` | empty or missing d/points disables rendering | 细节（父 `at:path.d`） | SVG 2 | 全平台 | ship-lofting-floor |
-| `concept:fill-closes-open-subpaths` | fill implicitly closes unclosed subpaths | 细节（父 `av:path.d=Z`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:line-has-no-fill-area` | line ignores fill | 细节（父 `el:line`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:negative-length-error` | negative width/height/r treated as zero | 细节（父 `el:rect`） | SVG 2 | 全平台 | 经 `el:rect` |
-| `concept:path-error-partial-render` | path data error renders up to error | 细节（父 `at:path.d`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:path-must-start-with-moveto` | path data must begin with M/m | 细节（父 `at:path.d`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:path-number-syntax` | compact number syntax in path data | 细节（父 `at:path.d`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:pathlength-on-basic-shapes` | pathLength on rect/circle/ellipse/line/polyline/polygon | 细节（父 `at:path.pathLength`） | SVG 2 | 全平台 | 经 `at:path.pathLength` |
-| `concept:points-odd-coordinate-count` | odd coordinate count drops trailing value | 细节（父 `at:polygon.points`） | SVG 2 | 全平台 | pipeline-mimic-board |
-| `concept:points-parse-error-partial-render` | points parse error renders prefix | 细节（父 `at:polygon.points`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:polygon-vs-path-equivalence` | basic shapes as equivalent paths | 细节（父 `el:path`） | SVG 2 | 全平台 | ship-lofting-floor |
-| `concept:polyline-fill-implicit-close` | polyline fill closes area but stroke stays open | 细节（父 `el:polyline`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:radius-percentage-normalized-diagonal` | percentage r resolves against normalized diagonal | 细节（父 `el:circle`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:rect-corner-radius-clamp` | rx/ry clamped to half size | 细节（父 `at:rect.rx`） | SVG 1.1 | 全平台 | 经 `at:rect.rx` |
-| `concept:rect-percentage-geometry` | percentage x/y/width/height on rect | 细节（父 `el:rect`） | SVG 1.1 | 全平台 | 经 `el:rect` |
-| `concept:relative-moveto-after-closepath` | relative m after Z is relative to subpath start | 细节（父 `av:path.d=M`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:smooth-command-without-predecessor` | S/T after non-curve uses current point as control | 细节（父 `concept:smooth-cubic-reflection`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:stroke-dash-start-position-on-shapes` | dash pattern origin per basic shape | 细节（父 `at:path.pathLength`） | SVG 2 | 全平台 | 经 `at:path.pathLength` |
-| `concept:winding-direction-holes` | subpath winding direction creates holes under nonzero | 细节（父 `pr:fill-rule`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:zero-length-subpath-square-cap` | zero-length segment with square cap renders square | 细节（父 `concept:zero-length-subpath-round-cap-dot`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:zero-size-shape-not-rendered` | zero width/height/r disables rendering | 细节（父 `el:rect`） | SVG 1.1 | 全平台 | 经 `el:rect` |
-| `css:custom-properties-in-geometry` | var() in geometry properties | 细节（父 `css:geometry-properties`） | CSS | 全平台 | ship-lofting-floor |
-| `css:d-property-transition` | CSS transition between path() values | 细节（父 `css:d-property`） | CSS | 全平台 | ship-lofting-floor |
-| `css:geometry-percentage-in-css` | percentage geometry values via CSS | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `css:geometry-properties-transition` | CSS transitions/animations on geometry properties | 细节（父 `css:geometry-properties`） | CSS | 全平台 | ship-lofting-floor |
-| `pr:cx` | cx geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pr:cy` | cy geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pr:height` | height geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pr:r` | r geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pr:rx` | rx geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pr:ry` | ry geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pr:width` | width geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pr:x` | x geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pr:y` | y geometry property | 细节（父 `css:geometry-properties`） | SVG 2 | 全平台 | 经 `css:geometry-properties` |
-| `pv:fill-rule=evenodd` | fill-rule evenodd | 细节（父 `pr:fill-rule`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pv:fill-rule=nonzero` | fill-rule nonzero | 细节（父 `pr:fill-rule`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pv:shape-rendering=auto` | shape-rendering auto | 细节（父 `pr:shape-rendering`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `pv:shape-rendering=crispEdges` | shape-rendering crispEdges | 细节（父 `pr:shape-rendering`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `pv:shape-rendering=geometricPrecision` | shape-rendering geometricPrecision | 细节（父 `pr:shape-rendering`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `pv:shape-rendering=optimizeSpeed` | shape-rendering optimizeSpeed | 细节（父 `pr:shape-rendering`） | SVG 1.1 | 部分支持 | four-colour-press-check |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `api:SVGTextContentElement.getComputedTextLength` | getComputedTextLength | core | broad | museum-label-panel, letterpress-type-specimen |
+| `api:SVGTextContentElement.getStartPositionOfChar` | getStartPositionOfChar / getEndPositionOfChar | core | broad | letterpress-type-specimen |
+| `at:text.dy` | dy relative vertical shift list | core | broad | stele-rubbing-hall |
+| `at:text.rotate` | rotate list per glyph (last value repeats) | core | broad | stele-rubbing-hall |
+| `at:text.textLength` | textLength forced advance width | core | broad | letterpress-type-specimen |
+| `at:text.x` | x list with per-glyph absolute positions (text/tspan) | core | broad | stele-rubbing-hall |
+| `at:textPath.href` | textPath href reference (unprefixed) | core | broad | stele-rubbing-hall |
+| `at:textPath.path` | inline path attribute on textPath | core | partial | stele-rubbing-hall |
+| `at:textPath.side` | side=right (text on other side of path) | core | partial | stele-rubbing-hall |
+| `at:textPath.startOffset` | startOffset as length or percentage | core | broad | stele-rubbing-hall |
+| `av:text.lengthAdjust=spacingAndGlyphs` | lengthAdjust spacingAndGlyphs (glyphs scale) | core | broad | letterpress-type-specimen |
+| `concept:multiline-text-tspan` | Multi-line text via tspan x reset and dy | core | broad | stele-rubbing-hall |
+| `concept:text-as-clip-path` | Text as clip-path or mask content | core | broad | stele-rubbing-hall |
+| `concept:text-gradient-fill` | Text filled with a gradient | core | broad | auroral-spectrograph |
+| `concept:text-stroke-paint-order` | Stroked text with paint-order stroke | core | broad | letterpress-type-specimen |
+| `concept:textpath-closed-path` | Text around a closed circle path | core | broad | stele-rubbing-hall |
+| `css:font-face-data-uri` | @font-face with data-URI font embedded in SVG | core | broad | stele-rubbing-hall, letterpress-type-specimen, neon-sign-workshop |
+| `el:text` | <text> element | core | broad | stele-rubbing-hall |
+| `el:textPath` | <textPath> text along a path | core | broad | stele-rubbing-hall |
+| `el:tspan` | <tspan> inline span | core | broad | stele-rubbing-hall |
+| `pr:alignment-baseline` | alignment-baseline on tspan | core | partial | stele-rubbing-hall |
+| `pr:baseline-shift` | baseline-shift length or percentage | core | broad | stele-rubbing-hall |
+| `pr:direction` | direction rtl | core | broad | stele-rubbing-hall |
+| `pr:dominant-baseline` | dominant-baseline | core | broad | stele-rubbing-hall |
+| `pr:font-family` | font-family and generic fallbacks | core | broad | letterpress-type-specimen |
+| `pr:font-feature-settings` | font-feature-settings OpenType features | core | broad | letterpress-type-specimen |
+| `pr:font-kerning` | font-kerning none / normal | core | broad | letterpress-type-specimen |
+| `pr:font-size` | font-size in user units, em, percent | core | broad | letterpress-type-specimen |
+| `pr:font-stretch` | font-stretch condensed / expanded | core | broad | letterpress-type-specimen |
+| `pr:font-style` | font-style italic / oblique | core | broad | letterpress-type-specimen |
+| `pr:font-variant` | font-variant small-caps | core | broad | letterpress-type-specimen |
+| `pr:font-weight` | font-weight keywords and numeric | core | broad | letterpress-type-specimen |
+| `pr:letter-spacing` | letter-spacing | core | broad | letterpress-type-specimen |
+| `pr:text-anchor` | text-anchor start / middle / end | core | broad | stele-rubbing-hall |
+| `pr:text-decoration` | text-decoration underline / overline / line-through | core | broad | letterpress-type-specimen |
+| `pr:text-orientation` | text-orientation mixed / upright / sideways | core | broad | stele-rubbing-hall |
+| `pr:unicode-bidi` | unicode-bidi embed / bidi-override / isolate | core | broad | stele-rubbing-hall |
+| `pr:white-space` | white-space pre on SVG text | core | partial | letterpress-type-specimen |
+| `pr:word-spacing` | word-spacing | core | broad | letterpress-type-specimen |
+| `pv:writing-mode=vertical-rl` | writing-mode vertical-rl | core | broad | stele-rubbing-hall |
+| `api:FontFaceSet.ready` | document.fonts.ready for font-load detection | detail / `css:font-face-data-uri` | broad | letterpress-type-specimen |
+| `api:SVGTextContentElement.getCharNumAtPosition` | getCharNumAtPosition hit testing | detail / `api:SVGTextContentElement.getStartPositionOfChar` | broad | letterpress-type-specimen |
+| `api:SVGTextContentElement.getExtentOfChar` | getExtentOfChar | detail / `api:SVGTextContentElement.getStartPositionOfChar` | broad | letterpress-type-specimen |
+| `api:SVGTextContentElement.getNumberOfChars` | getNumberOfChars | detail / `api:SVGTextContentElement.getComputedTextLength` | broad | letterpress-type-specimen |
+| `api:SVGTextContentElement.getRotationOfChar` | getRotationOfChar | detail / `api:SVGTextContentElement.getStartPositionOfChar` | broad | letterpress-type-specimen (via api:SVGTextContentElement.getStartPositionOfChar) |
+| `api:SVGTextContentElement.getSubStringLength` | getSubStringLength | detail / `api:SVGTextContentElement.getComputedTextLength` | broad | letterpress-type-specimen |
+| `api:SVGTextContentElement.selectSubString` | selectSubString | detail / `api:SVGTextContentElement.getStartPositionOfChar` | deprecated | letterpress-type-specimen (via api:SVGTextContentElement.getStartPositionOfChar) |
+| `api:SVGTextPathElement.startOffset` | SVGTextPathElement.startOffset animated length | detail / `at:textPath.startOffset` | broad | stele-rubbing-hall |
+| `api:SVGTextPositioningElement.x` | SVGTextPositioningElement x/y/dx/dy/rotate animated lists | detail / `at:text.x` | broad | stele-rubbing-hall |
+| `at:text.dx` | dx relative horizontal shift list | detail / `at:text.dy` | broad | stele-rubbing-hall |
+| `at:text.lang` | lang / xml:lang driving glyph selection | detail / `pr:font-family` | broad | letterpress-type-specimen (via pr:font-family) |
+| `at:text.xml:space` | xml:space=preserve whitespace handling | detail / `pr:white-space` | deprecated | letterpress-type-specimen |
+| `at:text.y` | y list with per-glyph absolute baselines | detail / `at:text.x` | broad | stele-rubbing-hall |
+| `at:textPath.method` | method align (default rigid glyphs) | detail / `el:textPath` | partial | stele-rubbing-hall (via el:textPath) |
+| `at:textPath.spacing` | spacing auto / exact | detail / `el:textPath` | none | stele-rubbing-hall (via el:textPath) |
+| `at:textPath.xlink:href` | textPath xlink:href (legacy) | detail / `at:textPath.href` | deprecated | stele-rubbing-hall |
+| `av:text.lengthAdjust=spacing` | lengthAdjust spacing (only gaps change, default) | detail / `at:text.textLength` | broad | letterpress-type-specimen |
+| `av:textPath.method=stretch` | method=stretch (warp glyph outlines) | detail / `el:textPath` | none | stele-rubbing-hall (via el:textPath) |
+| `concept:emoji-color-fonts` | Colour emoji and COLR fonts in SVG text | detail / `pr:font-family` | broad | letterpress-type-specimen (via pr:font-family) |
+| `concept:faux-italic-skewx` | Faux italic / oblique text via skewX | detail / `pr:font-style` | broad | letterpress-type-specimen |
+| `concept:hollow-outline-text` | Outline-only text (fill none, stroke set) | detail / `concept:text-stroke-paint-order` | broad | letterpress-type-specimen |
+| `concept:mixed-script-bidi` | Mixed LTR and RTL runs in one text | detail / `pr:unicode-bidi` | broad | stele-rubbing-hall |
+| `concept:nested-tspan-inheritance` | Nested tspans inheriting and overriding styles | detail / `el:tspan` | broad | stele-rubbing-hall |
+| `concept:svg-as-image-external-font-blocked` | External fonts blocked in SVG used as <img> | detail / `css:font-face-data-uri` | none | letterpress-type-specimen |
+| `concept:text-anchor-rtl-interaction` | text-anchor start follows direction rtl | detail / `pr:text-anchor` | broad | stele-rubbing-hall |
+| `concept:text-pattern-fill` | Text filled with a pattern | detail / `concept:text-gradient-fill` | broad | auroral-spectrograph (via concept:text-gradient-fill) |
+| `concept:textlength-on-tspan` | textLength applied to a single tspan | detail / `at:text.textLength` | broad | letterpress-type-specimen |
+| `concept:textpath-baseline-offset` | Lifting text off the path with dy | detail / `el:textPath` | broad | stele-rubbing-hall (via el:textPath) |
+| `concept:textpath-basic-shape-ref` | textPath referencing basic shapes | detail / `at:textPath.href` | partial | stele-rubbing-hall (via at:textPath.href) |
+| `concept:textpath-centered-text` | Centred text on path via 50% offset and middle anchor | detail / `at:textPath.startOffset` | broad | stele-rubbing-hall |
+| `concept:textpath-multi-subpath` | Text across multiple subpaths | detail / `el:textPath` | broad | stele-rubbing-hall (via el:textPath) |
+| `concept:textpath-overflow-clipped` | Glyphs beyond path end are not rendered | detail / `el:textPath` | broad | stele-rubbing-hall |
+| `concept:textpath-startoffset-animation` | Animating startOffset to scroll text along path | detail / `at:textPath.startOffset` | broad | stele-rubbing-hall |
+| `concept:tspan-absolute-repositioning` | Absolute repositioning mid-run with tspan x/y | detail / `el:tspan` | broad | stele-rubbing-hall |
+| `css:pseudo-elements-svg-text` | ::selection / ::first-letter / ::first-line on SVG text | detail / `el:text` | partial | stele-rubbing-hall (via el:text) |
+| `css:text-decoration-styling` | text-decoration-style / color / thickness on SVG text | detail / `pr:text-decoration` | partial | letterpress-type-specimen |
+| `css:text-shadow-svg-text` | text-shadow on SVG text | detail / `el:text` | partial | stele-rubbing-hall (via el:text) |
+| `css:text-transform` | text-transform uppercase on SVG text | detail / `el:text` | broad | stele-rubbing-hall |
+| `css:vertical-align-svg-text` | vertical-align shorthand replacing baseline props | detail / `pr:baseline-shift` | none | stele-rubbing-hall (via pr:baseline-shift) |
+| `el:altGlyph` | <altGlyph> alternate glyph selection | detail / `el:text` | deprecated | stele-rubbing-hall (via el:text) |
+| `el:altGlyphDef` | <altGlyphDef> | detail / `el:text` | deprecated | stele-rubbing-hall (via el:text) |
+| `el:altGlyphItem` | <altGlyphItem> | detail / `el:text` | deprecated | stele-rubbing-hall (via el:text) |
+| `el:definition-src` | <definition-src> (SVG 1.0) | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:font` | <font> SVG font container | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:font-face` | <font-face> SVG font descriptor | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:font-face-format` | <font-face-format> | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:font-face-name` | <font-face-name> | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:font-face-src` | <font-face-src> | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:font-face-uri` | <font-face-uri> | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:glyph` | <glyph> SVG font glyph | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:glyphRef` | <glyphRef> | detail / `el:text` | deprecated | stele-rubbing-hall (via el:text) |
+| `el:hkern` | <hkern> horizontal kerning pair | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:missing-glyph` | <missing-glyph> fallback | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `el:tbreak` | <tbreak> line break (SVG Tiny 1.2) | detail / `concept:multiline-text-tspan` | deprecated | stele-rubbing-hall (via concept:multiline-text-tspan) |
+| `el:textArea` | <textArea> wrapped text (SVG Tiny 1.2) | detail / `concept:multiline-text-tspan` | deprecated | stele-rubbing-hall (via concept:multiline-text-tspan) |
+| `el:tref` | <tref> text reference | detail / `el:tspan` | deprecated | stele-rubbing-hall (via el:tspan) |
+| `el:vkern` | <vkern> vertical kerning pair | detail / `css:font-face-data-uri` | deprecated | stele-rubbing-hall (via css:font-face-data-uri), letterpress-type-specimen (via css:font-face-data-uri), neon-sign-workshop (via css:font-face-data-uri) |
+| `pr:font` | font shorthand | detail / `pr:font-family` | broad | letterpress-type-specimen (via pr:font-family) |
+| `pr:font-size-adjust` | font-size-adjust x-height matching | detail / `pr:font-size` | broad | letterpress-type-specimen (via pr:font-size) |
+| `pr:font-variant-ligatures` | font-variant-ligatures none / common | detail / `pr:font-feature-settings` | broad | letterpress-type-specimen |
+| `pr:font-variant-numeric` | font-variant-numeric tabular / oldstyle | detail / `pr:font-feature-settings` | broad | letterpress-type-specimen |
+| `pr:font-variation-settings` | font-variation-settings variable axes | detail / `pr:font-weight` | broad | letterpress-type-specimen |
+| `pr:font-width` | font-width (font-stretch alias) | detail / `pr:font-stretch` | partial | letterpress-type-specimen (via pr:font-stretch) |
+| `pr:glyph-orientation-horizontal` | glyph-orientation-horizontal (legacy) | detail / `pr:text-orientation` | deprecated | stele-rubbing-hall (via pr:text-orientation) |
+| `pr:glyph-orientation-vertical` | glyph-orientation-vertical (legacy) | detail / `pr:text-orientation` | deprecated | stele-rubbing-hall (via pr:text-orientation) |
+| `pr:inline-size` | inline-size auto line wrapping | detail / `concept:multiline-text-tspan` | none | stele-rubbing-hall (via concept:multiline-text-tspan) |
+| `pr:kerning` | kerning property / attribute (legacy) | detail / `pr:font-kerning` | deprecated | letterpress-type-specimen |
+| `pr:shape-inside` | shape-inside / shape-subtract / shape-padding text wrapping | detail / `concept:multiline-text-tspan` | none | stele-rubbing-hall (via concept:multiline-text-tspan) |
+| `pr:text-decoration-fill` | text-decoration-fill / text-decoration-stroke | detail / `pr:text-decoration` | none | letterpress-type-specimen (via pr:text-decoration) |
+| `pr:text-overflow` | text-overflow on SVG text | detail / `el:text` | none | stele-rubbing-hall (via el:text) |
+| `pv:baseline-shift=sub` | baseline-shift sub | detail / `pr:baseline-shift` | broad | stele-rubbing-hall |
+| `pv:baseline-shift=super` | baseline-shift super | detail / `pr:baseline-shift` | broad | stele-rubbing-hall |
+| `pv:dominant-baseline=central` | dominant-baseline central | detail / `pr:dominant-baseline` | broad | stele-rubbing-hall |
+| `pv:dominant-baseline=hanging` | dominant-baseline hanging | detail / `pr:dominant-baseline` | broad | stele-rubbing-hall |
+| `pv:dominant-baseline=ideographic` | dominant-baseline ideographic / mathematical | detail / `pr:dominant-baseline` | broad | stele-rubbing-hall |
+| `pv:dominant-baseline=middle` | dominant-baseline middle | detail / `pr:dominant-baseline` | broad | stele-rubbing-hall |
+| `pv:dominant-baseline=text-before-edge` | dominant-baseline text-before-edge / text-after-edge | detail / `pr:dominant-baseline` | deprecated | stele-rubbing-hall (via pr:dominant-baseline) |
+| `pv:dominant-baseline=text-top` | dominant-baseline text-top / text-bottom | detail / `pr:dominant-baseline` | partial | stele-rubbing-hall (via pr:dominant-baseline) |
+| `pv:text-anchor=end` | text-anchor end | detail / `pr:text-anchor` | broad | stele-rubbing-hall |
+| `pv:text-anchor=middle` | text-anchor middle | detail / `pr:text-anchor` | broad | stele-rubbing-hall |
+| `pv:text-rendering=geometricPrecision` | text-rendering geometricPrecision | detail / `pr:text-rendering` | broad | letterpress-type-specimen |
+| `pv:writing-mode=tb` | legacy writing-mode tb / tb-rl / rl / lr | detail / `pv:writing-mode=vertical-rl` | deprecated | stele-rubbing-hall (via pv:writing-mode=vertical-rl) |
+| `pv:writing-mode=vertical-lr` | writing-mode vertical-lr | detail / `pv:writing-mode=vertical-rl` | broad | stele-rubbing-hall |
 
-### 填充、描边与合成属性（`painting`，核心 32 项 / 细节 58 项）
+### 裁剪与遮罩
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `concept:line-drawing-dash-animation` | Line-drawing effect with dasharray = path length | 核心 | CSS | 全平台 | seismic-drum-console |
-| `concept:paint-server-fallback` | url() paint with fallback colour or none | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `css:css-color-paint` | CSS Color syntaxes as paint (rgb/hsl, #rrggbbaa, oklch, lab, color()) | 核心 | CSS | 全平台 | ★guilloche-intaglio-plate |
-| `pr:color` | color property (currentColor source) | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pr:color-interpolation` | color-interpolation sRGB/linearRGB | 核心 | SVG 1.1 | 部分支持 | four-colour-press-check |
-| `pr:cursor` | cursor property on SVG elements | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `pr:display` | display: none vs visibility | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `pr:fill` | fill paint property | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pr:fill-opacity` | fill-opacity | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pr:isolation` | isolation: isolate | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `pr:mix-blend-mode` | mix-blend-mode on SVG elements | 核心 | CSS | 全平台 | ★neon-sign-workshop |
-| `pr:opacity` | opacity (group compositing vs per-element) | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pr:overflow` | overflow on nested viewports | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `pr:paint-order` | paint-order | 核心 | SVG 2 | 全平台 | ★guilloche-intaglio-plate |
-| `pr:stroke` | stroke paint property | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pr:stroke-dasharray` | stroke-dasharray lengths | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pr:stroke-dashoffset` | stroke-dashoffset (incl. negative) | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pr:stroke-linecap` | stroke-linecap butt/round/square | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pr:stroke-linejoin` | stroke-linejoin miter/round/bevel | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pr:stroke-miterlimit` | stroke-miterlimit | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pr:stroke-opacity` | stroke-opacity | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pr:stroke-width` | stroke-width in user units | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pr:text-rendering` | text-rendering hint | 核心 | SVG 1.1 | 部分支持 | letterpress-type-specimen |
-| `pr:visibility` | visibility hidden vs visible | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `pv:fill=context-fill` | context-fill paint (markers) | 核心 | SVG 2 | 全平台 | pipeline-mimic-board |
-| `pv:fill=context-stroke` | Cross-using context paints (fill=context-stroke) | 核心 | SVG 2 | 全平台 | ★pipeline-mimic-board |
-| `pv:fill=currentColor` | currentColor paint keyword | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pv:fill=none` | fill: none (unfilled) | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pv:fill=url()` | Paint server reference url(#id) | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `pv:paint-order=markers` | paint-order with markers first | 核心 | SVG 2 | 全平台 | pipeline-mimic-board |
-| `pv:stroke=context-stroke` | context-stroke paint (markers) | 核心 | SVG 2 | 全平台 | pipeline-mimic-board |
-| `pv:vector-effect=non-scaling-stroke` | vector-effect: non-scaling-stroke | 核心 | SVG 2 | 全平台 | ★guilloche-intaglio-plate |
-| `concept:closepath-join-vs-caps` | Closepath Z produces a join instead of caps | 细节（父 `pr:stroke-linejoin`） | SVG 1.1 | 全平台 | 经 `pr:stroke-linejoin` |
-| `concept:context-paint-in-use` | context-fill/context-stroke inside <use> references | 细节（父 `pv:fill=context-fill`） | SVG 2 | 部分支持 | pipeline-mimic-board |
-| `concept:currentcolor-icon-theming` | Recolouring <use> icons via CSS color | 细节（父 `pv:fill=currentColor`） | SVG 2 | 全平台 | guilloche-intaglio-plate |
-| `concept:dash-caps-overlap` | Caps applied to each dash | 细节（父 `pr:stroke-dasharray`） | SVG 1.1 | 全平台 | 经 `pr:stroke-dasharray` |
-| `concept:default-paint-values` | Initial values fill black, stroke none | 细节（父 `pr:fill`） | SVG 1.1 | 全平台 | 经 `pr:fill` |
-| `concept:dotted-line-round-caps` | Dotted line via zero dashes and round caps | 细节（父 `pr:stroke-dasharray`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:half-pixel-crisp-lines` | Half-pixel offset for crisp 1px strokes | 细节（父 `pr:shape-rendering`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:inner-outer-stroke-simulation` | Simulating inside/outside strokes | 细节（父 `pr:paint-order`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:marching-ants` | Marching-ants selection outline | 细节（父 `pr:stroke-dashoffset`） | CSS | 全平台 | guilloche-intaglio-plate |
-| `concept:multiple-fill-layers` | Multiple comma-separated fill/stroke paint layers (rolled back) | 细节（父 `pr:fill`） | SVG 2 | 未实现 | 经 `pr:fill` |
-| `concept:odd-dash-repetition` | Odd-count dasharray doubled | 细节（父 `pr:stroke-dasharray`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:opacity-zero-still-hit-testable` | opacity 0 keeps hit-testing unlike visibility hidden | 细节（父 `pr:opacity`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:progress-ring` | Circular progress ring via dash on circle | 细节（父 `pr:stroke-dasharray`） | SVG 1.1 | 全平台 | 经 `pr:stroke-dasharray` |
-| `concept:stroke-over-fill-transparency` | Translucent stroke shows fill beneath its inner half | 细节（父 `pr:stroke-opacity`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:stroke-paint-server` | Gradient or pattern on stroke | 细节（父 `pr:stroke`） | SVG 1.1 | 全平台 | 经 `pr:stroke` |
-| `concept:stroke-width-under-nonuniform-scale` | Stroke distorted by non-uniform transforms | 细节（父 `pv:vector-effect=non-scaling-stroke`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:svg-blend-with-html-backdrop` | Blending inline SVG content against HTML backdrop | 细节（父 `pr:mix-blend-mode`） | CSS | 全平台 | neon-sign-workshop |
-| `concept:visibility-child-override` | Child re-enabling visibility inside hidden parent | 细节（父 `pr:visibility`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `concept:zero-length-subpath-caps` | Zero-length subpaths render dots with round/square caps | 细节（父 `pr:stroke-linecap`） | SVG 2 | 全平台 | 经 `pr:stroke-linecap` |
-| `el:color-profile` | <color-profile> element and color-profile property | 细节（父 `css:css-color-paint`） | Deprecated | 已废弃 | 经 `css:css-color-paint` |
-| `el:cursor` | <cursor> element | 细节（父 `pr:cursor`） | Deprecated | 已废弃 | 经 `pr:cursor` |
-| `el:solidcolor` | <solidcolor> paint server (solid-color / solid-opacity) | 细节（父 `pv:fill=url()`） | Deprecated | 已废弃 | 经 `pv:fill=url()` |
-| `pr:buffered-rendering` | buffered-rendering (removed; use will-change) | 细节（父 `pr:opacity`） | Deprecated | 已废弃 | 经 `pr:opacity` |
-| `pr:color-rendering` | color-rendering hint | 细节（父 `pr:color-interpolation`） | Deprecated | 已废弃 | 经 `pr:color-interpolation` |
-| `pr:enable-background` | enable-background / BackgroundImage | 细节（父 `pr:isolation`） | Deprecated | 已废弃 | 经 `pr:isolation` |
-| `pr:stroke-alignment` | stroke-alignment inner/outer | 细节（父 `pr:stroke`） | SVG 2 | 未实现 | 经 `pr:stroke` |
-| `pr:stroke-dashcorner` | stroke-dashcorner / stroke-dash-justify | 细节（父 `pr:stroke-dasharray`） | SVG 2 | 未实现 | 经 `pr:stroke-dasharray` |
-| `pr:z-index` | z-index (dropped from SVG 2) | 细节（父 `pr:paint-order`） | Deprecated | 未实现 | 经 `pr:paint-order` |
-| `pv:cursor=url()` | Custom image cursor via url() | 细节（父 `pr:cursor`） | CSS | 全平台 | 经 `pr:cursor` |
-| `pv:fill=child` | child / child(n) paint values (deferred) | 细节（父 `pr:fill`） | SVG 2 | 未实现 | 经 `pr:fill` |
-| `pv:fill=color-mix()` | color-mix() as paint | 细节（父 `css:css-color-paint`） | CSS | 全平台 | guilloche-intaglio-plate |
-| `pv:fill=icc-color()` | icc-color() ICC profile paint | 细节（父 `css:css-color-paint`） | Deprecated | 已废弃 | 经 `css:css-color-paint` |
-| `pv:fill=inherit` | Explicit inherit of paint | 细节（父 `pr:fill`） | CSS | 全平台 | 经 `pr:fill` |
-| `pv:fill=light-dark()` | light-dark() paint for colour schemes | 细节（父 `css:css-color-paint`） | CSS | 全平台 | 经 `css:css-color-paint` |
-| `pv:fill=rgba()` | Alpha colour syntaxes (rgba, hsla, #rrggbbaa) | 细节（父 `css:css-color-paint`） | CSS | 全平台 | guilloche-intaglio-plate |
-| `pv:fill=system-color` | System colour keywords (Canvas, CanvasText, Highlight, AccentColor) | 细节（父 `css:css-color-paint`） | CSS | 全平台 | 经 `css:css-color-paint` |
-| `pv:fill=transparent` | transparent colour keyword as paint | 细节（父 `pv:fill=none`） | CSS | 全平台 | 经 `pv:fill=none` |
-| `pv:mix-blend-mode=difference` | difference / exclusion blend | 细节（父 `pr:mix-blend-mode`） | CSS | 全平台 | 经 `pr:mix-blend-mode` |
-| `pv:mix-blend-mode=luminosity` | Non-separable blends (hue, saturation, color, luminosity) | 细节（父 `pr:mix-blend-mode`） | CSS | 全平台 | 经 `pr:mix-blend-mode` |
-| `pv:mix-blend-mode=screen` | Additive blend modes (screen, lighten, plus-lighter) | 细节（父 `pr:mix-blend-mode`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:overflow=scroll` | overflow: scroll / auto behave as hidden in SVG | 细节（父 `pr:overflow`） | SVG 1.1 | 全平台 | seismic-drum-console |
-| `pv:paint-order=stroke` | paint-order: stroke on text (outline behind fill) | 细节（父 `pr:paint-order`） | SVG 2 | 全平台 | guilloche-intaglio-plate |
-| `pv:stroke-dasharray=percentage` | Percentage dash lengths | 细节（父 `pr:stroke-dasharray`） | SVG 1.1 | 全平台 | 经 `pr:stroke-dasharray` |
-| `pv:stroke-linecap=round` | Round caps | 细节（父 `pr:stroke-linecap`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pv:stroke-linecap=square` | Square caps | 细节（父 `pr:stroke-linecap`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pv:stroke-linejoin=arcs` | arcs join | 细节（父 `pr:stroke-linejoin`） | SVG 2 | 未实现 | 经 `pr:stroke-linejoin` |
-| `pv:stroke-linejoin=bevel` | Bevel joins | 细节（父 `pr:stroke-linejoin`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pv:stroke-linejoin=miter-clip` | miter-clip join | 细节（父 `pr:stroke-linejoin`） | SVG 2 | 部分支持 | 经 `pr:stroke-linejoin` |
-| `pv:stroke-linejoin=round` | Round joins | 细节（父 `pr:stroke-linejoin`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pv:stroke-width=0` | Zero stroke-width suppresses stroke | 细节（父 `pr:stroke-width`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pv:stroke-width=em` | stroke-width with CSS units (em, px, mm) | 细节（父 `pr:stroke-width`） | CSS | 全平台 | 经 `pr:stroke-width` |
-| `pv:stroke-width=percentage` | stroke-width as percentage of viewport diagonal | 细节（父 `pr:stroke-width`） | SVG 1.1 | 全平台 | 经 `pr:stroke-width` |
-| `pv:stroke=none` | stroke: none (default) | 细节（父 `pr:stroke`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pv:vector-effect=fixed-position` | vector-effect: fixed-position | 细节（父 `pv:vector-effect=non-scaling-stroke`） | SVG 2 | 未实现 | 经 `pv:vector-effect=non-scaling-stroke` |
-| `pv:vector-effect=non-rotation` | vector-effect: non-rotation | 细节（父 `pv:vector-effect=non-scaling-stroke`） | SVG 2 | 未实现 | 经 `pv:vector-effect=non-scaling-stroke` |
-| `pv:vector-effect=non-scaling-size` | vector-effect: non-scaling-size | 细节（父 `pv:vector-effect=non-scaling-stroke`） | SVG 2 | 未实现 | 经 `pv:vector-effect=non-scaling-stroke` |
-| `pv:vector-effect=non-scaling-stroke-viewport` | vector-effect viewport / screen reference modifiers | 细节（父 `pv:vector-effect=non-scaling-stroke`） | SVG 2 | 未实现 | 经 `pv:vector-effect=non-scaling-stroke` |
-| `pv:visibility=collapse` | visibility: collapse | 细节（父 `pr:visibility`） | CSS | 全平台 | escapement-chronometer |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `api:CSSStyleDeclaration.clipPath` | Scripted clip-path via style.clipPath | core | broad | neon-sign-workshop |
+| `at:clipPath.clipPathUnits` | clipPathUnits attribute | core | broad | core-sample-stratigraphy |
+| `at:clipPath.transform` | transform on clipPath and its children | core | broad | core-sample-stratigraphy |
+| `at:mask.maskContentUnits` | maskContentUnits attribute | core | broad | core-sample-stratigraphy |
+| `at:mask.maskUnits` | maskUnits attribute | core | broad | core-sample-stratigraphy |
+| `at:mask.width` | mask width region size | core | broad | core-sample-stratigraphy |
+| `at:mask.x` | mask x region origin | core | broad | core-sample-stratigraphy |
+| `av:clipPath.clipPathUnits=objectBoundingBox` | clipPathUnits=objectBoundingBox | core | broad | core-sample-stratigraphy |
+| `av:mask.maskContentUnits=objectBoundingBox` | maskContentUnits=objectBoundingBox | core | broad | core-sample-stratigraphy |
+| `concept:animated-clippath-reveal` | SMIL-animated clipPath geometry (reveal/wipe) | core | broad | core-sample-stratigraphy |
+| `concept:clip-group-vs-children` | Clip applied to a group vs each child | core | broad | core-sample-stratigraphy |
+| `concept:clip-path-html-to-svg-reference` | HTML element clipped by an inline SVG clipPath | core | broad | neon-sign-workshop |
+| `concept:clip-path-on-clippath-children` | clip-path on individual clipPath children | core | broad | core-sample-stratigraphy |
+| `concept:clip-path-shape-transition` | CSS transition/animation between basic shapes | core | broad | neon-sign-workshop |
+| `concept:clipped-hit-testing` | Pointer events respect clip-path | core | broad | core-sample-stratigraphy |
+| `concept:effect-order-filter-clip-mask-opacity` | Processing order: filter, clip, mask, opacity | core | broad | core-sample-stratigraphy |
+| `concept:gradient-feathered-mask` | Gradient-feathered mask edges (soft fade, vignette) | core | broad | core-sample-stratigraphy |
+| `concept:mask-html-to-svg-reference` | HTML element masked by an SVG mask element | core | partial | neon-sign-workshop |
+| `concept:mask-on-group-vs-element` | Mask on a group vs on each element | core | broad | core-sample-stratigraphy |
+| `concept:mask-smil-animation` | SMIL animation inside mask content | core | broad | core-sample-stratigraphy |
+| `concept:mask-with-filter` | Filtered mask content (blur feathering) | core | broad | mycelium-culture-chamber |
+| `concept:mask-with-image` | Raster or SVG image as mask content | core | broad | mycelium-culture-chamber |
+| `concept:mask-with-text` | Text as mask content | core | broad | stele-rubbing-hall |
+| `concept:masked-hit-testing` | Pointer events ignore mask transparency | core | broad | core-sample-stratigraphy |
+| `concept:nested-clippath` | clip-path on a clipPath element (intersection) | core | broad | core-sample-stratigraphy |
+| `concept:text-in-clippath` | text and textPath inside clipPath | core | broad | stele-rubbing-hall |
+| `concept:use-in-clippath` | use element inside clipPath | core | broad | core-sample-stratigraphy |
+| `css:clip-path-basic-shapes` | clip-path CSS basic shapes on SVG elements | core | broad | neon-sign-workshop |
+| `css:clip-path-geometry-box` | clip-path geometry-box keywords (fill-box, stroke-box, view-box) | core | broad | neon-sign-workshop |
+| `css:mask-composite` | mask-composite (add, subtract, intersect, exclude) | core | broad | neon-sign-workshop |
+| `css:mask-image` | CSS mask shorthand and mask-image on SVG elements | core | broad | neon-sign-workshop |
+| `css:mask-layers` | Multi-layer mask shorthand | core | broad | neon-sign-workshop |
+| `css:mask-mode` | mask-mode (alpha, luminance, match-source) | core | broad | neon-sign-workshop |
+| `css:mask-size` | mask-size | core | broad | neon-sign-workshop |
+| `el:clipPath` | clipPath element | core | broad | core-sample-stratigraphy |
+| `el:mask` | mask element | core | broad | neon-sign-workshop, core-sample-stratigraphy |
+| `pr:clip-path` | clip-path property | core | broad | core-sample-stratigraphy |
+| `pr:clip-rule` | clip-rule property | core | broad | core-sample-stratigraphy |
+| `pr:mask` | mask property/attribute with url() reference | core | broad | core-sample-stratigraphy |
+| `pr:mask-type` | mask-type property (luminance default vs alpha) | core | broad | neon-sign-workshop, core-sample-stratigraphy |
+| `api:SVGClipPathElement.clipPathUnits` | SVGClipPathElement animated attributes | detail / `at:clipPath.clipPathUnits` | broad | core-sample-stratigraphy |
+| `api:SVGClipPathElement.transform` | SVGClipPathElement.transform animated transform list | detail / `at:clipPath.transform` | broad | core-sample-stratigraphy (via at:clipPath.transform) |
+| `api:SVGMaskElement.maskUnits` | SVGMaskElement animated attributes | detail / `at:mask.maskUnits` | broad | core-sample-stratigraphy (via at:mask.maskUnits) |
+| `at:mask.height` | mask height region size | detail / `at:mask.width` | broad | core-sample-stratigraphy |
+| `at:mask.y` | mask y region origin | detail / `at:mask.x` | broad | core-sample-stratigraphy |
+| `av:clipPath.clipPathUnits=userSpaceOnUse` | clipPathUnits=userSpaceOnUse (default) | detail / `at:clipPath.clipPathUnits` | broad | core-sample-stratigraphy |
+| `av:mask.maskUnits=userSpaceOnUse` | maskUnits=userSpaceOnUse | detail / `at:mask.maskUnits` | broad | core-sample-stratigraphy |
+| `concept:clip-after-blur-via-group` | Reordering effects by wrapping in groups | detail / `concept:effect-order-filter-clip-mask-opacity` | broad | core-sample-stratigraphy |
+| `concept:clip-follows-target-transform` | Clip evaluated in target user space | detail / `at:clipPath.transform` | broad | core-sample-stratigraphy |
+| `concept:clippath-child-display-none` | display:none and visibility on clipPath children | detail / `el:clipPath` | partial | core-sample-stratigraphy |
+| `concept:clippath-disallowed-children` | Ignored clipPath children (g, image, foreignObject) | detail / `el:clipPath` | broad | core-sample-stratigraphy |
+| `concept:clippath-ignores-paint` | Clip uses raw geometry, ignores fill, stroke, opacity | detail / `el:clipPath` | broad | core-sample-stratigraphy |
+| `concept:clippath-union-of-children` | Union of multiple clipPath children | detail / `el:clipPath` | broad | core-sample-stratigraphy |
+| `concept:empty-clippath` | Empty clipPath hides element | detail / `el:clipPath` | broad | core-sample-stratigraphy |
+| `concept:external-clip-mask-reference` | clip-path/mask referencing an external SVG file | detail / `pr:clip-path` | partial | core-sample-stratigraphy (via pr:clip-path) |
+| `concept:getbbox-ignores-clip` | getBBox and getBoundingClientRect ignore clipping | detail / `concept:clipped-hit-testing` | broad | core-sample-stratigraphy |
+| `concept:invalid-clip-reference` | clip-path referencing missing element | detail / `pr:clip-path` | partial | core-sample-stratigraphy |
+| `concept:invalid-mask-reference` | mask referencing missing element | detail / `pr:mask` | partial | core-sample-stratigraphy |
+| `concept:marker-viewport-clipping` | marker overflow clipping | detail / `pr:overflow` | broad | seismic-drum-console (via pr:overflow) |
+| `concept:mask-and-clip-combined` | clip-path and mask on the same element | detail / `concept:effect-order-filter-clip-mask-opacity` | broad | core-sample-stratigraphy |
+| `concept:mask-content-opacity` | Opacity and fill-opacity inside mask content | detail / `el:mask` | broad | core-sample-stratigraphy |
+| `concept:mask-image-svg-url` | External SVG or raster file as CSS mask-image | detail / `css:mask-image` | broad | neon-sign-workshop |
+| `concept:mask-luminance-colorspace` | Luminance coefficients and color-interpolation on masks | detail / `pr:mask-type` | partial | core-sample-stratigraphy |
+| `concept:mask-with-pattern` | Pattern-filled mask content (halftone) | detail / `el:mask` | broad | neon-sign-workshop (via el:mask), core-sample-stratigraphy (via el:mask) |
+| `concept:nested-mask` | Mask content that is itself masked | detail / `el:mask` | broad | core-sample-stratigraphy |
+| `concept:objectboundingbox-zero-bbox-trap` | objectBoundingBox fails on zero-area bounding boxes | detail / `av:clipPath.clipPathUnits=objectBoundingBox` | broad | core-sample-stratigraphy |
+| `concept:outer-svg-overflow-in-html` | overflow:visible on inline svg root | detail / `pr:overflow` | broad | seismic-drum-console (via pr:overflow) |
+| `concept:overflow-hidden-hit-testing` | Viewport overflow clipping also clips hit-testing | detail / `concept:clipped-hit-testing` | broad | core-sample-stratigraphy (via concept:clipped-hit-testing) |
+| `concept:pattern-tile-clipping` | pattern tiles clip content to the tile | detail / `pr:overflow` | partial | seismic-drum-console (via pr:overflow) |
+| `concept:symbol-viewport-clipping` | symbol instances clip to their viewport | detail / `pr:overflow` | broad | seismic-drum-console (via pr:overflow) |
+| `css:mask-border` | mask-border on SVG elements | detail / `css:mask-image` | none | neon-sign-workshop (via css:mask-image) |
+| `css:mask-clip` | mask-clip geometry boxes on SVG | detail / `css:mask-image` | partial | neon-sign-workshop (via css:mask-image) |
+| `css:mask-origin` | mask-origin geometry boxes on SVG | detail / `css:mask-image` | partial | neon-sign-workshop (via css:mask-image) |
+| `css:mask-position` | mask-position | detail / `css:mask-size` | broad | neon-sign-workshop (via css:mask-size) |
+| `css:mask-repeat` | mask-repeat | detail / `css:mask-size` | broad | neon-sign-workshop |
+| `pr:clip` | clip property with rect() on viewports (deprecated) | detail / `pr:clip-path` | deprecated | core-sample-stratigraphy (via pr:clip-path) |
+| `pv:clip-path=border-box` | CSS box keywords (content-box, padding-box, border-box, margin-box) on SVG | detail / `css:clip-path-geometry-box` | broad | neon-sign-workshop (via css:clip-path-geometry-box) |
+| `pv:clip-path=circle()` | clip-path: circle() basic shape | detail / `css:clip-path-basic-shapes` | broad | neon-sign-workshop |
+| `pv:clip-path=ellipse()` | clip-path: ellipse() basic shape | detail / `css:clip-path-basic-shapes` | broad | neon-sign-workshop |
+| `pv:clip-path=fill-box` | clip-path geometry-box: fill-box | detail / `css:clip-path-geometry-box` | broad | neon-sign-workshop |
+| `pv:clip-path=inset()` | clip-path: inset() basic shape | detail / `css:clip-path-basic-shapes` | broad | neon-sign-workshop |
+| `pv:clip-path=none` | clip-path: none reset | detail / `pr:clip-path` | broad | core-sample-stratigraphy |
+| `pv:clip-path=path()` | clip-path: path() basic shape | detail / `css:clip-path-basic-shapes` | broad | neon-sign-workshop |
+| `pv:clip-path=polygon()` | clip-path: polygon() basic shape | detail / `css:clip-path-basic-shapes` | broad | neon-sign-workshop |
+| `pv:clip-path=rect()` | clip-path: rect() and xywh() shapes | detail / `css:clip-path-basic-shapes` | broad | neon-sign-workshop |
+| `pv:clip-path=shape()` | clip-path: shape() function | detail / `css:clip-path-basic-shapes` | partial | neon-sign-workshop (via css:clip-path-basic-shapes) |
+| `pv:clip-path=stroke-box` | clip-path geometry-box: stroke-box | detail / `css:clip-path-geometry-box` | broad | neon-sign-workshop |
+| `pv:clip-path=view-box` | clip-path geometry-box: view-box | detail / `css:clip-path-geometry-box` | broad | neon-sign-workshop |
+| `pv:clip-rule=evenodd` | clip-rule=evenodd | detail / `pr:clip-rule` | broad | core-sample-stratigraphy |
+| `pv:mask-type=alpha` | mask-type=alpha | detail / `pr:mask-type` | broad | core-sample-stratigraphy |
+| `pv:mask-type=luminance` | mask-type=luminance (default) | detail / `pr:mask-type` | broad | core-sample-stratigraphy |
 
-### 渐变与图案（`gradients`，核心 38 项 / 细节 50 项）
+### 标记 (marker)
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `at:linearGradient.gradientTransform` | gradientTransform | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `at:linearGradient.href` | href inheritance between gradients | 核心 | SVG 2 | 全平台 | ★auroral-spectrograph |
-| `at:linearGradient.x1` | Gradient vector x1/y1/x2/y2 | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `at:pattern.href` | Pattern href inheritance | 核心 | SVG 2 | 全平台 | ★jacquard-loom-draft |
-| `at:pattern.patternTransform` | patternTransform rotates/scales the tile grid | 核心 | SVG 1.1 | 全平台 | ★jacquard-loom-draft, four-colour-press-check |
-| `at:pattern.viewBox` | pattern viewBox scaling | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `at:pattern.width` | Tile size width/height | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `at:radialGradient.cx` | Radial centre and radius cx/cy/r | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `at:radialGradient.fr` | Focal radius fr | 核心 | SVG 2 | 部分支持 | ★auroral-spectrograph |
-| `at:radialGradient.fx` | Focal point fx/fy | 核心 | SVG 1.1 | 全平台 | ★auroral-spectrograph |
-| `at:stop.offset` | offset as number or percentage | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `av:linearGradient.gradientUnits=userSpaceOnUse` | gradientUnits userSpaceOnUse | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `av:linearGradient.spreadMethod=reflect` | spreadMethod reflect | 核心 | SVG 1.1 | 全平台 | ★auroral-spectrograph |
-| `av:linearGradient.spreadMethod=repeat` | spreadMethod repeat | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `av:pattern.patternContentUnits=objectBoundingBox` | patternContentUnits objectBoundingBox | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `av:pattern.patternUnits=userSpaceOnUse` | patternUnits userSpaceOnUse | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `av:radialGradient.spreadMethod=reflect` | Radial reflect with focal offset | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:animated-gradient-vector` | Animating gradient geometry or gradientTransform | 核心 | SMIL | 全平台 | auroral-spectrograph |
-| `concept:animated-pattern` | Animating patternTransform or tile content | 核心 | SMIL | 全平台 | jacquard-loom-draft |
-| `concept:conic-gradient-emulation` | Conic/angular gradient emulation | 核心 | SVG 1.1 | 全平台 | ★auroral-spectrograph |
-| `concept:gradient-on-marker` | Gradient inside marker content | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:gradient-on-stroke` | Gradient stroke | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:gradient-on-text` | Gradient-filled text | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:halftone-pattern` | Halftone dots via patterns | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:hatching-pattern` | Hatching via line patterns | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:mesh-gradient-emulation` | Mesh gradient emulation with blurred blobs | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:nested-pattern` | Pattern content filled with another pattern | 核心 | SVG 1.1 | 全平台 | ★jacquard-loom-draft |
-| `concept:pattern-seams` | Tile seams and anti-aliasing artifacts | 核心 | SVG 1.1 | 全平台 | ★jacquard-loom-draft |
-| `concept:pattern-with-image` | Raster image tiles in a pattern | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:pattern-with-text` | Text inside pattern tiles | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:smil-animated-stops` | SMIL animation of stop offset and colour | 核心 | SMIL | 全平台 | ★auroral-spectrograph |
-| `css:gradient-stop-selectors` | CSS-styled stops via selectors and classes | 核心 | CSS | 全平台 | auroral-spectrograph |
-| `el:linearGradient` | linearGradient element | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `el:pattern` | pattern element | 核心 | SVG 1.1 | 全平台 | ★jacquard-loom-draft, four-colour-press-check |
-| `el:radialGradient` | radialGradient element | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `el:stop` | stop element | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `pr:stop-color` | stop-color property | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `pr:stop-opacity` | stop-opacity property | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `api:SVGGradientElement.gradientUnits` | SVGGradientElement gradientUnits/spreadMethod/gradientTransform animated attributes | 细节（父 `av:linearGradient.gradientUnits=userSpaceOnUse`） | DOM | 全平台 | 经 `av:linearGradient.gradientUnits=userSpaceOnUse` |
-| `api:SVGLinearGradientElement.x1` | SVGLinearGradientElement x1/y1/x2/y2 SVGAnimatedLength | 细节（父 `at:linearGradient.x1`） | DOM | 全平台 | 经 `at:linearGradient.x1` |
-| `api:SVGPatternElement.patternTransform` | SVGPatternElement animated attributes | 细节（父 `at:pattern.patternTransform`） | DOM | 全平台 | jacquard-loom-draft |
-| `api:SVGRadialGradientElement.fx` | SVGRadialGradientElement cx/cy/r/fx/fy/fr SVGAnimatedLength | 细节（父 `at:radialGradient.fx`） | DOM | 全平台 | auroral-spectrograph |
-| `api:SVGStopElement.offset` | SVGStopElement.offset SVGAnimatedNumber | 细节（父 `at:stop.offset`） | DOM | 全平台 | auroral-spectrograph |
-| `at:linearGradient.xlink:href` | xlink:href on gradients and patterns | 细节（父 `at:linearGradient.href`） | Deprecated | 已废弃 | 经 `at:linearGradient.href` |
-| `at:pattern.preserveAspectRatio` | pattern preserveAspectRatio | 细节（父 `at:pattern.viewBox`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `at:pattern.x` | Tile origin x/y offset | 细节（父 `at:pattern.width`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `av:linearGradient.gradientUnits=objectBoundingBox` | gradientUnits objectBoundingBox (default) | 细节（父 `av:linearGradient.gradientUnits=userSpaceOnUse`） | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `av:linearGradient.spreadMethod=pad` | spreadMethod pad (default) | 细节（父 `el:linearGradient`） | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `av:pattern.patternContentUnits=userSpaceOnUse` | patternContentUnits userSpaceOnUse (default) | 细节（父 `av:pattern.patternContentUnits=objectBoundingBox`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `av:pattern.patternUnits=objectBoundingBox` | patternUnits objectBoundingBox (default) | 细节（父 `av:pattern.patternUnits=userSpaceOnUse`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `av:radialGradient.spreadMethod=repeat` | Radial repeat with focal offset | 细节（父 `av:radialGradient.spreadMethod=reflect`） | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:bbox-gradient-diagonal-skew` | objectBoundingBox skews diagonal gradients | 细节（父 `av:linearGradient.gradientUnits=userSpaceOnUse`） | SVG 1.1 | 全平台 | 经 `av:linearGradient.gradientUnits=userSpaceOnUse` |
-| `concept:bbox-zero-size-paint-server-disabled` | Zero-width/height bbox disables bbox paint servers | 细节（父 `av:linearGradient.gradientUnits=userSpaceOnUse`） | SVG 1.1 | 全平台 | 经 `av:linearGradient.gradientUnits=userSpaceOnUse` |
-| `concept:checkerboard-pattern` | Checkerboard and transparency-grid tiles | 细节（父 `el:pattern`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:cross-hatch-layering` | Cross-hatch by stacking two pattern fills | 细节（父 `concept:hatching-pattern`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:elliptical-radial-gradient` | Elliptical radial via gradientTransform or bbox units | 细节（父 `el:radialGradient`） | SVG 1.1 | 全平台 | 经 `el:radialGradient` |
-| `concept:external-gradient-reference` | Cross-document url(file.svg#grad) paint servers | 细节（父 `at:linearGradient.href`） | SVG 1.1 | 部分支持 | 经 `at:linearGradient.href` |
-| `concept:focal-point-outside-circle` | Focal point outside end circle (SVG 2 cone) | 细节（父 `at:radialGradient.fx`） | SVG 2 | 部分支持 | auroral-spectrograph |
-| `concept:foreignobject-css-gradient` | CSS conic/repeating gradients via foreignObject | 细节（父 `concept:conic-gradient-emulation`） | CSS | 部分支持 | 经 `concept:conic-gradient-emulation` |
-| `concept:gradient-banding-noise` | Banding and dither via feTurbulence noise overlay | 细节（父 `pr:color-interpolation`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:gradient-href-chain` | Multi-level href chains and attribute override | 细节（父 `at:linearGradient.href`） | SVG 1.1 | 全平台 | 经 `at:linearGradient.href` |
-| `concept:gradient-href-cross-type` | Linear referencing radial (stops only cross type) | 细节（父 `at:linearGradient.href`） | SVG 1.1 | 全平台 | 经 `at:linearGradient.href` |
-| `concept:gradient-on-group-bbox-per-child` | Gradient fill inherited from <g> resolves bbox per child | 细节（父 `av:linearGradient.gradientUnits=userSpaceOnUse`） | SVG 1.1 | 全平台 | 经 `av:linearGradient.gradientUnits=userSpaceOnUse` |
-| `concept:gradient-on-use-instances` | bbox gradients per <use> instance | 细节（父 `el:linearGradient`） | SVG 1.1 | 全平台 | 经 `el:linearGradient` |
-| `concept:hard-stop-banding` | Duplicate offsets create hard edges | 细节（父 `at:stop.offset`） | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:layered-radial-gradients` | Stacking transparent radial gradients | 细节（父 `concept:mesh-gradient-emulation`） | SVG 1.1 | 全平台 | 经 `concept:mesh-gradient-emulation` |
-| `concept:paint-server-reference-cycle` | Self/cyclic references are treated as errors | 细节（父 `el:pattern`） | SVG 1.1 | 全平台 | 经 `el:pattern` |
-| `concept:pattern-on-stroke` | Pattern-filled stroke | 细节（父 `concept:gradient-on-stroke`） | SVG 1.1 | 全平台 | 经 `concept:gradient-on-stroke` |
-| `concept:pattern-on-text` | Pattern-filled text | 细节（父 `concept:gradient-on-text`） | SVG 1.1 | 全平台 | 经 `concept:gradient-on-text` |
-| `concept:pattern-overflow-visible` | overflow:visible on pattern tiles | 细节（父 `el:pattern`） | SVG 1.1 | 未实现 | jacquard-loom-draft |
-| `concept:pattern-tile-rasterization` | Tile rasterization resolution and blur | 细节（父 `concept:pattern-seams`） | SVG 1.1 | 部分支持 | jacquard-loom-draft |
-| `concept:pattern-viewbox-overrides-contentunits` | viewBox overrides patternContentUnits | 细节（父 `at:pattern.viewBox`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:pattern-with-filter` | Filtered content inside pattern tiles | 细节（父 `el:pattern`） | SVG 1.1 | 全平台 | 经 `el:pattern` |
-| `concept:pattern-with-gradient` | Gradient-filled content inside pattern | 细节（父 `el:pattern`） | SVG 1.1 | 全平台 | 经 `el:pattern` |
-| `concept:pattern-with-use` | Pattern tile built from <use> instances | 细节（父 `el:pattern`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:pattern-zero-size-disabled` | Zero tile size disables the pattern | 细节（父 `at:pattern.width`） | SVG 1.1 | 全平台 | 经 `at:pattern.width` |
-| `concept:premultiplied-transparent-stop` | Transparent stops interpolate premultiplied | 细节（父 `pr:stop-opacity`） | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:single-or-zero-stop-gradient` | Zero stops = none, one stop = solid | 细节（父 `el:stop`） | SVG 1.1 | 全平台 | 经 `el:stop` |
-| `concept:single-stop-gradient-as-solidcolor` | Single-stop gradient as reusable named colour | 细节（父 `el:stop`） | SVG 1.1 | 全平台 | 经 `el:stop` |
-| `concept:stop-offset-clamping` | Offset clamping and monotonic ordering | 细节（父 `at:stop.offset`） | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:zero-length-gradient-vector` | Zero-length vector paints last stop colour | 细节（父 `at:linearGradient.x1`） | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `css:custom-properties-in-gradients` | CSS custom properties driving stop colours | 细节（父 `css:gradient-stop-selectors`） | CSS | 全平台 | auroral-spectrograph |
-| `css:fill-css-gradient-image` | CSS linear-gradient() as SVG fill | 细节（父 `el:linearGradient`） | CSS | 未实现 | 经 `el:linearGradient` |
-| `css:modern-color-syntax-in-stops` | CSS Color 4 values (oklch, color-mix) in stop-color | 细节（父 `pr:stop-color`） | CSS | 全平台 | 经 `pr:stop-color` |
-| `css:stop-color-transition` | CSS transitions and animations on stop-color/stop-opacity | 细节（父 `pr:stop-color`） | CSS | 全平台 | 经 `pr:stop-color` |
-| `el:hatch` | hatch / hatchpath paint server | 细节（父 `concept:hatching-pattern`） | SVG 2 | 未实现 | 经 `concept:hatching-pattern` |
-| `el:meshgradient` | meshgradient / meshrow / meshpatch (and draft mesh alias) | 细节（父 `concept:mesh-gradient-emulation`） | SVG 2 | 未实现 | 经 `concept:mesh-gradient-emulation` |
-| `pv:stop-color=currentcolor` | currentColor in stops | 细节（父 `pr:stop-color`） | SVG 1.1 | 全平台 | auroral-spectrograph |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `api:SVGMarkerElement.setOrientToAuto` | SVGMarkerElement.setOrientToAuto | core | broad | pipeline-mimic-board |
+| `at:marker.markerUnits` | markerUnits | core | broad | pipeline-mimic-board |
+| `at:marker.markerWidth` | markerWidth / markerHeight viewport size | core | broad | pipeline-mimic-board |
+| `at:marker.orient` | orient | core | broad | pipeline-mimic-board |
+| `at:marker.preserveAspectRatio` | marker preserveAspectRatio | core | broad | pipeline-mimic-board |
+| `at:marker.refX` | refX anchor point | core | broad | pipeline-mimic-board |
+| `at:marker.refY` | refY anchor point | core | broad | pipeline-mimic-board |
+| `at:marker.viewBox` | marker viewBox | core | broad | pipeline-mimic-board |
+| `av:marker.markerUnits=userSpaceOnUse` | markerUnits userSpaceOnUse (fixed size) | core | broad | pipeline-mimic-board |
+| `av:marker.orient=angle` | orient fixed angle (number, deg, rad, grad) | core | broad | pipeline-mimic-board |
+| `av:marker.orient=auto` | orient auto (follow path direction) | core | broad | pipeline-mimic-board |
+| `av:marker.orient=auto-start-reverse` | orient auto-start-reverse | core | broad | pipeline-mimic-board |
+| `concept:marker-arrowhead` | arrowhead technique | core | broad | pipeline-mimic-board |
+| `concept:marker-closed-path-direction` | closed subpath orientation at the closing vertex | core | broad | pipeline-mimic-board |
+| `concept:marker-css-state-swap` | swap marker via :hover or class change | core | broad | pipeline-mimic-board |
+| `concept:marker-dimension-ticks` | dimension line ticks perpendicular to the line | core | broad | pipeline-mimic-board |
+| `concept:marker-graph-nodes` | graph edges with node glyphs and arrowheads | core | broad | pipeline-mimic-board |
+| `concept:marker-non-scaling-stroke` | markers under vector-effect non-scaling-stroke | core | broad | pipeline-mimic-board |
+| `concept:marker-smil-attribute-animation` | SMIL animation of refX, orient, markerWidth | core | broad | pipeline-mimic-board |
+| `concept:marker-transform-inheritance` | markers inherit the referencing element's transform (incl. skew) | core | broad | pipeline-mimic-board |
+| `concept:marker-vertex-bisector` | mid-marker direction is the bisector of adjacent segments | core | broad | pipeline-mimic-board |
+| `concept:marker-vertex-glyphs` | vertex glyphs on polylines (data points) | core | broad | pipeline-mimic-board |
+| `concept:marker-vs-symbol` | marker versus symbol/use trade-offs | core | broad | pipeline-mimic-board |
+| `el:marker` | marker element | core | broad | pipeline-mimic-board |
+| `pr:marker` | marker shorthand (CSS only) | core | broad | pipeline-mimic-board |
+| `pr:marker-end` | marker-end | core | broad | pipeline-mimic-board |
+| `pr:marker-mid` | marker-mid | core | broad | pipeline-mimic-board |
+| `pr:marker-start` | marker-start | core | broad | pipeline-mimic-board |
+| `api:CSSStyleDeclaration.markerEnd` | style.markerEnd / markerStart / markerMid | detail / `pr:marker-end` | broad | pipeline-mimic-board |
+| `api:SVGBoundingBoxOptions.markers` | getBBox({markers:true}) | detail / `el:marker` | partial | pipeline-mimic-board |
+| `api:SVGMarkerElement.markerUnits` | SVGMarkerElement.markerUnits animated enumeration | detail / `api:SVGMarkerElement.setOrientToAuto` | broad | pipeline-mimic-board |
+| `api:SVGMarkerElement.orientType` | orientType / orientAngle animated properties | detail / `api:SVGMarkerElement.setOrientToAuto` | broad | pipeline-mimic-board |
+| `api:SVGMarkerElement.refX` | refX/refY/markerWidth/markerHeight as SVGAnimatedLength | detail / `api:SVGMarkerElement.setOrientToAuto` | broad | pipeline-mimic-board |
+| `api:SVGMarkerElement.setOrientToAngle` | SVGMarkerElement.setOrientToAngle | detail / `api:SVGMarkerElement.setOrientToAuto` | broad | pipeline-mimic-board |
+| `api:SVGMarkerElement.viewBox` | SVGFitToViewBox on marker (viewBox, preserveAspectRatio) | detail / `api:SVGMarkerElement.setOrientToAuto` | broad | pipeline-mimic-board |
+| `at:marker.markerHeight` | markerHeight | detail / `at:marker.markerWidth` | broad | pipeline-mimic-board |
+| `at:marker.position` | marker position attribute (draft) | detail / `pr:marker-mid` | none | pipeline-mimic-board (via pr:marker-mid) |
+| `at:marker.transform` | transform on marker element | detail / `el:marker` | none | pipeline-mimic-board (via el:marker) |
+| `av:marker.markerUnits=strokeWidth` | markerUnits strokeWidth (default, scales with stroke) | detail / `at:marker.markerUnits` | broad | pipeline-mimic-board (via at:marker.markerUnits) |
+| `av:marker.markerWidth=0` | markerWidth or markerHeight zero disables marker | detail / `at:marker.markerWidth` | broad | pipeline-mimic-board |
+| `av:marker.preserveAspectRatio=none` | non-uniform stretch of marker content | detail / `at:marker.preserveAspectRatio` | broad | pipeline-mimic-board |
+| `av:marker.refX=center` | refX/refY keywords left\|center\|right, top\|center\|bottom | detail / `at:marker.refX` | none | pipeline-mimic-board |
+| `concept:context-paint-gradient` | context-stroke referencing a gradient/pattern | detail / `pv:fill=context-stroke` | partial | pipeline-mimic-board |
+| `concept:marker-animated-content` | animated content inside a marker | detail / `concept:marker-smil-attribute-animation` | broad | pipeline-mimic-board |
+| `concept:marker-base-href-pitfall` | markers vanish with base href or routed URLs | detail / `pr:marker-end` | broad | pipeline-mimic-board (via pr:marker-end) |
+| `concept:marker-content-paint-servers` | gradients, patterns and filters inside marker content | detail / `el:marker` | broad | pipeline-mimic-board |
+| `concept:marker-currentcolor` | currentColor inside marker content follows the marker's own color | detail / `pv:fill=context-stroke` | broad | pipeline-mimic-board |
+| `concept:marker-curve-tangent` | orientation on curves uses the tangent | detail / `av:marker.orient=auto` | broad | pipeline-mimic-board |
+| `concept:marker-dashed-stroke` | markers on dashed strokes ignore dash gaps | detail / `pr:marker-mid` | broad | pipeline-mimic-board |
+| `concept:marker-display-ua-style` | marker element is never rendered directly | detail / `el:marker` | broad | pipeline-mimic-board |
+| `concept:marker-element-effects` | opacity, filter, clip-path, mask on host apply to markers | detail / `el:marker` | broad | pipeline-mimic-board (via el:marker) |
+| `concept:marker-external-reference` | marker referenced from an external SVG file | detail / `el:marker` | partial | pipeline-mimic-board (via el:marker) |
+| `concept:marker-follows-animated-path` | markers track an animated path d or points | detail / `concept:marker-smil-attribute-animation` | broad | pipeline-mimic-board |
+| `concept:marker-ignores-display` | display none on marker or its ancestors does not disable it | detail / `el:marker` | broad | pipeline-mimic-board (via el:marker) |
+| `concept:marker-pointer-events` | markers are not hit-testable | detail / `concept:marker-vs-symbol` | broad | pipeline-mimic-board |
+| `concept:marker-property-inheritance` | marker properties inherit to descendant shapes | detail / `pr:marker` | broad | pipeline-mimic-board |
+| `concept:marker-reverse-arrow-fallback` | reversed start arrow without auto-start-reverse | detail / `av:marker.orient=auto-start-reverse` | broad | pipeline-mimic-board |
+| `concept:marker-shared-defs-across-inline-svg` | marker defined in one inline svg used by another | detail / `el:marker` | broad | pipeline-mimic-board (via el:marker) |
+| `concept:marker-style-isolation` | marker content inherits from the marker's ancestors, not the host shape | detail / `el:marker` | broad | pipeline-mimic-board |
+| `concept:marker-subpath-vertices` | start/end only at path ends, mid at subpath starts | detail / `pr:marker-mid` | broad | pipeline-mimic-board |
+| `concept:marker-text-content` | text inside marker content | detail / `el:marker` | broad | pipeline-mimic-board |
+| `concept:marker-without-stroke` | markers render even when stroke is none | detail / `at:marker.markerUnits` | broad | pipeline-mimic-board |
+| `concept:marker-zero-length-direction` | direction with zero-length segments or coincident control points | detail / `concept:marker-vertex-bisector` | partial | pipeline-mimic-board |
+| `concept:markers-on-basic-shapes` | SVG 2 markers on rect, circle, ellipse | detail / `el:marker` | none | pipeline-mimic-board |
+| `concept:nested-markers` | marker content that itself uses markers | detail / `el:marker` | partial | pipeline-mimic-board |
+| `css:marker-properties` | marker properties from external/embedded CSS | detail / `pr:marker` | broad | pipeline-mimic-board |
+| `pr:marker-knockout-left` | marker-knockout-left / marker-knockout-right | detail / `pv:paint-order=markers` | none | pipeline-mimic-board |
+| `pr:marker-pattern` | marker-pattern (repeating markers along path) | detail / `pr:marker-mid` | none | pipeline-mimic-board (via pr:marker-mid) |
+| `pr:marker-segment` | marker-segment (per-segment midpoint marker) | detail / `pr:marker-mid` | none | pipeline-mimic-board (via pr:marker-mid) |
+| `pv:marker=none` | marker none reset | detail / `pr:marker` | broad | pipeline-mimic-board |
+| `pv:stroke=context-fill` | stroke context-fill | detail / `pv:fill=context-fill` | broad | pipeline-mimic-board |
 
-### 文本与排版（`text`，核心 40 项 / 细节 83 项）
+### 滤镜：区域、连线、合成与颜色原语
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:SVGTextContentElement.getComputedTextLength` | getComputedTextLength | 核心 | DOM | 全平台 | museum-label-panel, ★letterpress-type-specimen |
-| `api:SVGTextContentElement.getStartPositionOfChar` | getStartPositionOfChar / getEndPositionOfChar | 核心 | DOM | 全平台 | ★letterpress-type-specimen |
-| `at:text.dy` | dy relative vertical shift list | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `at:text.rotate` | rotate list per glyph (last value repeats) | 核心 | SVG 1.1 | 全平台 | ★stele-rubbing-hall |
-| `at:text.textLength` | textLength forced advance width | 核心 | SVG 1.1 | 全平台 | ★letterpress-type-specimen |
-| `at:text.x` | x list with per-glyph absolute positions (text/tspan) | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `at:textPath.href` | textPath href reference (unprefixed) | 核心 | SVG 2 | 全平台 | stele-rubbing-hall |
-| `at:textPath.path` | inline path attribute on textPath | 核心 | SVG 2 | 部分支持 | stele-rubbing-hall |
-| `at:textPath.side` | side=right (text on other side of path) | 核心 | SVG 2 | 部分支持 | ★stele-rubbing-hall |
-| `at:textPath.startOffset` | startOffset as length or percentage | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `av:text.lengthAdjust=spacingAndGlyphs` | lengthAdjust spacingAndGlyphs (glyphs scale) | 核心 | SVG 1.1 | 全平台 | ★letterpress-type-specimen |
-| `concept:multiline-text-tspan` | Multi-line text via tspan x reset and dy | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:text-as-clip-path` | Text as clip-path or mask content | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:text-gradient-fill` | Text filled with a gradient | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:text-stroke-paint-order` | Stroked text with paint-order stroke | 核心 | SVG 2 | 全平台 | letterpress-type-specimen |
-| `concept:textpath-closed-path` | Text around a closed circle path | 核心 | SVG 1.1 | 全平台 | ★stele-rubbing-hall |
-| `css:font-face-data-uri` | @font-face with data-URI font embedded in SVG | 核心 | CSS | 全平台 | stele-rubbing-hall, ★letterpress-type-specimen, neon-sign-workshop |
-| `el:text` | <text> element | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `el:textPath` | <textPath> text along a path | 核心 | SVG 1.1 | 全平台 | ★stele-rubbing-hall |
-| `el:tspan` | <tspan> inline span | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pr:alignment-baseline` | alignment-baseline on tspan | 核心 | SVG 1.1 | 部分支持 | stele-rubbing-hall |
-| `pr:baseline-shift` | baseline-shift length or percentage | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pr:direction` | direction rtl | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pr:dominant-baseline` | dominant-baseline | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pr:font-family` | font-family and generic fallbacks | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:font-feature-settings` | font-feature-settings OpenType features | 核心 | CSS | 全平台 | ★letterpress-type-specimen |
-| `pr:font-kerning` | font-kerning none / normal | 核心 | CSS | 全平台 | letterpress-type-specimen |
-| `pr:font-size` | font-size in user units, em, percent | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:font-stretch` | font-stretch condensed / expanded | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:font-style` | font-style italic / oblique | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:font-variant` | font-variant small-caps | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:font-weight` | font-weight keywords and numeric | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:letter-spacing` | letter-spacing | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:text-anchor` | text-anchor start / middle / end | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pr:text-decoration` | text-decoration underline / overline / line-through | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:text-orientation` | text-orientation mixed / upright / sideways | 核心 | SVG 2 | 全平台 | ★stele-rubbing-hall |
-| `pr:unicode-bidi` | unicode-bidi embed / bidi-override / isolate | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pr:white-space` | white-space pre on SVG text | 核心 | SVG 2 | 部分支持 | letterpress-type-specimen |
-| `pr:word-spacing` | word-spacing | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pv:writing-mode=vertical-rl` | writing-mode vertical-rl | 核心 | SVG 2 | 全平台 | ★stele-rubbing-hall |
-| `api:FontFaceSet.ready` | document.fonts.ready for font-load detection | 细节（父 `css:font-face-data-uri`） | DOM | 全平台 | letterpress-type-specimen |
-| `api:SVGTextContentElement.getCharNumAtPosition` | getCharNumAtPosition hit testing | 细节（父 `api:SVGTextContentElement.getStartPositionOfChar`） | DOM | 全平台 | letterpress-type-specimen |
-| `api:SVGTextContentElement.getExtentOfChar` | getExtentOfChar | 细节（父 `api:SVGTextContentElement.getStartPositionOfChar`） | DOM | 全平台 | letterpress-type-specimen |
-| `api:SVGTextContentElement.getNumberOfChars` | getNumberOfChars | 细节（父 `api:SVGTextContentElement.getComputedTextLength`） | DOM | 全平台 | letterpress-type-specimen |
-| `api:SVGTextContentElement.getRotationOfChar` | getRotationOfChar | 细节（父 `api:SVGTextContentElement.getStartPositionOfChar`） | DOM | 全平台 | 经 `api:SVGTextContentElement.getStartPositionOfChar` |
-| `api:SVGTextContentElement.getSubStringLength` | getSubStringLength | 细节（父 `api:SVGTextContentElement.getComputedTextLength`） | DOM | 全平台 | letterpress-type-specimen |
-| `api:SVGTextContentElement.selectSubString` | selectSubString | 细节（父 `api:SVGTextContentElement.getStartPositionOfChar`） | Deprecated | 已废弃 | 经 `api:SVGTextContentElement.getStartPositionOfChar` |
-| `api:SVGTextPathElement.startOffset` | SVGTextPathElement.startOffset animated length | 细节（父 `at:textPath.startOffset`） | DOM | 全平台 | stele-rubbing-hall |
-| `api:SVGTextPositioningElement.x` | SVGTextPositioningElement x/y/dx/dy/rotate animated lists | 细节（父 `at:text.x`） | DOM | 全平台 | stele-rubbing-hall |
-| `at:text.dx` | dx relative horizontal shift list | 细节（父 `at:text.dy`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `at:text.lang` | lang / xml:lang driving glyph selection | 细节（父 `pr:font-family`） | SVG 2 | 全平台 | 经 `pr:font-family` |
-| `at:text.xml:space` | xml:space=preserve whitespace handling | 细节（父 `pr:white-space`） | Deprecated | 已废弃 | letterpress-type-specimen |
-| `at:text.y` | y list with per-glyph absolute baselines | 细节（父 `at:text.x`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `at:textPath.method` | method align (default rigid glyphs) | 细节（父 `el:textPath`） | SVG 1.1 | 部分支持 | 经 `el:textPath` |
-| `at:textPath.spacing` | spacing auto / exact | 细节（父 `el:textPath`） | SVG 1.1 | 未实现 | 经 `el:textPath` |
-| `at:textPath.xlink:href` | textPath xlink:href (legacy) | 细节（父 `at:textPath.href`） | Deprecated | 已废弃 | stele-rubbing-hall |
-| `av:text.lengthAdjust=spacing` | lengthAdjust spacing (only gaps change, default) | 细节（父 `at:text.textLength`） | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `av:textPath.method=stretch` | method=stretch (warp glyph outlines) | 细节（父 `el:textPath`） | SVG 1.1 | 未实现 | 经 `el:textPath` |
-| `concept:emoji-color-fonts` | Colour emoji and COLR fonts in SVG text | 细节（父 `pr:font-family`） | CSS | 全平台 | 经 `pr:font-family` |
-| `concept:faux-italic-skewx` | Faux italic / oblique text via skewX | 细节（父 `pr:font-style`） | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `concept:hollow-outline-text` | Outline-only text (fill none, stroke set) | 细节（父 `concept:text-stroke-paint-order`） | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `concept:mixed-script-bidi` | Mixed LTR and RTL runs in one text | 细节（父 `pr:unicode-bidi`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:nested-tspan-inheritance` | Nested tspans inheriting and overriding styles | 细节（父 `el:tspan`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:svg-as-image-external-font-blocked` | External fonts blocked in SVG used as <img> | 细节（父 `css:font-face-data-uri`） | CSS | 未实现 | letterpress-type-specimen |
-| `concept:text-anchor-rtl-interaction` | text-anchor start follows direction rtl | 细节（父 `pr:text-anchor`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:text-pattern-fill` | Text filled with a pattern | 细节（父 `concept:text-gradient-fill`） | SVG 1.1 | 全平台 | 经 `concept:text-gradient-fill` |
-| `concept:textlength-on-tspan` | textLength applied to a single tspan | 细节（父 `at:text.textLength`） | SVG 2 | 全平台 | letterpress-type-specimen |
-| `concept:textpath-baseline-offset` | Lifting text off the path with dy | 细节（父 `el:textPath`） | SVG 1.1 | 全平台 | 经 `el:textPath` |
-| `concept:textpath-basic-shape-ref` | textPath referencing basic shapes | 细节（父 `at:textPath.href`） | SVG 2 | 部分支持 | 经 `at:textPath.href` |
-| `concept:textpath-centered-text` | Centred text on path via 50% offset and middle anchor | 细节（父 `at:textPath.startOffset`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:textpath-multi-subpath` | Text across multiple subpaths | 细节（父 `el:textPath`） | SVG 1.1 | 全平台 | 经 `el:textPath` |
-| `concept:textpath-overflow-clipped` | Glyphs beyond path end are not rendered | 细节（父 `el:textPath`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:textpath-startoffset-animation` | Animating startOffset to scroll text along path | 细节（父 `at:textPath.startOffset`） | SMIL | 全平台 | stele-rubbing-hall |
-| `concept:tspan-absolute-repositioning` | Absolute repositioning mid-run with tspan x/y | 细节（父 `el:tspan`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `css:pseudo-elements-svg-text` | ::selection / ::first-letter / ::first-line on SVG text | 细节（父 `el:text`） | SVG 2 | 部分支持 | 经 `el:text` |
-| `css:text-decoration-styling` | text-decoration-style / color / thickness on SVG text | 细节（父 `pr:text-decoration`） | CSS | 部分支持 | letterpress-type-specimen |
-| `css:text-shadow-svg-text` | text-shadow on SVG text | 细节（父 `el:text`） | CSS | 部分支持 | 经 `el:text` |
-| `css:text-transform` | text-transform uppercase on SVG text | 细节（父 `el:text`） | CSS | 全平台 | stele-rubbing-hall |
-| `css:vertical-align-svg-text` | vertical-align shorthand replacing baseline props | 细节（父 `pr:baseline-shift`） | SVG 2 | 未实现 | 经 `pr:baseline-shift` |
-| `el:altGlyph` | <altGlyph> alternate glyph selection | 细节（父 `el:text`） | Deprecated | 已废弃 | 经 `el:text` |
-| `el:altGlyphDef` | <altGlyphDef> | 细节（父 `el:text`） | Deprecated | 已废弃 | 经 `el:text` |
-| `el:altGlyphItem` | <altGlyphItem> | 细节（父 `el:text`） | Deprecated | 已废弃 | 经 `el:text` |
-| `el:definition-src` | <definition-src> (SVG 1.0) | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:font` | <font> SVG font container | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:font-face` | <font-face> SVG font descriptor | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:font-face-format` | <font-face-format> | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:font-face-name` | <font-face-name> | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:font-face-src` | <font-face-src> | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:font-face-uri` | <font-face-uri> | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:glyph` | <glyph> SVG font glyph | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:glyphRef` | <glyphRef> | 细节（父 `el:text`） | Deprecated | 已废弃 | 经 `el:text` |
-| `el:hkern` | <hkern> horizontal kerning pair | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:missing-glyph` | <missing-glyph> fallback | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `el:tbreak` | <tbreak> line break (SVG Tiny 1.2) | 细节（父 `concept:multiline-text-tspan`） | Deprecated | 已废弃 | 经 `concept:multiline-text-tspan` |
-| `el:textArea` | <textArea> wrapped text (SVG Tiny 1.2) | 细节（父 `concept:multiline-text-tspan`） | Deprecated | 已废弃 | 经 `concept:multiline-text-tspan` |
-| `el:tref` | <tref> text reference | 细节（父 `el:tspan`） | Deprecated | 已废弃 | 经 `el:tspan` |
-| `el:vkern` | <vkern> vertical kerning pair | 细节（父 `css:font-face-data-uri`） | Deprecated | 已废弃 | 经 `css:font-face-data-uri` |
-| `pr:font` | font shorthand | 细节（父 `pr:font-family`） | SVG 1.1 | 全平台 | 经 `pr:font-family` |
-| `pr:font-size-adjust` | font-size-adjust x-height matching | 细节（父 `pr:font-size`） | CSS | 全平台 | 经 `pr:font-size` |
-| `pr:font-variant-ligatures` | font-variant-ligatures none / common | 细节（父 `pr:font-feature-settings`） | CSS | 全平台 | letterpress-type-specimen |
-| `pr:font-variant-numeric` | font-variant-numeric tabular / oldstyle | 细节（父 `pr:font-feature-settings`） | CSS | 全平台 | letterpress-type-specimen |
-| `pr:font-variation-settings` | font-variation-settings variable axes | 细节（父 `pr:font-weight`） | CSS | 全平台 | letterpress-type-specimen |
-| `pr:font-width` | font-width (font-stretch alias) | 细节（父 `pr:font-stretch`） | CSS | 部分支持 | 经 `pr:font-stretch` |
-| `pr:glyph-orientation-horizontal` | glyph-orientation-horizontal (legacy) | 细节（父 `pr:text-orientation`） | Deprecated | 已废弃 | 经 `pr:text-orientation` |
-| `pr:glyph-orientation-vertical` | glyph-orientation-vertical (legacy) | 细节（父 `pr:text-orientation`） | Deprecated | 已废弃 | 经 `pr:text-orientation` |
-| `pr:inline-size` | inline-size auto line wrapping | 细节（父 `concept:multiline-text-tspan`） | SVG 2 | 未实现 | 经 `concept:multiline-text-tspan` |
-| `pr:kerning` | kerning property / attribute (legacy) | 细节（父 `pr:font-kerning`） | Deprecated | 已废弃 | letterpress-type-specimen |
-| `pr:shape-inside` | shape-inside / shape-subtract / shape-padding text wrapping | 细节（父 `concept:multiline-text-tspan`） | SVG 2 | 未实现 | 经 `concept:multiline-text-tspan` |
-| `pr:text-decoration-fill` | text-decoration-fill / text-decoration-stroke | 细节（父 `pr:text-decoration`） | SVG 2 | 未实现 | 经 `pr:text-decoration` |
-| `pr:text-overflow` | text-overflow on SVG text | 细节（父 `el:text`） | SVG 2 | 未实现 | 经 `el:text` |
-| `pv:baseline-shift=sub` | baseline-shift sub | 细节（父 `pr:baseline-shift`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pv:baseline-shift=super` | baseline-shift super | 细节（父 `pr:baseline-shift`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pv:dominant-baseline=central` | dominant-baseline central | 细节（父 `pr:dominant-baseline`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pv:dominant-baseline=hanging` | dominant-baseline hanging | 细节（父 `pr:dominant-baseline`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pv:dominant-baseline=ideographic` | dominant-baseline ideographic / mathematical | 细节（父 `pr:dominant-baseline`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pv:dominant-baseline=middle` | dominant-baseline middle | 细节（父 `pr:dominant-baseline`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pv:dominant-baseline=text-before-edge` | dominant-baseline text-before-edge / text-after-edge | 细节（父 `pr:dominant-baseline`） | Deprecated | 已废弃 | 经 `pr:dominant-baseline` |
-| `pv:dominant-baseline=text-top` | dominant-baseline text-top / text-bottom | 细节（父 `pr:dominant-baseline`） | SVG 2 | 部分支持 | 经 `pr:dominant-baseline` |
-| `pv:text-anchor=end` | text-anchor end | 细节（父 `pr:text-anchor`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pv:text-anchor=middle` | text-anchor middle | 细节（父 `pr:text-anchor`） | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `pv:text-rendering=geometricPrecision` | text-rendering geometricPrecision | 细节（父 `pr:text-rendering`） | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pv:writing-mode=tb` | legacy writing-mode tb / tb-rl / rl / lr | 细节（父 `pv:writing-mode=vertical-rl`） | Deprecated | 已废弃 | 经 `pv:writing-mode=vertical-rl` |
-| `pv:writing-mode=vertical-lr` | writing-mode vertical-lr | 细节（父 `pv:writing-mode=vertical-rl`） | SVG 2 | 全平台 | stele-rubbing-hall |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `at:feGaussianBlur.stdDeviation` | stdDeviation blur radius | core | broad | neon-sign-workshop |
+| `at:filter.filterUnits` | filterUnits | core | broad | four-colour-press-check |
+| `at:filter.primitiveUnits` | primitiveUnits | core | broad | mycelium-culture-chamber |
+| `at:filter.x` | filter region x/y/width/height | core | broad | four-colour-press-check |
+| `av:feColorMatrix.type=luminanceToAlpha` | feColorMatrix luminanceToAlpha | core | broad | core-sample-stratigraphy |
+| `av:feComposite.operator=arithmetic` | feComposite arithmetic with k1..k4 | core | broad | four-colour-press-check |
+| `av:feGaussianBlur.in=SourceAlpha` | SourceAlpha keyword | core | broad | core-sample-stratigraphy |
+| `av:feGaussianBlur.stdDeviation=two-values` | Anisotropic blur with two stdDeviation values | core | broad | forge-metallography-bench |
+| `av:feImage.href=#element` | feImage href to an in-document element (#id) | core | partial | jacquard-loom-draft |
+| `concept:classic-drop-shadow-chain` | SourceAlpha + blur + offset + merge shadow chain | core | broad | neon-sign-workshop |
+| `concept:duotone-via-component-transfer` | Duotone/false-colour by greyscale plus per-channel tables | core | broad | four-colour-press-check |
+| `concept:filter-input-wiring` | in / in2 / result wiring between primitives | core | broad | four-colour-press-check, neon-sign-workshop |
+| `concept:filter-on-group-vs-children` | Filter on a group composites children first | core | broad | mycelium-culture-chamber |
+| `concept:filter-on-text` | Filter effects on text | core | broad | letterpress-type-specimen |
+| `concept:filter-primitive-subregion` | Per-primitive subregion x/y/width/height | core | broad | four-colour-press-check |
+| `concept:inner-shadow-technique` | Inner shadow via SourceAlpha out compositing | core | broad | neon-sign-workshop |
+| `concept:outline-stroke-via-alpha-dilate` | Outline/halo via blurred alpha thresholded then flooded | core | broad | neon-sign-workshop |
+| `concept:text-background-box-via-flood` | Text label background box via feFlood+feMerge | core | broad | letterpress-type-specimen |
+| `css:filter-chaining` | Chaining several filters: filter: url(#a) url(#b) blur(2px) | core | broad | neon-sign-workshop |
+| `css:filter-functions-on-svg` | CSS filter functions (blur, drop-shadow, grayscale, hue-rotate...) on SVG elements | core | broad | neon-sign-workshop |
+| `css:svg-filter-on-html-element` | SVG filter applied to HTML elements and the outermost svg via filter:url(#id) | core | broad | neon-sign-workshop |
+| `el:feBlend` | feBlend | core | broad | four-colour-press-check |
+| `el:feColorMatrix` | feColorMatrix | core | broad | four-colour-press-check |
+| `el:feComponentTransfer` | feComponentTransfer per-channel remap | core | broad | four-colour-press-check, neon-sign-workshop |
+| `el:feComposite` | feComposite Porter-Duff compositing | core | broad | four-colour-press-check |
+| `el:feDropShadow` | feDropShadow single-primitive shadow | core | broad | neon-sign-workshop |
+| `el:feFlood` | feFlood solid color fill | core | broad | letterpress-type-specimen |
+| `el:feFuncA` | feFuncA alpha channel function | core | broad | four-colour-press-check |
+| `el:feFuncB` | feFuncB blue channel function | core | broad | four-colour-press-check |
+| `el:feFuncG` | feFuncG green channel function | core | broad | four-colour-press-check |
+| `el:feFuncR` | feFuncR red channel function | core | broad | four-colour-press-check |
+| `el:feGaussianBlur` | feGaussianBlur | core | broad | neon-sign-workshop |
+| `el:feImage` | feImage external/data-URI image input | core | broad | jacquard-loom-draft |
+| `el:feMerge` | feMerge stacking | core | broad | four-colour-press-check |
+| `el:feMergeNode` | feMergeNode layer order | core | broad | four-colour-press-check |
+| `el:feOffset` | feOffset translation | core | broad | neon-sign-workshop |
+| `el:feTile` | feTile repeating an input subregion | core | broad | jacquard-loom-draft |
+| `el:filter` | filter element | core | broad | four-colour-press-check |
+| `pr:color-interpolation-filters` | color-interpolation-filters (linearRGB default vs sRGB) | core | broad | four-colour-press-check, neon-sign-workshop |
+| `pr:filter` | filter presentation property (attribute or CSS url()) | core | broad | four-colour-press-check |
+| `pr:flood-color` | flood-color (feFlood and feDropShadow) | core | broad | letterpress-type-specimen |
+| `pr:flood-opacity` | flood-opacity | core | broad | letterpress-type-specimen |
+| `api:CSS.supports-filter` | CSS.supports('filter','url(#x)') feature detection | detail / `pr:filter` | broad | four-colour-press-check |
+| `api:SVGComponentTransferFunctionElement.tableValues` | feFunc* type/tableValues/slope/intercept/amplitude/exponent/offset DOM access | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `api:SVGFEBlendElement.mode` | SVGFEBlendElement.mode with SVG_FEBLEND_MODE_* constants | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `api:SVGFEColorMatrixElement.values` | SVGFEColorMatrixElement.values SVGAnimatedNumberList | detail / `el:feColorMatrix` | broad | four-colour-press-check |
+| `api:SVGFECompositeElement.k1` | SVGFECompositeElement k1..k4 animated numbers | detail / `av:feComposite.operator=arithmetic` | broad | four-colour-press-check (via av:feComposite.operator=arithmetic) |
+| `api:SVGFEDropShadowElement.setStdDeviation` | SVGFEDropShadowElement.setStdDeviation | detail / `el:feDropShadow` | broad | neon-sign-workshop (via el:feDropShadow) |
+| `api:SVGFEGaussianBlurElement.setStdDeviation` | SVGFEGaussianBlurElement.setStdDeviation(x, y) | detail / `el:feGaussianBlur` | broad | neon-sign-workshop |
+| `api:SVGFilterElement.filterUnits` | SVGFilterElement animated attribute access (filterUnits, x, width...) | detail / `el:filter` | broad | four-colour-press-check (via el:filter) |
+| `api:SVGFilterPrimitiveStandardAttributes.result` | Primitive x/y/width/height/result animated attributes | detail / `concept:filter-input-wiring` | broad | four-colour-press-check |
+| `at:feBlend.in2` | in2 second input (feBlend, feComposite, feDisplacementMap) | detail / `concept:filter-input-wiring` | broad | four-colour-press-check |
+| `at:feBlend.mode` | feBlend mode | detail / `el:feBlend` | broad | four-colour-press-check |
+| `at:feColorMatrix.type` | feColorMatrix type | detail / `el:feColorMatrix` | broad | four-colour-press-check |
+| `at:feColorMatrix.values` | feColorMatrix values | detail / `el:feColorMatrix` | broad | four-colour-press-check |
+| `at:feComposite.k1` | feComposite k1/k2/k3/k4 | detail / `av:feComposite.operator=arithmetic` | broad | four-colour-press-check |
+| `at:feComposite.operator` | feComposite operator | detail / `el:feComposite` | broad | four-colour-press-check |
+| `at:feDropShadow.dx` | feDropShadow dx/dy/stdDeviation | detail / `el:feDropShadow` | broad | neon-sign-workshop |
+| `at:feFuncR.amplitude` | amplitude | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `at:feFuncR.exponent` | exponent | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `at:feFuncR.intercept` | intercept | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `at:feFuncR.offset` | offset (gamma transfer) | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `at:feFuncR.slope` | slope | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `at:feFuncR.tableValues` | tableValues | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `at:feFuncR.type` | transfer function type (all feFunc*) | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `at:feGaussianBlur.edgeMode` | edgeMode on feGaussianBlur (none/duplicate/wrap) | detail / `el:feGaussianBlur` | none | neon-sign-workshop (via el:feGaussianBlur) |
+| `at:feImage.crossorigin` | feImage crossorigin | detail / `el:feImage` | partial | jacquard-loom-draft (via el:feImage) |
+| `at:feImage.href` | feImage href (SVG 2 unprefixed) | detail / `el:feImage` | broad | jacquard-loom-draft |
+| `at:feImage.preserveAspectRatio` | feImage preserveAspectRatio | detail / `el:feImage` | broad | jacquard-loom-draft (via el:feImage) |
+| `at:feImage.x` | feImage x/y/width/height placement | detail / `el:feImage` | broad | jacquard-loom-draft (via el:feImage) |
+| `at:feImage.xlink:href` | feImage xlink:href | detail / `el:feImage` | deprecated | jacquard-loom-draft (via el:feImage) |
+| `at:feMergeNode.in` | feMergeNode in | detail / `el:feMergeNode` | broad | four-colour-press-check |
+| `at:feOffset.dx` | feOffset dx/dy (including negative and fractional) | detail / `el:feOffset` | broad | neon-sign-workshop |
+| `at:filter.filterRes` | filterRes intermediate resolution | detail / `el:filter` | deprecated | four-colour-press-check (via el:filter) |
+| `at:filter.href` | filter href inheritance from another filter | detail / `el:filter` | deprecated | four-colour-press-check (via el:filter) |
+| `av:feBlend.mode=color` | feBlend color | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=color-burn` | feBlend color-burn | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=color-dodge` | feBlend color-dodge | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=darken` | feBlend darken | detail / `el:feBlend` | broad | four-colour-press-check |
+| `av:feBlend.mode=difference` | feBlend difference | detail / `el:feBlend` | broad | four-colour-press-check |
+| `av:feBlend.mode=exclusion` | feBlend exclusion | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=hard-light` | feBlend hard-light | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=hue` | feBlend hue | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=lighten` | feBlend lighten | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=luminosity` | feBlend luminosity | detail / `el:feBlend` | broad | four-colour-press-check |
+| `av:feBlend.mode=multiply` | feBlend multiply | detail / `el:feBlend` | broad | four-colour-press-check |
+| `av:feBlend.mode=normal` | feBlend normal | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=overlay` | feBlend overlay | detail / `el:feBlend` | broad | four-colour-press-check |
+| `av:feBlend.mode=saturation` | feBlend saturation | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feBlend.mode=screen` | feBlend screen | detail / `el:feBlend` | broad | four-colour-press-check |
+| `av:feBlend.mode=soft-light` | feBlend soft-light | detail / `el:feBlend` | broad | four-colour-press-check (via el:feBlend) |
+| `av:feColorMatrix.type=hueRotate` | feColorMatrix hueRotate | detail / `el:feColorMatrix` | broad | four-colour-press-check |
+| `av:feColorMatrix.type=matrix` | feColorMatrix matrix (4x5 values) | detail / `el:feColorMatrix` | broad | four-colour-press-check |
+| `av:feColorMatrix.type=saturate` | feColorMatrix saturate | detail / `el:feColorMatrix` | broad | four-colour-press-check |
+| `av:feComposite.operator=atop` | feComposite atop | detail / `el:feComposite` | broad | four-colour-press-check |
+| `av:feComposite.operator=in` | feComposite in | detail / `el:feComposite` | broad | four-colour-press-check |
+| `av:feComposite.operator=lighter` | feComposite lighter (additive) | detail / `el:feComposite` | partial | four-colour-press-check |
+| `av:feComposite.operator=out` | feComposite out | detail / `el:feComposite` | broad | four-colour-press-check |
+| `av:feComposite.operator=over` | feComposite over (default) | detail / `el:feComposite` | broad | four-colour-press-check |
+| `av:feComposite.operator=xor` | feComposite xor | detail / `el:feComposite` | broad | four-colour-press-check |
+| `av:feFuncR.type=discrete` | transfer type discrete (posterize) | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `av:feFuncR.type=gamma` | transfer type gamma with amplitude/exponent/offset | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `av:feFuncR.type=identity` | transfer type identity | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `av:feFuncR.type=linear` | transfer type linear with slope/intercept | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `av:feFuncR.type=table` | transfer type table with tableValues | detail / `el:feComponentTransfer` | broad | four-colour-press-check |
+| `av:feGaussianBlur.in=BackgroundAlpha` | BackgroundAlpha keyword | detail / `concept:filter-input-wiring` | deprecated | four-colour-press-check (via concept:filter-input-wiring), neon-sign-workshop (via concept:filter-input-wiring) |
+| `av:feGaussianBlur.in=BackgroundImage` | BackgroundImage keyword | detail / `concept:filter-input-wiring` | deprecated | four-colour-press-check (via concept:filter-input-wiring), neon-sign-workshop (via concept:filter-input-wiring) |
+| `av:feGaussianBlur.in=FillPaint` | FillPaint keyword | detail / `concept:filter-input-wiring` | deprecated | four-colour-press-check (via concept:filter-input-wiring), neon-sign-workshop (via concept:filter-input-wiring) |
+| `av:feGaussianBlur.in=SourceGraphic` | SourceGraphic keyword | detail / `concept:filter-input-wiring` | broad | four-colour-press-check |
+| `av:feGaussianBlur.in=StrokePaint` | StrokePaint keyword | detail / `concept:filter-input-wiring` | deprecated | four-colour-press-check (via concept:filter-input-wiring), neon-sign-workshop (via concept:filter-input-wiring) |
+| `av:feGaussianBlur.stdDeviation=0` | stdDeviation 0 pass-through | detail / `at:feGaussianBlur.stdDeviation` | broad | neon-sign-workshop |
+| `av:filter.filterUnits=objectBoundingBox` | filterUnits objectBoundingBox (default) | detail / `at:filter.filterUnits` | broad | four-colour-press-check |
+| `av:filter.filterUnits=userSpaceOnUse` | filterUnits userSpaceOnUse | detail / `at:filter.filterUnits` | broad | four-colour-press-check |
+| `av:filter.primitiveUnits=objectBoundingBox` | primitiveUnits objectBoundingBox | detail / `at:filter.primitiveUnits` | broad | mycelium-culture-chamber |
+| `av:filter.primitiveUnits=userSpaceOnUse` | primitiveUnits userSpaceOnUse (default) | detail / `at:filter.primitiveUnits` | broad | mycelium-culture-chamber |
+| `concept:arithmetic-alpha-threshold` | Arithmetic compositing to boost or threshold alpha | detail / `av:feComposite.operator=arithmetic` | broad | four-colour-press-check (via av:feComposite.operator=arithmetic) |
+| `concept:fetile-subregion-pattern` | feTile requires an explicit input subregion | detail / `el:feTile` | broad | jacquard-loom-draft |
+| `concept:filter-and-transform` | Filter is applied in user space before the element's transform | detail / `el:filter` | broad | four-colour-press-check |
+| `concept:filter-clip-mask-opacity-order` | Order: filter, then clip-path, then mask, then opacity | detail / `el:filter` | broad | four-colour-press-check |
+| `concept:filter-on-empty-group` | Filter on empty or invisible group renders nothing in objectBoundingBox mode | detail / `at:filter.filterUnits` | broad | four-colour-press-check (via at:filter.filterUnits) |
+| `concept:filter-on-zero-bbox-element` | objectBoundingBox filter vanishes on zero-width/height bbox | detail / `at:filter.filterUnits` | broad | four-colour-press-check (via at:filter.filterUnits) |
+| `concept:filter-region-clipping-trap` | Filter region clipping of shadows and blur | detail / `at:filter.x` | broad | four-colour-press-check |
+| `concept:filter-region-css-units` | filter x/y/width/height accept percentages and user units | detail / `at:filter.x` | broad | four-colour-press-check (via at:filter.x) |
+| `concept:filter-region-default` | Default filter region -10%/-10%/120%/120% | detail / `at:filter.x` | broad | four-colour-press-check |
+| `concept:flood-fills-filter-region` | feFlood fills the entire filter region | detail / `el:feFlood` | broad | letterpress-type-specimen |
+| `concept:implicit-chaining` | Implicit chaining when in is omitted | detail / `concept:filter-input-wiring` | broad | four-colour-press-check |
+| `concept:last-primitive-is-output` | Filter output is the last primitive | detail / `concept:filter-input-wiring` | broad | four-colour-press-check |
+| `concept:multiple-results-fan-out` | Fan-out: one result feeding several primitives | detail / `concept:filter-input-wiring` | broad | four-colour-press-check |
+| `concept:nested-filtered-elements` | Filtered element inside a filtered group | detail / `concept:filter-on-group-vs-children` | broad | mycelium-culture-chamber (via concept:filter-on-group-vs-children) |
+| `concept:premultiplied-alpha-in-colormatrix` | Colour primitives operate on un-premultiplied values; alpha row affects edges | detail / `el:feColorMatrix` | broad | four-colour-press-check |
+| `concept:primitive-subregion-defaults` | Default primitive subregion: union of inputs vs full filter region | detail / `concept:filter-primitive-subregion` | partial | four-colour-press-check |
+| `concept:reuse-filter-across-elements` | One filter definition shared by many elements | detail / `el:filter` | broad | four-colour-press-check |
+| `concept:subregion-crop-technique` | Using a primitive subregion as a crop | detail / `concept:filter-primitive-subregion` | broad | four-colour-press-check |
+| `css:custom-properties-in-filter` | CSS custom properties driving flood-color or filter | detail / `pr:flood-color` | broad | letterpress-type-specimen |
+| `css:filter-transition` | CSS transitions/animations of filter functions | detail / `css:filter-functions-on-svg` | broad | neon-sign-workshop |
+| `css:filter-url-external-file` | filter: url(external.svg#id) | detail / `pr:filter` | partial | four-colour-press-check (via pr:filter) |
+| `css:flood-color-transition` | CSS transition of flood-color/flood-opacity | detail / `pr:flood-color` | broad | letterpress-type-specimen |
+| `pv:color-interpolation-filters=linearRGB` | color-interpolation-filters: linearRGB (default) | detail / `pr:color-interpolation-filters` | broad | four-colour-press-check |
+| `pv:color-interpolation-filters=sRGB` | color-interpolation-filters: sRGB | detail / `pr:color-interpolation-filters` | broad | four-colour-press-check |
+| `pv:filter=none` | filter: none override | detail / `pr:filter` | broad | four-colour-press-check |
+| `pv:flood-color=currentColor` | flood-color: currentColor | detail / `pr:flood-color` | broad | letterpress-type-specimen |
 
-### 裁剪与遮罩（`clipmask`，核心 40 项 / 细节 51 项）
+### 滤镜：卷积、形态学、噪声、置换与光照
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:CSSStyleDeclaration.clipPath` | Scripted clip-path via style.clipPath | 核心 | DOM | 全平台 | neon-sign-workshop |
-| `at:clipPath.clipPathUnits` | clipPathUnits attribute | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `at:clipPath.transform` | transform on clipPath and its children | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `at:mask.maskContentUnits` | maskContentUnits attribute | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `at:mask.maskUnits` | maskUnits attribute | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `at:mask.width` | mask width region size | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `at:mask.x` | mask x region origin | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `av:clipPath.clipPathUnits=objectBoundingBox` | clipPathUnits=objectBoundingBox | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `av:mask.maskContentUnits=objectBoundingBox` | maskContentUnits=objectBoundingBox | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:animated-clippath-reveal` | SMIL-animated clipPath geometry (reveal/wipe) | 核心 | SMIL | 全平台 | ★core-sample-stratigraphy |
-| `concept:clip-group-vs-children` | Clip applied to a group vs each child | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:clip-path-html-to-svg-reference` | HTML element clipped by an inline SVG clipPath | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `concept:clip-path-on-clippath-children` | clip-path on individual clipPath children | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:clip-path-shape-transition` | CSS transition/animation between basic shapes | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `concept:clipped-hit-testing` | Pointer events respect clip-path | 核心 | SVG 2 | 全平台 | ★core-sample-stratigraphy |
-| `concept:effect-order-filter-clip-mask-opacity` | Processing order: filter, clip, mask, opacity | 核心 | SVG 1.1 | 全平台 | ★core-sample-stratigraphy |
-| `concept:gradient-feathered-mask` | Gradient-feathered mask edges (soft fade, vignette) | 核心 | SVG 1.1 | 全平台 | ★core-sample-stratigraphy |
-| `concept:mask-html-to-svg-reference` | HTML element masked by an SVG mask element | 核心 | CSS | 部分支持 | neon-sign-workshop |
-| `concept:mask-on-group-vs-element` | Mask on a group vs on each element | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:mask-smil-animation` | SMIL animation inside mask content | 核心 | SMIL | 全平台 | core-sample-stratigraphy |
-| `concept:mask-with-filter` | Filtered mask content (blur feathering) | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:mask-with-image` | Raster or SVG image as mask content | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:mask-with-text` | Text as mask content | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:masked-hit-testing` | Pointer events ignore mask transparency | 核心 | SVG 2 | 全平台 | ★core-sample-stratigraphy |
-| `concept:nested-clippath` | clip-path on a clipPath element (intersection) | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:text-in-clippath` | text and textPath inside clipPath | 核心 | SVG 1.1 | 全平台 | ★stele-rubbing-hall |
-| `concept:use-in-clippath` | use element inside clipPath | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `css:clip-path-basic-shapes` | clip-path CSS basic shapes on SVG elements | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `css:clip-path-geometry-box` | clip-path geometry-box keywords (fill-box, stroke-box, view-box) | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `css:mask-composite` | mask-composite (add, subtract, intersect, exclude) | 核心 | CSS | 全平台 | ★neon-sign-workshop |
-| `css:mask-image` | CSS mask shorthand and mask-image on SVG elements | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `css:mask-layers` | Multi-layer mask shorthand | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `css:mask-mode` | mask-mode (alpha, luminance, match-source) | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `css:mask-size` | mask-size | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `el:clipPath` | clipPath element | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `el:mask` | mask element | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop, ★core-sample-stratigraphy |
-| `pr:clip-path` | clip-path property | 核心 | CSS | 全平台 | core-sample-stratigraphy |
-| `pr:clip-rule` | clip-rule property | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pr:mask` | mask property/attribute with url() reference | 核心 | CSS | 全平台 | core-sample-stratigraphy |
-| `pr:mask-type` | mask-type property (luminance default vs alpha) | 核心 | CSS | 全平台 | neon-sign-workshop, ★core-sample-stratigraphy |
-| `api:SVGClipPathElement.clipPathUnits` | SVGClipPathElement animated attributes | 细节（父 `at:clipPath.clipPathUnits`） | DOM | 全平台 | core-sample-stratigraphy |
-| `api:SVGClipPathElement.transform` | SVGClipPathElement.transform animated transform list | 细节（父 `at:clipPath.transform`） | DOM | 全平台 | 经 `at:clipPath.transform` |
-| `api:SVGMaskElement.maskUnits` | SVGMaskElement animated attributes | 细节（父 `at:mask.maskUnits`） | DOM | 全平台 | 经 `at:mask.maskUnits` |
-| `at:mask.height` | mask height region size | 细节（父 `at:mask.width`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `at:mask.y` | mask y region origin | 细节（父 `at:mask.x`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `av:clipPath.clipPathUnits=userSpaceOnUse` | clipPathUnits=userSpaceOnUse (default) | 细节（父 `at:clipPath.clipPathUnits`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `av:mask.maskUnits=userSpaceOnUse` | maskUnits=userSpaceOnUse | 细节（父 `at:mask.maskUnits`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:clip-after-blur-via-group` | Reordering effects by wrapping in groups | 细节（父 `concept:effect-order-filter-clip-mask-opacity`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:clip-follows-target-transform` | Clip evaluated in target user space | 细节（父 `at:clipPath.transform`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:clippath-child-display-none` | display:none and visibility on clipPath children | 细节（父 `el:clipPath`） | SVG 1.1 | 部分支持 | core-sample-stratigraphy |
-| `concept:clippath-disallowed-children` | Ignored clipPath children (g, image, foreignObject) | 细节（父 `el:clipPath`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:clippath-ignores-paint` | Clip uses raw geometry, ignores fill, stroke, opacity | 细节（父 `el:clipPath`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:clippath-union-of-children` | Union of multiple clipPath children | 细节（父 `el:clipPath`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:empty-clippath` | Empty clipPath hides element | 细节（父 `el:clipPath`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:external-clip-mask-reference` | clip-path/mask referencing an external SVG file | 细节（父 `pr:clip-path`） | CSS | 部分支持 | 经 `pr:clip-path` |
-| `concept:getbbox-ignores-clip` | getBBox and getBoundingClientRect ignore clipping | 细节（父 `concept:clipped-hit-testing`） | SVG 2 | 全平台 | core-sample-stratigraphy |
-| `concept:invalid-clip-reference` | clip-path referencing missing element | 细节（父 `pr:clip-path`） | CSS | 部分支持 | core-sample-stratigraphy |
-| `concept:invalid-mask-reference` | mask referencing missing element | 细节（父 `pr:mask`） | CSS | 部分支持 | core-sample-stratigraphy |
-| `concept:marker-viewport-clipping` | marker overflow clipping | 细节（父 `pr:overflow`） | SVG 1.1 | 全平台 | 经 `pr:overflow` |
-| `concept:mask-and-clip-combined` | clip-path and mask on the same element | 细节（父 `concept:effect-order-filter-clip-mask-opacity`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:mask-content-opacity` | Opacity and fill-opacity inside mask content | 细节（父 `el:mask`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:mask-image-svg-url` | External SVG or raster file as CSS mask-image | 细节（父 `css:mask-image`） | CSS | 全平台 | neon-sign-workshop |
-| `concept:mask-luminance-colorspace` | Luminance coefficients and color-interpolation on masks | 细节（父 `pr:mask-type`） | SVG 1.1 | 部分支持 | core-sample-stratigraphy |
-| `concept:mask-with-pattern` | Pattern-filled mask content (halftone) | 细节（父 `el:mask`） | SVG 1.1 | 全平台 | 经 `el:mask` |
-| `concept:nested-mask` | Mask content that is itself masked | 细节（父 `el:mask`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:objectboundingbox-zero-bbox-trap` | objectBoundingBox fails on zero-area bounding boxes | 细节（父 `av:clipPath.clipPathUnits=objectBoundingBox`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:outer-svg-overflow-in-html` | overflow:visible on inline svg root | 细节（父 `pr:overflow`） | SVG 2 | 全平台 | 经 `pr:overflow` |
-| `concept:overflow-hidden-hit-testing` | Viewport overflow clipping also clips hit-testing | 细节（父 `concept:clipped-hit-testing`） | SVG 2 | 全平台 | 经 `concept:clipped-hit-testing` |
-| `concept:pattern-tile-clipping` | pattern tiles clip content to the tile | 细节（父 `pr:overflow`） | SVG 1.1 | 部分支持 | 经 `pr:overflow` |
-| `concept:symbol-viewport-clipping` | symbol instances clip to their viewport | 细节（父 `pr:overflow`） | SVG 1.1 | 全平台 | 经 `pr:overflow` |
-| `css:mask-border` | mask-border on SVG elements | 细节（父 `css:mask-image`） | CSS | 未实现 | 经 `css:mask-image` |
-| `css:mask-clip` | mask-clip geometry boxes on SVG | 细节（父 `css:mask-image`） | CSS | 部分支持 | 经 `css:mask-image` |
-| `css:mask-origin` | mask-origin geometry boxes on SVG | 细节（父 `css:mask-image`） | CSS | 部分支持 | 经 `css:mask-image` |
-| `css:mask-position` | mask-position | 细节（父 `css:mask-size`） | CSS | 全平台 | 经 `css:mask-size` |
-| `css:mask-repeat` | mask-repeat | 细节（父 `css:mask-size`） | CSS | 全平台 | neon-sign-workshop |
-| `pr:clip` | clip property with rect() on viewports (deprecated) | 细节（父 `pr:clip-path`） | Deprecated | 已废弃 | 经 `pr:clip-path` |
-| `pv:clip-path=border-box` | CSS box keywords (content-box, padding-box, border-box, margin-box) on SVG | 细节（父 `css:clip-path-geometry-box`） | CSS | 全平台 | 经 `css:clip-path-geometry-box` |
-| `pv:clip-path=circle()` | clip-path: circle() basic shape | 细节（父 `css:clip-path-basic-shapes`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-path=ellipse()` | clip-path: ellipse() basic shape | 细节（父 `css:clip-path-basic-shapes`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-path=fill-box` | clip-path geometry-box: fill-box | 细节（父 `css:clip-path-geometry-box`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-path=inset()` | clip-path: inset() basic shape | 细节（父 `css:clip-path-basic-shapes`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-path=none` | clip-path: none reset | 细节（父 `pr:clip-path`） | CSS | 全平台 | core-sample-stratigraphy |
-| `pv:clip-path=path()` | clip-path: path() basic shape | 细节（父 `css:clip-path-basic-shapes`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-path=polygon()` | clip-path: polygon() basic shape | 细节（父 `css:clip-path-basic-shapes`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-path=rect()` | clip-path: rect() and xywh() shapes | 细节（父 `css:clip-path-basic-shapes`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-path=shape()` | clip-path: shape() function | 细节（父 `css:clip-path-basic-shapes`） | CSS | 部分支持 | 经 `css:clip-path-basic-shapes` |
-| `pv:clip-path=stroke-box` | clip-path geometry-box: stroke-box | 细节（父 `css:clip-path-geometry-box`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-path=view-box` | clip-path geometry-box: view-box | 细节（父 `css:clip-path-geometry-box`） | CSS | 全平台 | neon-sign-workshop |
-| `pv:clip-rule=evenodd` | clip-rule=evenodd | 细节（父 `pr:clip-rule`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:mask-type=alpha` | mask-type=alpha | 细节（父 `pr:mask-type`） | CSG | 全平台 | core-sample-stratigraphy |
-| `pv:mask-type=luminance` | mask-type=luminance (default) | 细节（父 `pr:mask-type`） | CSS | 全平台 | core-sample-stratigraphy |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `at:feConvolveMatrix.edgeMode` | edgeMode border handling | core | broad | forge-metallography-bench |
+| `at:feConvolveMatrix.kernelMatrix` | kernelMatrix weights | core | broad | forge-metallography-bench |
+| `at:feConvolveMatrix.order` | Kernel order (size), incl. non-square | core | broad | forge-metallography-bench |
+| `at:feDiffuseLighting.surfaceScale` | surfaceScale height | core | broad | forge-metallography-bench |
+| `at:feDisplacementMap.in2` | in2 map source | core | broad | mycelium-culture-chamber |
+| `at:feDisplacementMap.scale` | scale magnitude | core | broad | mycelium-culture-chamber |
+| `at:feDisplacementMap.xChannelSelector` | xChannelSelector R/G/B/A | core | broad | mycelium-culture-chamber |
+| `at:feDistantLight.azimuth` | azimuth angle | core | broad | forge-metallography-bench |
+| `at:feMorphology.operator` | operator erode / dilate | core | broad | neon-sign-workshop |
+| `at:feMorphology.radius` | radius with two values (anisotropic) | core | broad | neon-sign-workshop |
+| `at:fePointLight.z` | Point light z height | core | broad | forge-metallography-bench |
+| `at:feSpecularLighting.specularExponent` | specularExponent shininess | core | broad | forge-metallography-bench |
+| `at:feSpotLight.limitingConeAngle` | limitingConeAngle hard cutoff | core | broad | forge-metallography-bench |
+| `at:feSpotLight.pointsAtX` | pointsAtX/Y/Z aim target | core | broad | forge-metallography-bench |
+| `at:feTurbulence.baseFrequency` | baseFrequency (one or two values) | core | broad | mycelium-culture-chamber |
+| `at:feTurbulence.numOctaves` | numOctaves detail layers | core | broad | mycelium-culture-chamber |
+| `at:feTurbulence.stitchTiles` | stitchTiles seamless tiling | core | broad | jacquard-loom-draft |
+| `at:feTurbulence.type` | type turbulence vs fractalNoise | core | broad | mycelium-culture-chamber |
+| `concept:animated-light-source` | Animated light position / angle | core | broad | forge-metallography-bench |
+| `concept:animated-turbulence` | Animated noise (baseFrequency/seed) | core | broad | mycelium-culture-chamber |
+| `concept:brushed-metal-texture` | Brushed metal texture | core | broad | forge-metallography-bench |
+| `concept:chrome-metal-effect` | Chrome / polished metal text | core | broad | forge-metallography-bench |
+| `concept:convolve-edge-detect` | Edge detection (Laplacian / Sobel) | core | broad | forge-metallography-bench |
+| `concept:convolve-emboss` | Emboss recipe | core | broad | forge-metallography-bench |
+| `concept:convolve-sharpen` | Sharpen / unsharp kernel | core | broad | forge-metallography-bench |
+| `concept:filter-device-pixel-resolution` | Filter rasterised at device pixels | core | broad | four-colour-press-check |
+| `concept:glass-refraction-effect` | Glass / frosted refraction recipe | core | broad | mycelium-culture-chamber |
+| `concept:halftone-dots` | Halftone dot screen | core | broad | four-colour-press-check |
+| `concept:heat-shimmer-animation` | Heat shimmer / mirage | core | broad | mycelium-culture-chamber |
+| `concept:lighting-alpha-bump-map` | Alpha channel as height map | core | broad | forge-metallography-bench |
+| `concept:liquid-distortion-effect` | Liquid / gooey distortion | core | broad | mycelium-culture-chamber |
+| `concept:morphology-outline-stroke` | Outline via dilate minus source | core | broad | neon-sign-workshop |
+| `concept:neon-glow-morphology` | Neon glow via dilate + blur | core | broad | neon-sign-workshop |
+| `concept:paper-grain-texture` | Paper grain / film grain overlay | core | broad | mycelium-culture-chamber |
+| `concept:watercolor-bleed-effect` | Watercolor bleed edges | core | broad | mycelium-culture-chamber |
+| `el:feConvolveMatrix` | feConvolveMatrix primitive | core | broad | forge-metallography-bench |
+| `el:feDiffuseLighting` | feDiffuseLighting primitive | core | broad | forge-metallography-bench |
+| `el:feDisplacementMap` | feDisplacementMap primitive | core | broad | mycelium-culture-chamber |
+| `el:feDistantLight` | feDistantLight source | core | broad | forge-metallography-bench |
+| `el:feMorphology` | feMorphology primitive | core | broad | neon-sign-workshop |
+| `el:fePointLight` | fePointLight source | core | broad | forge-metallography-bench |
+| `el:feSpecularLighting` | feSpecularLighting primitive | core | broad | forge-metallography-bench |
+| `el:feSpotLight` | feSpotLight source | core | broad | forge-metallography-bench |
+| `el:feTurbulence` | feTurbulence primitive | core | broad | mycelium-culture-chamber |
+| `pr:lighting-color` | lighting-color property | core | broad | forge-metallography-bench |
+| `api:SVGFEConvolveMatrixElement.kernelMatrix` | Scripted kernelMatrix (SVGAnimatedNumberList) | detail / `at:feConvolveMatrix.kernelMatrix` | broad | forge-metallography-bench |
+| `api:SVGFEDisplacementMapElement.scale` | Scripted displacement scale | detail / `at:feDisplacementMap.scale` | broad | mycelium-culture-chamber (via at:feDisplacementMap.scale) |
+| `api:SVGFEDistantLightElement.azimuth` | Scripted distant light angle | detail / `at:feDistantLight.azimuth` | broad | forge-metallography-bench |
+| `api:SVGFEMorphologyElement.radiusX` | Scripted morphology radius | detail / `at:feMorphology.radius` | broad | neon-sign-workshop |
+| `api:SVGFEPointLightElement.x` | Scripted point light position | detail / `concept:animated-light-source` | broad | forge-metallography-bench |
+| `api:SVGFESpotLightElement.pointsAtX` | Scripted spotlight aim | detail / `concept:animated-light-source` | broad | forge-metallography-bench |
+| `api:SVGFETurbulenceElement.baseFrequencyX` | Scripted baseFrequency animation | detail / `concept:animated-turbulence` | broad | mycelium-culture-chamber |
+| `api:SVGFETurbulenceElement.seed` | Scripted seed re-roll | detail / `concept:animated-turbulence` | broad | mycelium-culture-chamber (via concept:animated-turbulence) |
+| `at:feConvolveMatrix.bias` | bias offset | detail / `at:feConvolveMatrix.kernelMatrix` | partial | forge-metallography-bench |
+| `at:feConvolveMatrix.divisor` | divisor normalisation | detail / `at:feConvolveMatrix.kernelMatrix` | broad | forge-metallography-bench |
+| `at:feConvolveMatrix.kernelUnitLength` | kernelUnitLength (convolution) | detail / `el:feConvolveMatrix` | none | forge-metallography-bench (via el:feConvolveMatrix) |
+| `at:feConvolveMatrix.preserveAlpha` | preserveAlpha true/false | detail / `el:feConvolveMatrix` | broad | forge-metallography-bench |
+| `at:feConvolveMatrix.targetX` | targetX kernel anchor | detail / `at:feConvolveMatrix.order` | broad | forge-metallography-bench |
+| `at:feConvolveMatrix.targetY` | targetY kernel anchor | detail / `at:feConvolveMatrix.order` | broad | forge-metallography-bench (via at:feConvolveMatrix.order) |
+| `at:feDiffuseLighting.diffuseConstant` | diffuseConstant | detail / `el:feDiffuseLighting` | broad | forge-metallography-bench |
+| `at:feDiffuseLighting.kernelUnitLength` | kernelUnitLength (lighting) | detail / `el:feDiffuseLighting` | none | forge-metallography-bench (via el:feDiffuseLighting) |
+| `at:feDisplacementMap.yChannelSelector` | yChannelSelector R/G/B/A | detail / `at:feDisplacementMap.xChannelSelector` | broad | mycelium-culture-chamber |
+| `at:feDistantLight.elevation` | elevation angle | detail / `at:feDistantLight.azimuth` | broad | forge-metallography-bench |
+| `at:fePointLight.x` | Point light x position | detail / `el:fePointLight` | broad | forge-metallography-bench |
+| `at:fePointLight.y` | Point light y position | detail / `el:fePointLight` | broad | forge-metallography-bench |
+| `at:feSpecularLighting.specularConstant` | specularConstant | detail / `el:feSpecularLighting` | broad | forge-metallography-bench |
+| `at:feSpecularLighting.surfaceScale` | surfaceScale (specular) | detail / `at:feDiffuseLighting.surfaceScale` | broad | forge-metallography-bench |
+| `at:feSpotLight.pointsAtY` | pointsAtY | detail / `at:feSpotLight.pointsAtX` | broad | forge-metallography-bench |
+| `at:feSpotLight.pointsAtZ` | pointsAtZ | detail / `at:feSpotLight.pointsAtX` | broad | forge-metallography-bench |
+| `at:feSpotLight.specularExponent` | Spot focus exponent | detail / `el:feSpotLight` | broad | forge-metallography-bench |
+| `at:feSpotLight.x` | Spot light x/y position | detail / `el:feSpotLight` | broad | forge-metallography-bench |
+| `at:feSpotLight.z` | Spot light z height | detail / `el:feSpotLight` | broad | forge-metallography-bench |
+| `at:feTurbulence.seed` | seed | detail / `el:feTurbulence` | broad | mycelium-culture-chamber |
+| `av:feConvolveMatrix.edgeMode=duplicate` | edgeMode duplicate (default) | detail / `at:feConvolveMatrix.edgeMode` | broad | forge-metallography-bench |
+| `av:feConvolveMatrix.edgeMode=none` | edgeMode none | detail / `at:feConvolveMatrix.edgeMode` | broad | forge-metallography-bench |
+| `av:feConvolveMatrix.edgeMode=wrap` | edgeMode wrap | detail / `at:feConvolveMatrix.edgeMode` | broad | forge-metallography-bench |
+| `av:feDisplacementMap.xChannelSelector=A` | Alpha channel as displacement (default) | detail / `at:feDisplacementMap.xChannelSelector` | broad | mycelium-culture-chamber |
+| `av:feMorphology.operator=dilate` | operator dilate | detail / `at:feMorphology.operator` | broad | neon-sign-workshop |
+| `av:feMorphology.operator=erode` | operator erode (default) | detail / `at:feMorphology.operator` | broad | neon-sign-workshop |
+| `av:feTurbulence.stitchTiles=noStitch` | stitchTiles noStitch (default) | detail / `at:feTurbulence.stitchTiles` | broad | jacquard-loom-draft |
+| `av:feTurbulence.type=fractalNoise` | type fractalNoise | detail / `at:feTurbulence.type` | broad | mycelium-culture-chamber |
+| `av:feTurbulence.type=turbulence` | type turbulence (default) | detail / `at:feTurbulence.type` | broad | mycelium-culture-chamber |
+| `concept:cloud-smoke-texture` | Clouds / smoke from fractalNoise | detail / `at:feTurbulence.type` | broad | mycelium-culture-chamber |
+| `concept:convolve-box-blur` | Box / motion blur via kernel | detail / `at:feConvolveMatrix.order` | broad | forge-metallography-bench |
+| `concept:diffuse-output-opaque` | Diffuse result is opaque; re-mask with SourceAlpha | detail / `el:feDiffuseLighting` | broad | forge-metallography-bench |
+| `concept:displacement-color-space-caveat` | Displacement map read in linearRGB by default | detail / `el:feDisplacementMap` | broad | mycelium-culture-chamber (via el:feDisplacementMap) |
+| `concept:displacement-filter-region-overflow` | Displaced pixels clipped by filter region | detail / `at:feDisplacementMap.scale` | broad | mycelium-culture-chamber |
+| `concept:displacement-gradient-lens` | Gradient-driven lens / ripple | detail / `at:feDisplacementMap.in2` | broad | mycelium-culture-chamber |
+| `concept:filter-effects-primitives-unchanged` | Advanced primitives carried unchanged into Filter Effects / CSS filter() | detail / `el:feTurbulence` | broad | mycelium-culture-chamber (via el:feTurbulence) |
+| `concept:filter-performance-caveats` | Performance of heavy primitives | detail / `concept:filter-device-pixel-resolution` | broad | four-colour-press-check |
+| `concept:lighting-plus-turbulence-bump` | Lighting a noise bump map | detail / `concept:lighting-alpha-bump-map` | broad | forge-metallography-bench (via concept:lighting-alpha-bump-map) |
+| `concept:morphology-thicken-text` | Faux-bold / thin text | detail / `at:feMorphology.operator` | broad | neon-sign-workshop |
+| `concept:morphology-zero-radius` | Zero / negative radius behaviour | detail / `at:feMorphology.radius` | partial | neon-sign-workshop |
+| `concept:primitive-units-lighting-coordinates` | primitiveUnits objectBoundingBox with lights | detail / `el:fePointLight` | partial | forge-metallography-bench |
+| `concept:rough-sketch-edges` | Hand-drawn rough edges | detail / `el:feDisplacementMap` | broad | mycelium-culture-chamber (via el:feDisplacementMap) |
+| `concept:single-light-source-child` | Exactly one light-source child per lighting primitive | detail / `el:feDiffuseLighting` | broad | forge-metallography-bench |
+| `concept:smil-animate-displacement-scale` | Animating displacement scale | detail / `at:feDisplacementMap.scale` | broad | mycelium-culture-chamber |
+| `concept:smil-animate-morphology-radius` | Animating morphology radius | detail / `at:feMorphology.radius` | broad | neon-sign-workshop |
+| `concept:specular-composite-add` | Adding specular result to source | detail / `el:feSpecularLighting` | broad | forge-metallography-bench |
+| `concept:turbulence-color-channels` | Independent RGBA noise channels | detail / `el:feTurbulence` | broad | mycelium-culture-chamber (via el:feTurbulence) |
+| `concept:turbulence-fills-filter-region` | Turbulence has no input; fills subregion | detail / `el:feTurbulence` | broad | mycelium-culture-chamber |
+| `concept:turbulence-linearrgb-darkening` | Noise brightness vs color-interpolation-filters | detail / `el:feTurbulence` | broad | mycelium-culture-chamber (via el:feTurbulence) |
+| `concept:turbulence-zoom-stability` | Noise granularity under zoom / DPR | detail / `concept:filter-device-pixel-resolution` | partial | four-colour-press-check (via concept:filter-device-pixel-resolution) |
+| `concept:wood-marble-texture` | Wood grain / marble veins | detail / `at:feTurbulence.baseFrequency` | broad | mycelium-culture-chamber |
 
-### 标记 (marker)（`markers`，核心 28 项 / 细节 43 项）
+### SMIL 动画
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:SVGMarkerElement.setOrientToAuto` | SVGMarkerElement.setOrientToAuto | 核心 | DOM | 全平台 | pipeline-mimic-board |
-| `at:marker.markerUnits` | markerUnits | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:marker.markerWidth` | markerWidth / markerHeight viewport size | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:marker.orient` | orient | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:marker.preserveAspectRatio` | marker preserveAspectRatio | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:marker.refX` | refX anchor point | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:marker.refY` | refY anchor point | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:marker.viewBox` | marker viewBox | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `av:marker.markerUnits=userSpaceOnUse` | markerUnits userSpaceOnUse (fixed size) | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `av:marker.orient=angle` | orient fixed angle (number, deg, rad, grad) | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `av:marker.orient=auto` | orient auto (follow path direction) | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `av:marker.orient=auto-start-reverse` | orient auto-start-reverse | 核心 | SVG 2 | 全平台 | ★pipeline-mimic-board |
-| `concept:marker-arrowhead` | arrowhead technique | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-closed-path-direction` | closed subpath orientation at the closing vertex | 核心 | SVG 2 | 全平台 | ★pipeline-mimic-board |
-| `concept:marker-css-state-swap` | swap marker via :hover or class change | 核心 | CSS | 全平台 | pipeline-mimic-board |
-| `concept:marker-dimension-ticks` | dimension line ticks perpendicular to the line | 核心 | SVG 1.1 | 全平台 | ★pipeline-mimic-board |
-| `concept:marker-graph-nodes` | graph edges with node glyphs and arrowheads | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-non-scaling-stroke` | markers under vector-effect non-scaling-stroke | 核心 | SVG 2 | 全平台 | ★pipeline-mimic-board |
-| `concept:marker-smil-attribute-animation` | SMIL animation of refX, orient, markerWidth | 核心 | SMIL | 全平台 | ★pipeline-mimic-board |
-| `concept:marker-transform-inheritance` | markers inherit the referencing element's transform (incl. skew) | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-vertex-bisector` | mid-marker direction is the bisector of adjacent segments | 核心 | SVG 1.1 | 全平台 | ★pipeline-mimic-board |
-| `concept:marker-vertex-glyphs` | vertex glyphs on polylines (data points) | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-vs-symbol` | marker versus symbol/use trade-offs | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `el:marker` | marker element | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `pr:marker` | marker shorthand (CSS only) | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `pr:marker-end` | marker-end | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `pr:marker-mid` | marker-mid | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `pr:marker-start` | marker-start | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `api:CSSStyleDeclaration.markerEnd` | style.markerEnd / markerStart / markerMid | 细节（父 `pr:marker-end`） | DOM | 全平台 | pipeline-mimic-board |
-| `api:SVGBoundingBoxOptions.markers` | getBBox({markers:true}) | 细节（父 `el:marker`） | SVG 2 | 部分支持 | pipeline-mimic-board |
-| `api:SVGMarkerElement.markerUnits` | SVGMarkerElement.markerUnits animated enumeration | 细节（父 `api:SVGMarkerElement.setOrientToAuto`） | DOM | 全平台 | pipeline-mimic-board |
-| `api:SVGMarkerElement.orientType` | orientType / orientAngle animated properties | 细节（父 `api:SVGMarkerElement.setOrientToAuto`） | DOM | 全平台 | pipeline-mimic-board |
-| `api:SVGMarkerElement.refX` | refX/refY/markerWidth/markerHeight as SVGAnimatedLength | 细节（父 `api:SVGMarkerElement.setOrientToAuto`） | DOM | 全平台 | pipeline-mimic-board |
-| `api:SVGMarkerElement.setOrientToAngle` | SVGMarkerElement.setOrientToAngle | 细节（父 `api:SVGMarkerElement.setOrientToAuto`） | DOM | 全平台 | pipeline-mimic-board |
-| `api:SVGMarkerElement.viewBox` | SVGFitToViewBox on marker (viewBox, preserveAspectRatio) | 细节（父 `api:SVGMarkerElement.setOrientToAuto`） | DOM | 全平台 | pipeline-mimic-board |
-| `at:marker.markerHeight` | markerHeight | 细节（父 `at:marker.markerWidth`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `at:marker.position` | marker position attribute (draft) | 细节（父 `pr:marker-mid`） | Deprecated | 未实现 | 经 `pr:marker-mid` |
-| `at:marker.transform` | transform on marker element | 细节（父 `el:marker`） | SVG 2 | 未实现 | 经 `el:marker` |
-| `av:marker.markerUnits=strokeWidth` | markerUnits strokeWidth (default, scales with stroke) | 细节（父 `at:marker.markerUnits`） | SVG 1.1 | 全平台 | 经 `at:marker.markerUnits` |
-| `av:marker.markerWidth=0` | markerWidth or markerHeight zero disables marker | 细节（父 `at:marker.markerWidth`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `av:marker.preserveAspectRatio=none` | non-uniform stretch of marker content | 细节（父 `at:marker.preserveAspectRatio`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `av:marker.refX=center` | refX/refY keywords left\|center\|right, top\|center\|bottom | 细节（父 `at:marker.refX`） | SVG 2 | 未实现 | pipeline-mimic-board |
-| `concept:context-paint-gradient` | context-stroke referencing a gradient/pattern | 细节（父 `pv:fill=context-stroke`） | SVG 2 | 部分支持 | pipeline-mimic-board |
-| `concept:marker-animated-content` | animated content inside a marker | 细节（父 `concept:marker-smil-attribute-animation`） | SMIL | 全平台 | pipeline-mimic-board |
-| `concept:marker-base-href-pitfall` | markers vanish with base href or routed URLs | 细节（父 `pr:marker-end`） | CSS | 全平台 | 经 `pr:marker-end` |
-| `concept:marker-content-paint-servers` | gradients, patterns and filters inside marker content | 细节（父 `el:marker`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-currentcolor` | currentColor inside marker content follows the marker's own color | 细节（父 `pv:fill=context-stroke`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-curve-tangent` | orientation on curves uses the tangent | 细节（父 `av:marker.orient=auto`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-dashed-stroke` | markers on dashed strokes ignore dash gaps | 细节（父 `pr:marker-mid`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-display-ua-style` | marker element is never rendered directly | 细节（父 `el:marker`） | SVG 2 | 全平台 | pipeline-mimic-board |
-| `concept:marker-element-effects` | opacity, filter, clip-path, mask on host apply to markers | 细节（父 `el:marker`） | SVG 1.1 | 全平台 | 经 `el:marker` |
-| `concept:marker-external-reference` | marker referenced from an external SVG file | 细节（父 `el:marker`） | SVG 1.1 | 部分支持 | 经 `el:marker` |
-| `concept:marker-follows-animated-path` | markers track an animated path d or points | 细节（父 `concept:marker-smil-attribute-animation`） | SMIL | 全平台 | pipeline-mimic-board |
-| `concept:marker-ignores-display` | display none on marker or its ancestors does not disable it | 细节（父 `el:marker`） | SVG 1.1 | 全平台 | 经 `el:marker` |
-| `concept:marker-pointer-events` | markers are not hit-testable | 细节（父 `concept:marker-vs-symbol`） | SVG 2 | 全平台 | pipeline-mimic-board |
-| `concept:marker-property-inheritance` | marker properties inherit to descendant shapes | 细节（父 `pr:marker`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-reverse-arrow-fallback` | reversed start arrow without auto-start-reverse | 细节（父 `av:marker.orient=auto-start-reverse`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-shared-defs-across-inline-svg` | marker defined in one inline svg used by another | 细节（父 `el:marker`） | SVG 1.1 | 全平台 | 经 `el:marker` |
-| `concept:marker-style-isolation` | marker content inherits from the marker's ancestors, not the host shape | 细节（父 `el:marker`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-subpath-vertices` | start/end only at path ends, mid at subpath starts | 细节（父 `pr:marker-mid`） | SVG 2 | 全平台 | pipeline-mimic-board |
-| `concept:marker-text-content` | text inside marker content | 细节（父 `el:marker`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-without-stroke` | markers render even when stroke is none | 细节（父 `at:marker.markerUnits`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `concept:marker-zero-length-direction` | direction with zero-length segments or coincident control points | 细节（父 `concept:marker-vertex-bisector`） | SVG 2 | 部分支持 | pipeline-mimic-board |
-| `concept:markers-on-basic-shapes` | SVG 2 markers on rect, circle, ellipse | 细节（父 `el:marker`） | SVG 2 | 未实现 | pipeline-mimic-board |
-| `concept:nested-markers` | marker content that itself uses markers | 细节（父 `el:marker`） | SVG 1.1 | 部分支持 | pipeline-mimic-board |
-| `css:marker-properties` | marker properties from external/embedded CSS | 细节（父 `pr:marker`） | CSS | 全平台 | pipeline-mimic-board |
-| `pr:marker-knockout-left` | marker-knockout-left / marker-knockout-right | 细节（父 `pv:paint-order=markers`） | Deprecated | 未实现 | pipeline-mimic-board |
-| `pr:marker-pattern` | marker-pattern (repeating markers along path) | 细节（父 `pr:marker-mid`） | Deprecated | 未实现 | 经 `pr:marker-mid` |
-| `pr:marker-segment` | marker-segment (per-segment midpoint marker) | 细节（父 `pr:marker-mid`） | Deprecated | 未实现 | 经 `pr:marker-mid` |
-| `pv:marker=none` | marker none reset | 细节（父 `pr:marker`） | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `pv:stroke=context-fill` | stroke context-fill | 细节（父 `pv:fill=context-fill`） | SVG 2 | 全平台 | pipeline-mimic-board |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `api:SVGAnimationElement.beginElement` | beginElement() scripted start/restart | core | broad | escapement-chronometer |
+| `api:SVGSVGElement.pauseAnimations` | pauseAnimations() | core | broad | escapement-chronometer |
+| `api:SVGSVGElement.setCurrentTime` | setCurrentTime() timeline scrubbing | core | broad | escapement-chronometer |
+| `at:animate.begin` | begin attribute (start time list) | core | broad | escapement-chronometer |
+| `at:animate.by` | by relative delta animation | core | broad | mycelium-culture-chamber |
+| `at:animate.dur` | dur simple duration | core | broad | escapement-chronometer |
+| `at:animate.end` | end attribute (event, syncbase or offset) | core | broad | escapement-chronometer |
+| `at:animate.from` | from/to pair | core | broad | core-sample-stratigraphy |
+| `at:animate.href` | href targeting a non-parent element | core | broad | escapement-chronometer |
+| `at:animate.keySplines` | keySplines cubic-Bezier easing per segment | core | broad | escapement-chronometer |
+| `at:animate.keyTimes` | keyTimes pacing of values | core | broad | escapement-chronometer |
+| `at:animate.repeatCount` | repeatCount (number or indefinite) | core | broad | escapement-chronometer |
+| `at:animate.restart` | restart (always / whenNotActive / never) | core | broad | escapement-chronometer |
+| `at:animate.values` | values list (multi-keyframe) | core | broad | auroral-spectrograph |
+| `at:animateMotion.keyPoints` | animateMotion keyPoints with keyTimes | core | broad | escapement-chronometer |
+| `at:animateMotion.path` | animateMotion inline path attribute | core | broad | escapement-chronometer |
+| `av:animate.accumulate=sum` | accumulate sum across repeats | core | broad | mycelium-culture-chamber |
+| `av:animate.additive=sum` | additive sum on attribute animations | core | broad | escapement-chronometer |
+| `av:animate.begin=event` | event-based begin (click, mouseover, focusin, id.event) | core | broad | escapement-chronometer |
+| `av:animate.begin=indefinite` | begin indefinite (script-only start) | core | broad | escapement-chronometer |
+| `av:animate.begin=syncbase` | syncbase begin id.begin / id.end + offset | core | broad | escapement-chronometer |
+| `av:animate.calcMode=discrete` | calcMode discrete (frame flipping) | core | broad | escapement-chronometer |
+| `av:animate.calcMode=paced` | calcMode paced (constant velocity) | core | broad | forge-metallography-bench |
+| `av:animate.fill=freeze` | fill freeze (hold end value) | core | broad | core-sample-stratigraphy |
+| `av:animateMotion.rotate=auto` | animateMotion rotate auto | core | broad | escapement-chronometer |
+| `av:animateTransform.additive=sum` | stacked animateTransforms with additive=sum | core | broad | escapement-chronometer |
+| `av:animateTransform.type=rotate` | animateTransform type rotate (angle cx cy) | core | broad | escapement-chronometer |
+| `concept:animate-color` | colour interpolation of fill/stroke/stop-color | core | broad | auroral-spectrograph |
+| `concept:animate-filter-basefrequency` | animating feTurbulence baseFrequency | core | broad | mycelium-culture-chamber |
+| `concept:animate-filter-stddeviation` | animating feGaussianBlur stdDeviation | core | broad | neon-sign-workshop |
+| `concept:animate-gradient-stop` | animating gradient stops and vector | core | broad | auroral-spectrograph |
+| `concept:animate-in-use-shadow-tree` | animations inside use-instanced content | core | partial | celestial-astrolabe-cabinet |
+| `concept:animate-path-d-morph` | path d morphing with matching commands | core | broad | ship-lofting-floor |
+| `concept:animate-text-attributes` | animating text x/dx/rotate/font-size/textLength/startOffset | core | broad | stele-rubbing-hall |
+| `concept:animate-use-href` | animating href of use (symbol swap) | core | broad | celestial-astrolabe-cabinet |
+| `concept:animate-viewbox` | animating viewBox (camera pan/zoom) | core | broad | celestial-astrolabe-cabinet |
+| `concept:smil-2026-support-status` | SMIL browser support status 2026 | core | broad | escapement-chronometer |
+| `concept:smil-events` | beginEvent / endEvent / repeatEvent DOM events | core | broad | escapement-chronometer |
+| `el:animate` | animate element | core | broad | escapement-chronometer |
+| `el:animateMotion` | animateMotion element | core | broad | escapement-chronometer |
+| `el:animateTransform` | animateTransform element | core | broad | escapement-chronometer |
+| `el:discard` | discard element (remove element at time) | core | partial | escapement-chronometer |
+| `el:mpath` | mpath (reference an existing path for motion) | core | broad | escapement-chronometer |
+| `el:set` | set element (discrete value switch) | core | broad | escapement-chronometer |
+| `api:SVGAnimatedLength.animVal` | animVal vs baseVal while animating | detail / `el:animate` | broad | escapement-chronometer |
+| `api:SVGAnimationElement.beginElementAt` | beginElementAt(offset) | detail / `api:SVGAnimationElement.beginElement` | broad | escapement-chronometer |
+| `api:SVGAnimationElement.endElement` | endElement() scripted stop | detail / `api:SVGAnimationElement.beginElement` | broad | escapement-chronometer |
+| `api:SVGAnimationElement.getCurrentTime` | SVGAnimationElement.getCurrentTime() | detail / `api:SVGAnimationElement.beginElement` | broad | escapement-chronometer |
+| `api:SVGAnimationElement.getSimpleDuration` | getSimpleDuration() | detail / `api:SVGAnimationElement.beginElement` | broad | escapement-chronometer |
+| `api:SVGAnimationElement.getStartTime` | getStartTime() | detail / `api:SVGAnimationElement.beginElement` | broad | escapement-chronometer |
+| `api:SVGAnimationElement.targetElement` | targetElement property | detail / `api:SVGAnimationElement.beginElement` | broad | escapement-chronometer |
+| `api:SVGSVGElement.animationsPaused` | animationsPaused() | detail / `api:SVGSVGElement.pauseAnimations` | broad | escapement-chronometer |
+| `api:SVGSVGElement.getCurrentTime` | SVGSVGElement.getCurrentTime() document time | detail / `api:SVGSVGElement.setCurrentTime` | broad | escapement-chronometer |
+| `api:SVGSVGElement.unpauseAnimations` | unpauseAnimations() | detail / `api:SVGSVGElement.pauseAnimations` | broad | escapement-chronometer |
+| `api:TimeEvent` | TimeEvent interface (detail) | detail / `concept:smil-events` | deprecated | escapement-chronometer |
+| `at:animate.attributeName` | attributeName target attribute/property | detail / `el:animate` | broad | escapement-chronometer |
+| `at:animate.attributeType` | attributeType CSS / XML / auto | detail / `el:animate` | deprecated | escapement-chronometer |
+| `at:animate.max` | max active duration | detail / `at:animate.dur` | partial | escapement-chronometer (via at:animate.dur) |
+| `at:animate.min` | min active duration | detail / `at:animate.dur` | partial | escapement-chronometer (via at:animate.dur) |
+| `at:animate.onbegin` | onbegin/onend/onrepeat event attributes | detail / `concept:smil-events` | broad | escapement-chronometer |
+| `at:animate.repeatDur` | repeatDur total repeat time | detail / `at:animate.repeatCount` | broad | escapement-chronometer |
+| `at:animate.to` | to-only animation (blend from base value) | detail / `at:animate.from` | broad | core-sample-stratigraphy |
+| `at:animateMotion.origin` | animateMotion origin attribute | detail / `el:animateMotion` | none | escapement-chronometer (via el:animateMotion) |
+| `at:animateTransform.type` | animateTransform type selector | detail / `el:animateTransform` | broad | escapement-chronometer |
+| `at:discard.begin` | discard begin time | detail / `el:discard` | partial | escapement-chronometer |
+| `at:discard.href` | discard href target | detail / `el:discard` | partial | escapement-chronometer |
+| `at:mpath.href` | mpath href | detail / `el:mpath` | broad | escapement-chronometer |
+| `at:set.to` | set to value | detail / `el:set` | broad | escapement-chronometer |
+| `at:svg.timelinebegin` | timelinebegin | detail / `api:SVGSVGElement.setCurrentTime` | none | escapement-chronometer (via api:SVGSVGElement.setCurrentTime) |
+| `av:animate.begin=accessKey` | accessKey(key) begin | detail / `at:animate.begin` | partial | escapement-chronometer (via at:animate.begin) |
+| `av:animate.begin=negative-offset` | negative begin offset (start mid-way) | detail / `at:animate.begin` | broad | escapement-chronometer (via at:animate.begin) |
+| `av:animate.begin=offset` | begin clock-value offset | detail / `at:animate.begin` | broad | escapement-chronometer |
+| `av:animate.begin=repeat` | syncbase on repeat iteration id.repeat(n) | detail / `at:animate.begin` | partial | escapement-chronometer |
+| `av:animate.begin=wallclock` | wallclock() begin | detail / `at:animate.begin` | none | escapement-chronometer (via at:animate.begin) |
+| `av:animate.calcMode=linear` | calcMode linear (default) | detail / `at:animate.values` | broad | auroral-spectrograph (via at:animate.values) |
+| `av:animate.calcMode=spline` | calcMode spline | detail / `at:animate.keySplines` | broad | escapement-chronometer |
+| `av:animate.dur=media` | dur media | detail / `at:animate.dur` | none | escapement-chronometer (via at:animate.dur) |
+| `av:animate.fill=remove` | fill remove (default snap-back) | detail / `av:animate.fill=freeze` | broad | core-sample-stratigraphy |
+| `av:animate.repeatCount=indefinite` | repeatCount indefinite | detail / `at:animate.repeatCount` | broad | escapement-chronometer |
+| `av:animate.restart=never` | restart never | detail / `at:animate.restart` | broad | escapement-chronometer |
+| `av:animate.restart=whenNotActive` | restart whenNotActive | detail / `at:animate.restart` | broad | escapement-chronometer |
+| `av:animateMotion.rotate=angle` | animateMotion fixed rotate angle | detail / `av:animateMotion.rotate=auto` | broad | escapement-chronometer (via av:animateMotion.rotate=auto) |
+| `av:animateMotion.rotate=auto-reverse` | animateMotion rotate auto-reverse | detail / `av:animateMotion.rotate=auto` | broad | escapement-chronometer |
+| `av:animateTransform.accumulate=sum` | animateTransform accumulate across repeats | detail / `av:animate.accumulate=sum` | broad | mycelium-culture-chamber (via av:animate.accumulate=sum) |
+| `av:animateTransform.type=scale` | animateTransform type scale | detail / `el:animateTransform` | broad | escapement-chronometer (via el:animateTransform) |
+| `av:animateTransform.type=skewX` | animateTransform type skewX | detail / `el:animateTransform` | broad | escapement-chronometer (via el:animateTransform) |
+| `av:animateTransform.type=skewY` | animateTransform type skewY | detail / `el:animateTransform` | broad | escapement-chronometer (via el:animateTransform) |
+| `av:animateTransform.type=translate` | animateTransform type translate | detail / `el:animateTransform` | broad | escapement-chronometer (via el:animateTransform) |
+| `concept:animate-light-position` | animating fePointLight/feSpotLight x y z | detail / `concept:animate-filter-stddeviation` | broad | neon-sign-workshop (via concept:animate-filter-stddeviation) |
+| `concept:animate-path-d-mismatch-discrete` | d command mismatch falls back to discrete | detail / `concept:animate-path-d-morph` | broad | ship-lofting-floor |
+| `concept:animate-points` | animating polygon/polyline points | detail / `concept:animate-path-d-morph` | broad | ship-lofting-floor (via concept:animate-path-d-morph) |
+| `concept:animate-transform-requires-animatetransform` | animate on transform is ignored; animateTransform required | detail / `el:animateTransform` | broad | escapement-chronometer |
+| `concept:animatemotion-paced-default` | animateMotion defaults to calcMode paced | detail / `av:animate.calcMode=paced` | broad | forge-metallography-bench (via av:animate.calcMode=paced) |
+| `concept:animatemotion-transform-stacking` | motion transform composed after the transform attribute | detail / `el:animateMotion` | broad | escapement-chronometer |
+| `concept:animatemotion-values-coordinates` | animateMotion via from/to/values coordinate pairs | detail / `el:animateMotion` | broad | escapement-chronometer (via el:animateMotion) |
+| `concept:animatetransform-base-transform-preserved` | additive=sum keeps the static transform attribute | detail / `av:animateTransform.additive=sum` | broad | escapement-chronometer |
+| `concept:animation-sandwich-priority` | animation sandwich model (later animation wins) | detail / `av:animate.additive=sum` | broad | escapement-chronometer |
+| `concept:dynamic-animate-insertion` | script-inserted animation elements start running | detail / `api:SVGAnimationElement.beginElement` | broad | escapement-chronometer (via api:SVGAnimationElement.beginElement) |
+| `concept:multiple-begin-values` | semicolon-separated begin list | detail / `at:animate.begin` | broad | escapement-chronometer |
+| `concept:set-visibility-toggle` | set on visibility/display to show or hide at a time | detail / `el:set` | broad | escapement-chronometer |
+| `concept:smil-in-img` | SMIL runs inside img and CSS background | detail / `concept:smil-2026-support-status` | broad | escapement-chronometer (via concept:smil-2026-support-status) |
+| `concept:smil-in-resource-documents` | animations do not run in resource documents | detail / `concept:smil-2026-support-status` | broad | escapement-chronometer (via concept:smil-2026-support-status) |
+| `concept:smil-overrides-css` | SMIL animated value beats author CSS | detail / `el:animate` | partial | escapement-chronometer |
+| `concept:view-element-animations` | animation elements inside view | detail / `at:animate.begin` | none | escapement-chronometer (via at:animate.begin) |
+| `el:animateColor` | animateColor element | detail / `concept:animate-color` | deprecated | auroral-spectrograph (via concept:animate-color) |
+| `el:animation` | nested SVG animation element (SVG Tiny 1.2) | detail / `el:animate` | deprecated | escapement-chronometer (via el:animate) |
+| `el:prefetch` | prefetch resource element (SVG Tiny 1.2) | detail / `el:animate` | deprecated | escapement-chronometer (via el:animate) |
 
-### 滤镜：区域、连线、合成与颜色原语（`filters-core`，核心 42 项 / 细节 99 项）
+### CSS 动画、CSS 变换与脚本 API
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `at:feGaussianBlur.stdDeviation` | stdDeviation blur radius | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `at:filter.filterUnits` | filterUnits | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:filter.primitiveUnits` | primitiveUnits | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `at:filter.x` | filter region x/y/width/height | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feColorMatrix.type=luminanceToAlpha` | feColorMatrix luminanceToAlpha | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `av:feComposite.operator=arithmetic` | feComposite arithmetic with k1..k4 | 核心 | SVG 1.1 | 全平台 | ★four-colour-press-check |
-| `av:feGaussianBlur.in=SourceAlpha` | SourceAlpha keyword | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `av:feGaussianBlur.stdDeviation=two-values` | Anisotropic blur with two stdDeviation values | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `av:feImage.href=#element` | feImage href to an in-document element (#id) | 核心 | SVG 1.1 | 部分支持 | jacquard-loom-draft |
-| `concept:classic-drop-shadow-chain` | SourceAlpha + blur + offset + merge shadow chain | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `concept:duotone-via-component-transfer` | Duotone/false-colour by greyscale plus per-channel tables | 核心 | SVG 1.1 | 全平台 | ★four-colour-press-check |
-| `concept:filter-input-wiring` | in / in2 / result wiring between primitives | 核心 | SVG 1.1 | 全平台 | ★four-colour-press-check, neon-sign-workshop |
-| `concept:filter-on-group-vs-children` | Filter on a group composites children first | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:filter-on-text` | Filter effects on text | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `concept:filter-primitive-subregion` | Per-primitive subregion x/y/width/height | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:inner-shadow-technique` | Inner shadow via SourceAlpha out compositing | 核心 | SVG 1.1 | 全平台 | ★neon-sign-workshop |
-| `concept:outline-stroke-via-alpha-dilate` | Outline/halo via blurred alpha thresholded then flooded | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `concept:text-background-box-via-flood` | Text label background box via feFlood+feMerge | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `css:filter-chaining` | Chaining several filters: filter: url(#a) url(#b) blur(2px) | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `css:filter-functions-on-svg` | CSS filter functions (blur, drop-shadow, grayscale, hue-rotate...) on SVG elements | 核心 | CSS | 全平台 | neon-sign-workshop |
-| `css:svg-filter-on-html-element` | SVG filter applied to HTML elements and the outermost svg via filter:url(#id) | 核心 | CSS | 全平台 | ★neon-sign-workshop |
-| `el:feBlend` | feBlend | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feColorMatrix` | feColorMatrix | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feComponentTransfer` | feComponentTransfer per-channel remap | 核心 | SVG 1.1 | 全平台 | ★four-colour-press-check, neon-sign-workshop |
-| `el:feComposite` | feComposite Porter-Duff compositing | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feDropShadow` | feDropShadow single-primitive shadow | 核心 | SVG 2 | 全平台 | neon-sign-workshop |
-| `el:feFlood` | feFlood solid color fill | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `el:feFuncA` | feFuncA alpha channel function | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feFuncB` | feFuncB blue channel function | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feFuncG` | feFuncG green channel function | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feFuncR` | feFuncR red channel function | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feGaussianBlur` | feGaussianBlur | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `el:feImage` | feImage external/data-URI image input | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `el:feMerge` | feMerge stacking | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feMergeNode` | feMergeNode layer order | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `el:feOffset` | feOffset translation | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `el:feTile` | feTile repeating an input subregion | 核心 | SVG 1.1 | 全平台 | ★jacquard-loom-draft |
-| `el:filter` | filter element | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `pr:color-interpolation-filters` | color-interpolation-filters (linearRGB default vs sRGB) | 核心 | SVG 1.1 | 全平台 | ★four-colour-press-check, neon-sign-workshop |
-| `pr:filter` | filter presentation property (attribute or CSS url()) | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `pr:flood-color` | flood-color (feFlood and feDropShadow) | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `pr:flood-opacity` | flood-opacity | 核心 | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `api:CSS.supports-filter` | CSS.supports('filter','url(#x)') feature detection | 细节（父 `pr:filter`） | DOM | 全平台 | four-colour-press-check |
-| `api:SVGComponentTransferFunctionElement.tableValues` | feFunc* type/tableValues/slope/intercept/amplitude/exponent/offset DOM access | 细节（父 `el:feComponentTransfer`） | DOM | 全平台 | four-colour-press-check |
-| `api:SVGFEBlendElement.mode` | SVGFEBlendElement.mode with SVG_FEBLEND_MODE_* constants | 细节（父 `el:feBlend`） | DOM | 全平台 | 经 `el:feBlend` |
-| `api:SVGFEColorMatrixElement.values` | SVGFEColorMatrixElement.values SVGAnimatedNumberList | 细节（父 `el:feColorMatrix`） | DOM | 全平台 | four-colour-press-check |
-| `api:SVGFECompositeElement.k1` | SVGFECompositeElement k1..k4 animated numbers | 细节（父 `av:feComposite.operator=arithmetic`） | DOM | 全平台 | 经 `av:feComposite.operator=arithmetic` |
-| `api:SVGFEDropShadowElement.setStdDeviation` | SVGFEDropShadowElement.setStdDeviation | 细节（父 `el:feDropShadow`） | DOM | 全平台 | 经 `el:feDropShadow` |
-| `api:SVGFEGaussianBlurElement.setStdDeviation` | SVGFEGaussianBlurElement.setStdDeviation(x, y) | 细节（父 `el:feGaussianBlur`） | DOM | 全平台 | neon-sign-workshop |
-| `api:SVGFilterElement.filterUnits` | SVGFilterElement animated attribute access (filterUnits, x, width...) | 细节（父 `el:filter`） | DOM | 全平台 | 经 `el:filter` |
-| `api:SVGFilterPrimitiveStandardAttributes.result` | Primitive x/y/width/height/result animated attributes | 细节（父 `concept:filter-input-wiring`） | DOM | 全平台 | four-colour-press-check |
-| `at:feBlend.in2` | in2 second input (feBlend, feComposite, feDisplacementMap) | 细节（父 `concept:filter-input-wiring`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feBlend.mode` | feBlend mode | 细节（父 `el:feBlend`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feColorMatrix.type` | feColorMatrix type | 细节（父 `el:feColorMatrix`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feColorMatrix.values` | feColorMatrix values | 细节（父 `el:feColorMatrix`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feComposite.k1` | feComposite k1/k2/k3/k4 | 细节（父 `av:feComposite.operator=arithmetic`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feComposite.operator` | feComposite operator | 细节（父 `el:feComposite`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feDropShadow.dx` | feDropShadow dx/dy/stdDeviation | 细节（父 `el:feDropShadow`） | SVG 2 | 全平台 | neon-sign-workshop |
-| `at:feFuncR.amplitude` | amplitude | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feFuncR.exponent` | exponent | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feFuncR.intercept` | intercept | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feFuncR.offset` | offset (gamma transfer) | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feFuncR.slope` | slope | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feFuncR.tableValues` | tableValues | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feFuncR.type` | transfer function type (all feFunc*) | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feGaussianBlur.edgeMode` | edgeMode on feGaussianBlur (none/duplicate/wrap) | 细节（父 `el:feGaussianBlur`） | SVG 2 | 未实现 | 经 `el:feGaussianBlur` |
-| `at:feImage.crossorigin` | feImage crossorigin | 细节（父 `el:feImage`） | SVG 2 | 部分支持 | 经 `el:feImage` |
-| `at:feImage.href` | feImage href (SVG 2 unprefixed) | 细节（父 `el:feImage`） | SVG 2 | 全平台 | jacquard-loom-draft |
-| `at:feImage.preserveAspectRatio` | feImage preserveAspectRatio | 细节（父 `el:feImage`） | SVG 1.1 | 全平台 | 经 `el:feImage` |
-| `at:feImage.x` | feImage x/y/width/height placement | 细节（父 `el:feImage`） | SVG 1.1 | 全平台 | 经 `el:feImage` |
-| `at:feImage.xlink:href` | feImage xlink:href | 细节（父 `el:feImage`） | Deprecated | 已废弃 | 经 `el:feImage` |
-| `at:feMergeNode.in` | feMergeNode in | 细节（父 `el:feMergeNode`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `at:feOffset.dx` | feOffset dx/dy (including negative and fractional) | 细节（父 `el:feOffset`） | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `at:filter.filterRes` | filterRes intermediate resolution | 细节（父 `el:filter`） | Deprecated | 已废弃 | 经 `el:filter` |
-| `at:filter.href` | filter href inheritance from another filter | 细节（父 `el:filter`） | Deprecated | 已废弃 | 经 `el:filter` |
-| `av:feBlend.mode=color` | feBlend color | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=color-burn` | feBlend color-burn | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=color-dodge` | feBlend color-dodge | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=darken` | feBlend darken | 细节（父 `el:feBlend`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feBlend.mode=difference` | feBlend difference | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | four-colour-press-check |
-| `av:feBlend.mode=exclusion` | feBlend exclusion | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=hard-light` | feBlend hard-light | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=hue` | feBlend hue | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=lighten` | feBlend lighten | 细节（父 `el:feBlend`） | SVG 1.1 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=luminosity` | feBlend luminosity | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | four-colour-press-check |
-| `av:feBlend.mode=multiply` | feBlend multiply | 细节（父 `el:feBlend`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feBlend.mode=normal` | feBlend normal | 细节（父 `el:feBlend`） | SVG 1.1 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=overlay` | feBlend overlay | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | four-colour-press-check |
-| `av:feBlend.mode=saturation` | feBlend saturation | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | 经 `el:feBlend` |
-| `av:feBlend.mode=screen` | feBlend screen | 细节（父 `el:feBlend`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feBlend.mode=soft-light` | feBlend soft-light | 细节（父 `el:feBlend`） | SVG 2 | 全平台 | 经 `el:feBlend` |
-| `av:feColorMatrix.type=hueRotate` | feColorMatrix hueRotate | 细节（父 `el:feColorMatrix`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feColorMatrix.type=matrix` | feColorMatrix matrix (4x5 values) | 细节（父 `el:feColorMatrix`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feColorMatrix.type=saturate` | feColorMatrix saturate | 细节（父 `el:feColorMatrix`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feComposite.operator=atop` | feComposite atop | 细节（父 `el:feComposite`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feComposite.operator=in` | feComposite in | 细节（父 `el:feComposite`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feComposite.operator=lighter` | feComposite lighter (additive) | 细节（父 `el:feComposite`） | SVG 2 | 部分支持 | four-colour-press-check |
-| `av:feComposite.operator=out` | feComposite out | 细节（父 `el:feComposite`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feComposite.operator=over` | feComposite over (default) | 细节（父 `el:feComposite`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feComposite.operator=xor` | feComposite xor | 细节（父 `el:feComposite`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feFuncR.type=discrete` | transfer type discrete (posterize) | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feFuncR.type=gamma` | transfer type gamma with amplitude/exponent/offset | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feFuncR.type=identity` | transfer type identity | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feFuncR.type=linear` | transfer type linear with slope/intercept | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feFuncR.type=table` | transfer type table with tableValues | 细节（父 `el:feComponentTransfer`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feGaussianBlur.in=BackgroundAlpha` | BackgroundAlpha keyword | 细节（父 `concept:filter-input-wiring`） | Deprecated | 已废弃 | 经 `concept:filter-input-wiring` |
-| `av:feGaussianBlur.in=BackgroundImage` | BackgroundImage keyword | 细节（父 `concept:filter-input-wiring`） | Deprecated | 已废弃 | 经 `concept:filter-input-wiring` |
-| `av:feGaussianBlur.in=FillPaint` | FillPaint keyword | 细节（父 `concept:filter-input-wiring`） | Deprecated | 已废弃 | 经 `concept:filter-input-wiring` |
-| `av:feGaussianBlur.in=SourceGraphic` | SourceGraphic keyword | 细节（父 `concept:filter-input-wiring`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:feGaussianBlur.in=StrokePaint` | StrokePaint keyword | 细节（父 `concept:filter-input-wiring`） | Deprecated | 已废弃 | 经 `concept:filter-input-wiring` |
-| `av:feGaussianBlur.stdDeviation=0` | stdDeviation 0 pass-through | 细节（父 `at:feGaussianBlur.stdDeviation`） | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `av:filter.filterUnits=objectBoundingBox` | filterUnits objectBoundingBox (default) | 细节（父 `at:filter.filterUnits`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:filter.filterUnits=userSpaceOnUse` | filterUnits userSpaceOnUse | 细节（父 `at:filter.filterUnits`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `av:filter.primitiveUnits=objectBoundingBox` | primitiveUnits objectBoundingBox | 细节（父 `at:filter.primitiveUnits`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `av:filter.primitiveUnits=userSpaceOnUse` | primitiveUnits userSpaceOnUse (default) | 细节（父 `at:filter.primitiveUnits`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:arithmetic-alpha-threshold` | Arithmetic compositing to boost or threshold alpha | 细节（父 `av:feComposite.operator=arithmetic`） | SVG 1.1 | 全平台 | 经 `av:feComposite.operator=arithmetic` |
-| `concept:fetile-subregion-pattern` | feTile requires an explicit input subregion | 细节（父 `el:feTile`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:filter-and-transform` | Filter is applied in user space before the element's transform | 细节（父 `el:filter`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:filter-clip-mask-opacity-order` | Order: filter, then clip-path, then mask, then opacity | 细节（父 `el:filter`） | SVG 2 | 全平台 | four-colour-press-check |
-| `concept:filter-on-empty-group` | Filter on empty or invisible group renders nothing in objectBoundingBox mode | 细节（父 `at:filter.filterUnits`） | SVG 1.1 | 全平台 | 经 `at:filter.filterUnits` |
-| `concept:filter-on-zero-bbox-element` | objectBoundingBox filter vanishes on zero-width/height bbox | 细节（父 `at:filter.filterUnits`） | SVG 1.1 | 全平台 | 经 `at:filter.filterUnits` |
-| `concept:filter-region-clipping-trap` | Filter region clipping of shadows and blur | 细节（父 `at:filter.x`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:filter-region-css-units` | filter x/y/width/height accept percentages and user units | 细节（父 `at:filter.x`） | SVG 1.1 | 全平台 | 经 `at:filter.x` |
-| `concept:filter-region-default` | Default filter region -10%/-10%/120%/120% | 细节（父 `at:filter.x`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:flood-fills-filter-region` | feFlood fills the entire filter region | 细节（父 `el:feFlood`） | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `concept:implicit-chaining` | Implicit chaining when in is omitted | 细节（父 `concept:filter-input-wiring`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:last-primitive-is-output` | Filter output is the last primitive | 细节（父 `concept:filter-input-wiring`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:multiple-results-fan-out` | Fan-out: one result feeding several primitives | 细节（父 `concept:filter-input-wiring`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:nested-filtered-elements` | Filtered element inside a filtered group | 细节（父 `concept:filter-on-group-vs-children`） | SVG 1.1 | 全平台 | 经 `concept:filter-on-group-vs-children` |
-| `concept:premultiplied-alpha-in-colormatrix` | Colour primitives operate on un-premultiplied values; alpha row affects edges | 细节（父 `el:feColorMatrix`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:primitive-subregion-defaults` | Default primitive subregion: union of inputs vs full filter region | 细节（父 `concept:filter-primitive-subregion`） | SVG 2 | 部分支持 | four-colour-press-check |
-| `concept:reuse-filter-across-elements` | One filter definition shared by many elements | 细节（父 `el:filter`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:subregion-crop-technique` | Using a primitive subregion as a crop | 细节（父 `concept:filter-primitive-subregion`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `css:custom-properties-in-filter` | CSS custom properties driving flood-color or filter | 细节（父 `pr:flood-color`） | CSS | 全平台 | letterpress-type-specimen |
-| `css:filter-transition` | CSS transitions/animations of filter functions | 细节（父 `css:filter-functions-on-svg`） | CSS | 全平台 | neon-sign-workshop |
-| `css:filter-url-external-file` | filter: url(external.svg#id) | 细节（父 `pr:filter`） | CSS | 部分支持 | 经 `pr:filter` |
-| `css:flood-color-transition` | CSS transition of flood-color/flood-opacity | 细节（父 `pr:flood-color`） | CSS | 全平台 | letterpress-type-specimen |
-| `pv:color-interpolation-filters=linearRGB` | color-interpolation-filters: linearRGB (default) | 细节（父 `pr:color-interpolation-filters`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `pv:color-interpolation-filters=sRGB` | color-interpolation-filters: sRGB | 细节（父 `pr:color-interpolation-filters`） | SVG 1.1 | 全平台 | four-colour-press-check |
-| `pv:filter=none` | filter: none override | 细节（父 `pr:filter`） | CSS | 全平台 | four-colour-press-check |
-| `pv:flood-color=currentColor` | flood-color: currentColor | 细节（父 `pr:flood-color`） | SVG 2 | 全平台 | letterpress-type-specimen |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `api:DOMMatrix` | DOMMatrix construction and multiplication | core | broad | seismic-drum-console |
+| `api:DOMPoint.matrixTransform` | DOMPoint.matrixTransform | core | broad | seismic-drum-console |
+| `api:Element.animate` | Web Animations API on SVG elements | core | broad | seismic-drum-console |
+| `api:IntersectionObserver.observe` | IntersectionObserver with SVG elements | core | broad | seismic-drum-console |
+| `api:ResizeObserver.observe` | ResizeObserver on SVG elements | core | broad | seismic-drum-console |
+| `api:SVGAnimatedRect.baseVal` | viewBox.baseVal scripted pan and zoom | core | broad | seismic-drum-console |
+| `api:SVGElement.dataset` | dataset and data-* attributes on SVG elements | core | broad | seismic-drum-console |
+| `api:SVGGraphicsElement.getCTM` | getCTM | core | broad | seismic-drum-console |
+| `api:SVGGraphicsElement.getScreenCTM` | getScreenCTM | core | broad | ship-lofting-floor, guilloche-intaglio-plate, four-colour-press-check, seismic-drum-console |
+| `api:SVGSVGElement.checkIntersection` | checkIntersection / checkEnclosure | core | partial | seismic-drum-console |
+| `api:SVGTransformList` | transform.baseVal SVGTransformList manipulation | core | broad | seismic-drum-console |
+| `api:Window.getComputedStyle` | Reading computed paint values | core | broad | letterpress-type-specimen |
+| `api:Window.requestAnimationFrame` | requestAnimationFrame-driven attribute updates | core | broad | ship-lofting-floor, seismic-drum-console |
+| `concept:pointer-to-user-space` | Mapping pointer coordinates to SVG user space | core | broad | seismic-drum-console |
+| `concept:presentation-attribute-cascade` | Presentation attribute vs CSS cascade precedence | core | broad | letterpress-type-specimen |
+| `concept:svg-script-security-context` | Script execution context of embedded SVG | core | broad | museum-label-panel |
+| `concept:svg-to-canvas-rasterization` | Serialize SVG and draw to canvas / export PNG | core | broad | museum-label-panel |
+| `css:3d-transforms` | 3D transform functions on SVG elements | core | partial | guilloche-intaglio-plate |
+| `css:animation-timeline-scroll` | Scroll-driven animations on SVG | core | partial | seismic-drum-console |
+| `css:geometry-properties` | Geometry attributes as CSS properties (x, y, width, height, cx, cy, r, rx, ry) | core | partial | ship-lofting-floor |
+| `css:keyframes-on-svg` | CSS @keyframes on SVG presentation properties | core | broad | letterpress-type-specimen |
+| `css:keyframes-paint-animation` | CSS keyframe animation of fill, stroke, opacity, dashoffset | core | broad | letterpress-type-specimen |
+| `css:presentation-attribute-specificity` | Presentation attributes lose to any CSS rule | core | broad | museum-label-panel, letterpress-type-specimen |
+| `css:transitions` | CSS transitions on SVG presentation properties | core | broad | letterpress-type-specimen |
+| `pr:offset-distance` | offset-distance | core | broad | seismic-drum-console |
+| `pr:offset-path` | offset-path: path() motion path | core | broad | seismic-drum-console |
+| `pr:offset-rotate` | offset-rotate auto / reverse / angle | core | broad | seismic-drum-console |
+| `pr:rotate` | Individual transform properties rotate / scale / translate | core | broad | guilloche-intaglio-plate |
+| `pr:transform` | CSS transform property on SVG elements | core | broad | guilloche-intaglio-plate |
+| `pr:transform-box` | transform-box reference box | core | broad | guilloche-intaglio-plate |
+| `pr:transform-origin` | transform-origin on SVG | core | broad | guilloche-intaglio-plate |
+| `api:Animation.playbackRate` | Animation object control (pause, reverse, playbackRate, currentTime) | detail / `api:Element.animate` | broad | seismic-drum-console |
+| `api:CSSStyleDeclaration.fill` | Setting paint via element.style | detail / `css:presentation-attribute-specificity` | broad | letterpress-type-specimen |
+| `api:Document.getAnimations` | document.getAnimations / element.getAnimations | detail / `api:Element.animate` | broad | seismic-drum-console |
+| `api:Element.classList` | classList on SVG elements | detail / `api:SVGAnimatedLength.baseVal` | broad | ship-lofting-floor |
+| `api:Element.getBoundingClientRect` | getBoundingClientRect on SVG elements | detail / `api:SVGGraphicsElement.getBBox` | broad | letterpress-type-specimen (via api:SVGGraphicsElement.getBBox) |
+| `api:ElementCSSInlineStyle.style` | el.style inline property writes on SVG elements | detail / `api:Window.getComputedStyle` | broad | letterpress-type-specimen (via api:Window.getComputedStyle) |
+| `api:SVGAnimatedString.baseVal` | href.baseVal / className.baseVal | detail / `api:SVGAnimatedLength.baseVal` | broad | ship-lofting-floor |
+| `api:SVGAnimationElement.onbegin` | beginEvent / endEvent / repeatEvent listeners | detail / `api:SVGAnimationElement.beginElement` | broad | escapement-chronometer |
+| `api:SVGBoundingBoxOptions.stroke` | getBBox with SVGBoundingBoxOptions (fill/stroke/markers/clipped) | detail / `api:SVGGraphicsElement.getBBox` | partial | letterpress-type-specimen |
+| `api:SVGElement.getPresentationAttribute` | getPresentationAttribute, SVGPaint, SVGColor removed | detail / `api:Window.getComputedStyle` | deprecated | letterpress-type-specimen |
+| `api:SVGElementInstance` | SVGElementInstance / SVGElementInstanceList removed | detail / `el:script` | deprecated | mycelium-culture-chamber (via el:script) |
+| `api:SVGGraphicsElement.getTransformToElement` | getTransformToElement removed | detail / `api:SVGGraphicsElement.getCTM` | deprecated | seismic-drum-console (via api:SVGGraphicsElement.getCTM) |
+| `api:SVGGraphicsElement.nearestViewportElement` | nearestViewportElement / farthestViewportElement | detail / `api:SVGGraphicsElement.getCTM` | deprecated | seismic-drum-console |
+| `api:SVGLength.convertToSpecifiedUnits` | SVGLength unit conversion | detail / `api:SVGAnimatedLength.baseVal` | broad | ship-lofting-floor |
+| `api:SVGMatrix` | SVGMatrix / SVGPoint / SVGRect legacy interfaces | detail / `api:DOMMatrix` | deprecated | seismic-drum-console |
+| `api:SVGSVGElement.createSVGPoint` | createSVGPoint / createSVGMatrix / createSVGLength legacy factories | detail / `api:DOMPoint.matrixTransform` | broad | seismic-drum-console |
+| `api:SVGSVGElement.createSVGRect` | createSVGRect | detail / `api:SVGSVGElement.checkIntersection` | broad | seismic-drum-console |
+| `api:SVGSVGElement.createSVGTransformFromMatrix` | createSVGTransform / createSVGTransformFromMatrix | detail / `api:SVGTransformList` | broad | seismic-drum-console |
+| `api:SVGSVGElement.currentView` | currentView / useCurrentView / SVGViewSpec / pixelUnitToMillimeterX | detail / `api:SVGSVGElement.currentScale` | deprecated | seismic-drum-console (via api:SVGSVGElement.currentScale) |
+| `api:SVGSVGElement.suspendRedraw` | suspendRedraw / unsuspendRedraw / forceRedraw / deselectAll | detail / `api:Window.requestAnimationFrame` | deprecated | ship-lofting-floor (via api:Window.requestAnimationFrame), seismic-drum-console (via api:Window.requestAnimationFrame) |
+| `api:SVGTransform.setRotate` | SVGTransform setRotate / setTranslate / setScale / setMatrix | detail / `api:SVGTransformList` | broad | seismic-drum-console |
+| `api:SVGUnknownElement` | SVGUnknownElement interface | detail / `api:Document.createElementNS` | none | mycelium-culture-chamber |
+| `api:SVGZoomEvent` | SVGZoomEvent removed | detail / `api:SVGSVGElement.currentScale` | deprecated | seismic-drum-console (via api:SVGSVGElement.currentScale) |
+| `at:script.crossorigin` | script crossorigin | detail / `el:script` | broad | mycelium-culture-chamber (via el:script) |
+| `at:style.type` | style element type | detail / `el:style` | broad | letterpress-type-specimen |
+| `at:svg.contentStyleType` | contentStyleType | detail / `el:style` | deprecated | letterpress-type-specimen (via el:style) |
+| `av:script.type=module` | module scripts in SVG | detail / `el:script` | partial | mycelium-culture-chamber (via el:script) |
+| `concept:animation-in-img-context` | CSS/SMIL animations run inside img but scripts do not | detail / `concept:svg-script-security-context` | broad | museum-label-panel |
+| `concept:cross-document-svg-scripting` | Scripting an embedded SVG via contentDocument | detail / `concept:svg-script-security-context` | broad | museum-label-panel |
+| `concept:getbbox-unrendered-element` | getBBox on display:none or detached elements | detail / `api:SVGGraphicsElement.getBBox` | broad | letterpress-type-specimen (via api:SVGGraphicsElement.getBBox) |
+| `concept:innerhtml-svg-parsing` | innerHTML / insertAdjacentHTML inside an svg element | detail / `api:Document.createElementNS` | broad | mycelium-culture-chamber (via api:Document.createElementNS) |
+| `concept:presentation-attributes-any-element` | Presentation attributes allowed on any SVG element | detail / `concept:presentation-attribute-cascade` | broad | letterpress-type-specimen (via concept:presentation-attribute-cascade) |
+| `concept:transform-attribute-css-syntax` | CSS unit syntax inside transform attribute | detail / `pr:transform` | partial | guilloche-intaglio-plate |
+| `concept:waapi-non-css-attribute-animation` | WAAPI cannot animate non-CSS SVG attributes | detail / `api:Element.animate` | none | seismic-drum-console |
+| `concept:xlink-namespace-setattribute` | setAttributeNS with the xlink namespace for href | detail / `api:Document.createElementNS` | deprecated | mycelium-culture-chamber (via api:Document.createElementNS) |
+| `css:animating-stop-color` | CSS animation of gradient stops inside defs | detail / `css:keyframes-on-svg` | broad | letterpress-type-specimen (via css:keyframes-on-svg) |
+| `css:animation-composition` | animation-composition add / accumulate | detail / `css:keyframes-on-svg` | broad | letterpress-type-specimen (via css:keyframes-on-svg) |
+| `css:hover-fill-transition` | :hover state with fill/stroke transition | detail / `css:keyframes-paint-animation` | broad | letterpress-type-specimen (via css:keyframes-paint-animation) |
+| `css:property-registered-animation` | @property registered custom property animation | detail / `css:custom-properties` | broad | museum-label-panel |
+| `css:starting-style` | @starting-style entry transitions | detail / `css:transitions` | broad | letterpress-type-specimen (via css:transitions) |
+| `css:transition-behavior-allow-discrete` | transition-behavior: allow-discrete | detail / `css:transitions` | broad | letterpress-type-specimen (via css:transitions) |
+| `pr:offset-anchor` | offset-anchor | detail / `pr:offset-path` | broad | seismic-drum-console (via pr:offset-path) |
+| `pr:offset-position` | offset-position | detail / `pr:offset-path` | partial | seismic-drum-console (via pr:offset-path) |
+| `pr:perspective` | perspective on SVG children | detail / `css:3d-transforms` | partial | guilloche-intaglio-plate |
+| `pv:offset-path=ray` | offset-path: ray() | detail / `pr:offset-path` | partial | seismic-drum-console (via pr:offset-path) |
+| `pv:offset-path=url` | offset-path: url(#shape) and basic shapes with coord-box | detail / `pr:offset-path` | partial | seismic-drum-console (via pr:offset-path) |
+| `pv:transform-box=fill-box` | transform-box: fill-box | detail / `pr:transform-box` | broad | guilloche-intaglio-plate |
+| `pv:transform-box=stroke-box` | transform-box: stroke-box | detail / `pr:transform-box` | partial | guilloche-intaglio-plate |
+| `pv:transform-box=view-box` | transform-box: view-box (default) | detail / `pr:transform-box` | broad | guilloche-intaglio-plate |
+| `pv:transform-style=preserve-3d` | transform-style: preserve-3d inside SVG | detail / `css:3d-transforms` | none | guilloche-intaglio-plate (via css:3d-transforms) |
 
-### 滤镜：卷积、形态学、噪声、置换与光照（`filters-advanced`，核心 45 项 / 细节 59 项）
+### 变换与坐标系
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `at:feConvolveMatrix.edgeMode` | edgeMode border handling | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feConvolveMatrix.kernelMatrix` | kernelMatrix weights | 核心 | SVG 1.1 | 全平台 | ★forge-metallography-bench |
-| `at:feConvolveMatrix.order` | Kernel order (size), incl. non-square | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feDiffuseLighting.surfaceScale` | surfaceScale height | 核心 | SVG 1.1 | 全平台 | ★forge-metallography-bench |
-| `at:feDisplacementMap.in2` | in2 map source | 核心 | SVG 1.1 | 全平台 | ★mycelium-culture-chamber |
-| `at:feDisplacementMap.scale` | scale magnitude | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `at:feDisplacementMap.xChannelSelector` | xChannelSelector R/G/B/A | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `at:feDistantLight.azimuth` | azimuth angle | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feMorphology.operator` | operator erode / dilate | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `at:feMorphology.radius` | radius with two values (anisotropic) | 核心 | SVG 1.1 | 全平台 | ★neon-sign-workshop |
-| `at:fePointLight.z` | Point light z height | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpecularLighting.specularExponent` | specularExponent shininess | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpotLight.limitingConeAngle` | limitingConeAngle hard cutoff | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpotLight.pointsAtX` | pointsAtX/Y/Z aim target | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feTurbulence.baseFrequency` | baseFrequency (one or two values) | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `at:feTurbulence.numOctaves` | numOctaves detail layers | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `at:feTurbulence.stitchTiles` | stitchTiles seamless tiling | 核心 | SVG 1.1 | 全平台 | ★jacquard-loom-draft |
-| `at:feTurbulence.type` | type turbulence vs fractalNoise | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:animated-light-source` | Animated light position / angle | 核心 | SMIL | 全平台 | ★forge-metallography-bench |
-| `concept:animated-turbulence` | Animated noise (baseFrequency/seed) | 核心 | SMIL | 全平台 | mycelium-culture-chamber |
-| `concept:brushed-metal-texture` | Brushed metal texture | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `concept:chrome-metal-effect` | Chrome / polished metal text | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `concept:convolve-edge-detect` | Edge detection (Laplacian / Sobel) | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `concept:convolve-emboss` | Emboss recipe | 核心 | SVG 1.1 | 全平台 | ★forge-metallography-bench |
-| `concept:convolve-sharpen` | Sharpen / unsharp kernel | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `concept:filter-device-pixel-resolution` | Filter rasterised at device pixels | 核心 | SVG 2 | 全平台 | four-colour-press-check |
-| `concept:glass-refraction-effect` | Glass / frosted refraction recipe | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:halftone-dots` | Halftone dot screen | 核心 | SVG 1.1 | 全平台 | ★four-colour-press-check |
-| `concept:heat-shimmer-animation` | Heat shimmer / mirage | 核心 | SMIL | 全平台 | mycelium-culture-chamber |
-| `concept:lighting-alpha-bump-map` | Alpha channel as height map | 核心 | SVG 1.1 | 全平台 | ★forge-metallography-bench |
-| `concept:liquid-distortion-effect` | Liquid / gooey distortion | 核心 | SMIL | 全平台 | ★mycelium-culture-chamber |
-| `concept:morphology-outline-stroke` | Outline via dilate minus source | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `concept:neon-glow-morphology` | Neon glow via dilate + blur | 核心 | SVG 1.1 | 全平台 | ★neon-sign-workshop |
-| `concept:paper-grain-texture` | Paper grain / film grain overlay | 核心 | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:watercolor-bleed-effect` | Watercolor bleed edges | 核心 | SVG 1.1 | 全平台 | ★mycelium-culture-chamber |
-| `el:feConvolveMatrix` | feConvolveMatrix primitive | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `el:feDiffuseLighting` | feDiffuseLighting primitive | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `el:feDisplacementMap` | feDisplacementMap primitive | 核心 | SVG 1.1 | 全平台 | ★mycelium-culture-chamber |
-| `el:feDistantLight` | feDistantLight source | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `el:feMorphology` | feMorphology primitive | 核心 | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `el:fePointLight` | fePointLight source | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `el:feSpecularLighting` | feSpecularLighting primitive | 核心 | SVG 1.1 | 全平台 | ★forge-metallography-bench |
-| `el:feSpotLight` | feSpotLight source | 核心 | SVG 1.1 | 全平台 | ★forge-metallography-bench |
-| `el:feTurbulence` | feTurbulence primitive | 核心 | SVG 1.1 | 全平台 | ★mycelium-culture-chamber |
-| `pr:lighting-color` | lighting-color property | 核心 | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `api:SVGFEConvolveMatrixElement.kernelMatrix` | Scripted kernelMatrix (SVGAnimatedNumberList) | 细节（父 `at:feConvolveMatrix.kernelMatrix`） | DOM | 全平台 | forge-metallography-bench |
-| `api:SVGFEDisplacementMapElement.scale` | Scripted displacement scale | 细节（父 `at:feDisplacementMap.scale`） | DOM | 全平台 | 经 `at:feDisplacementMap.scale` |
-| `api:SVGFEDistantLightElement.azimuth` | Scripted distant light angle | 细节（父 `at:feDistantLight.azimuth`） | DOM | 全平台 | forge-metallography-bench |
-| `api:SVGFEMorphologyElement.radiusX` | Scripted morphology radius | 细节（父 `at:feMorphology.radius`） | DOM | 全平台 | neon-sign-workshop |
-| `api:SVGFEPointLightElement.x` | Scripted point light position | 细节（父 `concept:animated-light-source`） | DOM | 全平台 | forge-metallography-bench |
-| `api:SVGFESpotLightElement.pointsAtX` | Scripted spotlight aim | 细节（父 `concept:animated-light-source`） | DOM | 全平台 | forge-metallography-bench |
-| `api:SVGFETurbulenceElement.baseFrequencyX` | Scripted baseFrequency animation | 细节（父 `concept:animated-turbulence`） | DOM | 全平台 | mycelium-culture-chamber |
-| `api:SVGFETurbulenceElement.seed` | Scripted seed re-roll | 细节（父 `concept:animated-turbulence`） | DOM | 全平台 | 经 `concept:animated-turbulence` |
-| `at:feConvolveMatrix.bias` | bias offset | 细节（父 `at:feConvolveMatrix.kernelMatrix`） | SVG 1.1 | 部分支持 | forge-metallography-bench |
-| `at:feConvolveMatrix.divisor` | divisor normalisation | 细节（父 `at:feConvolveMatrix.kernelMatrix`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feConvolveMatrix.kernelUnitLength` | kernelUnitLength (convolution) | 细节（父 `el:feConvolveMatrix`） | SVG 1.1 | 未实现 | 经 `el:feConvolveMatrix` |
-| `at:feConvolveMatrix.preserveAlpha` | preserveAlpha true/false | 细节（父 `el:feConvolveMatrix`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feConvolveMatrix.targetX` | targetX kernel anchor | 细节（父 `at:feConvolveMatrix.order`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feConvolveMatrix.targetY` | targetY kernel anchor | 细节（父 `at:feConvolveMatrix.order`） | SVG 1.1 | 全平台 | 经 `at:feConvolveMatrix.order` |
-| `at:feDiffuseLighting.diffuseConstant` | diffuseConstant | 细节（父 `el:feDiffuseLighting`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feDiffuseLighting.kernelUnitLength` | kernelUnitLength (lighting) | 细节（父 `el:feDiffuseLighting`） | SVG 1.1 | 未实现 | 经 `el:feDiffuseLighting` |
-| `at:feDisplacementMap.yChannelSelector` | yChannelSelector R/G/B/A | 细节（父 `at:feDisplacementMap.xChannelSelector`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `at:feDistantLight.elevation` | elevation angle | 细节（父 `at:feDistantLight.azimuth`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:fePointLight.x` | Point light x position | 细节（父 `el:fePointLight`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:fePointLight.y` | Point light y position | 细节（父 `el:fePointLight`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpecularLighting.specularConstant` | specularConstant | 细节（父 `el:feSpecularLighting`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpecularLighting.surfaceScale` | surfaceScale (specular) | 细节（父 `at:feDiffuseLighting.surfaceScale`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpotLight.pointsAtY` | pointsAtY | 细节（父 `at:feSpotLight.pointsAtX`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpotLight.pointsAtZ` | pointsAtZ | 细节（父 `at:feSpotLight.pointsAtX`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpotLight.specularExponent` | Spot focus exponent | 细节（父 `el:feSpotLight`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpotLight.x` | Spot light x/y position | 细节（父 `el:feSpotLight`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feSpotLight.z` | Spot light z height | 细节（父 `el:feSpotLight`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `at:feTurbulence.seed` | seed | 细节（父 `el:feTurbulence`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `av:feConvolveMatrix.edgeMode=duplicate` | edgeMode duplicate (default) | 细节（父 `at:feConvolveMatrix.edgeMode`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `av:feConvolveMatrix.edgeMode=none` | edgeMode none | 细节（父 `at:feConvolveMatrix.edgeMode`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `av:feConvolveMatrix.edgeMode=wrap` | edgeMode wrap | 细节（父 `at:feConvolveMatrix.edgeMode`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `av:feDisplacementMap.xChannelSelector=A` | Alpha channel as displacement (default) | 细节（父 `at:feDisplacementMap.xChannelSelector`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `av:feMorphology.operator=dilate` | operator dilate | 细节（父 `at:feMorphology.operator`） | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `av:feMorphology.operator=erode` | operator erode (default) | 细节（父 `at:feMorphology.operator`） | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `av:feTurbulence.stitchTiles=noStitch` | stitchTiles noStitch (default) | 细节（父 `at:feTurbulence.stitchTiles`） | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `av:feTurbulence.type=fractalNoise` | type fractalNoise | 细节（父 `at:feTurbulence.type`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `av:feTurbulence.type=turbulence` | type turbulence (default) | 细节（父 `at:feTurbulence.type`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:cloud-smoke-texture` | Clouds / smoke from fractalNoise | 细节（父 `at:feTurbulence.type`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:convolve-box-blur` | Box / motion blur via kernel | 细节（父 `at:feConvolveMatrix.order`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `concept:diffuse-output-opaque` | Diffuse result is opaque; re-mask with SourceAlpha | 细节（父 `el:feDiffuseLighting`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `concept:displacement-color-space-caveat` | Displacement map read in linearRGB by default | 细节（父 `el:feDisplacementMap`） | SVG 1.1 | 全平台 | 经 `el:feDisplacementMap` |
-| `concept:displacement-filter-region-overflow` | Displaced pixels clipped by filter region | 细节（父 `at:feDisplacementMap.scale`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:displacement-gradient-lens` | Gradient-driven lens / ripple | 细节（父 `at:feDisplacementMap.in2`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:filter-effects-primitives-unchanged` | Advanced primitives carried unchanged into Filter Effects / CSS filter() | 细节（父 `el:feTurbulence`） | CSS | 全平台 | 经 `el:feTurbulence` |
-| `concept:filter-performance-caveats` | Performance of heavy primitives | 细节（父 `concept:filter-device-pixel-resolution`） | SVG 2 | 全平台 | four-colour-press-check |
-| `concept:lighting-plus-turbulence-bump` | Lighting a noise bump map | 细节（父 `concept:lighting-alpha-bump-map`） | SVG 1.1 | 全平台 | 经 `concept:lighting-alpha-bump-map` |
-| `concept:morphology-thicken-text` | Faux-bold / thin text | 细节（父 `at:feMorphology.operator`） | SVG 1.1 | 全平台 | neon-sign-workshop |
-| `concept:morphology-zero-radius` | Zero / negative radius behaviour | 细节（父 `at:feMorphology.radius`） | SVG 2 | 部分支持 | neon-sign-workshop |
-| `concept:primitive-units-lighting-coordinates` | primitiveUnits objectBoundingBox with lights | 细节（父 `el:fePointLight`） | SVG 1.1 | 部分支持 | forge-metallography-bench |
-| `concept:rough-sketch-edges` | Hand-drawn rough edges | 细节（父 `el:feDisplacementMap`） | SVG 1.1 | 全平台 | 经 `el:feDisplacementMap` |
-| `concept:single-light-source-child` | Exactly one light-source child per lighting primitive | 细节（父 `el:feDiffuseLighting`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `concept:smil-animate-displacement-scale` | Animating displacement scale | 细节（父 `at:feDisplacementMap.scale`） | SMIL | 全平台 | mycelium-culture-chamber |
-| `concept:smil-animate-morphology-radius` | Animating morphology radius | 细节（父 `at:feMorphology.radius`） | SMIL | 全平台 | neon-sign-workshop |
-| `concept:specular-composite-add` | Adding specular result to source | 细节（父 `el:feSpecularLighting`） | SVG 1.1 | 全平台 | forge-metallography-bench |
-| `concept:turbulence-color-channels` | Independent RGBA noise channels | 细节（父 `el:feTurbulence`） | SVG 1.1 | 全平台 | 经 `el:feTurbulence` |
-| `concept:turbulence-fills-filter-region` | Turbulence has no input; fills subregion | 细节（父 `el:feTurbulence`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
-| `concept:turbulence-linearrgb-darkening` | Noise brightness vs color-interpolation-filters | 细节（父 `el:feTurbulence`） | SVG 1.1 | 全平台 | 经 `el:feTurbulence` |
-| `concept:turbulence-zoom-stability` | Noise granularity under zoom / DPR | 细节（父 `concept:filter-device-pixel-resolution`） | SVG 1.1 | 部分支持 | 经 `concept:filter-device-pixel-resolution` |
-| `concept:wood-marble-texture` | Wood grain / marble veins | 细节（父 `at:feTurbulence.baseFrequency`） | SVG 1.1 | 全平台 | mycelium-culture-chamber |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `api:SVGAnimatedTransformList.baseVal` | element.transform.baseVal list manipulation | core | broad | seismic-drum-console |
+| `av:svg.preserveAspectRatio=slice` | meetOrSlice = slice (cover and crop) | core | broad | seismic-drum-console |
+| `concept:hairline-stroke-rendering` | Sub-device-pixel strokes and zero width under downscale | core | broad | guilloche-intaglio-plate |
+| `concept:half-pixel-crisp-alignment` | translate(0.5 0.5) for crisp 1px lines | core | broad | four-colour-press-check |
+| `concept:isometric-projection-matrix` | Isometric / axonometric projection via matrix() | core | broad | ship-lofting-floor |
+| `concept:length-units-absolute` | Absolute units px, mm, cm, in, pt, pc at 96 dpi | core | broad | ship-lofting-floor |
+| `concept:length-units-font-relative` | em and rem lengths on geometry | core | broad | letterpress-type-specimen |
+| `concept:mouse-to-svg-coordinates` | Screen to user space via getScreenCTM().inverse() and DOMPoint | core | broad | ship-lofting-floor, four-colour-press-check, seismic-drum-console |
+| `concept:nearest-viewport-percentage-resolution` | Percentages resolve against the nearest viewport, not the root | core | broad | seismic-drum-console |
+| `concept:negative-scale-mirroring` | Mirroring with negative scale | core | broad | ship-lofting-floor |
+| `concept:nested-group-ctm-accumulation` | Nested <g> transforms accumulate into the CTM | core | broad | guilloche-intaglio-plate |
+| `concept:nested-svg-viewport` | Nested <svg> with x/y/width/height and its own viewBox | core | broad | seismic-drum-console |
+| `concept:objectboundingbox-unit-skew` | objectBoundingBox units stretch with non-square bounding boxes | core | broad | jacquard-loom-draft |
+| `concept:percentage-diagonal-formula` | Non-axis percentages use the normalized diagonal sqrt((w²+h²)/2) | core | broad | seismic-drum-console |
+| `concept:stroke-scales-with-ctm` | Stroke width and dashes scale with the transform | core | broad | guilloche-intaglio-plate |
+| `concept:transform-list-composition-order` | Transform list composition order (right-to-left application) | core | broad | guilloche-intaglio-plate |
+| `concept:viewbox-camera-pan` | viewBox min-x / min-y as camera offset | core | broad | seismic-drum-console |
+| `concept:viewbox-camera-zoom` | Smaller viewBox magnifies (zoom in), larger shrinks (zoom out) | core | broad | seismic-drum-console |
+| `concept:viewbox-negative-origin` | Negative viewBox origin centring (0,0) in the viewport | core | broad | seismic-drum-console |
+| `concept:y-down-clockwise-angles` | y axis points down, positive angles rotate clockwise | core | broad | celestial-astrolabe-cabinet |
+| `css:individual-transform-properties` | CSS translate / rotate / scale properties on SVG elements | core | broad | guilloche-intaglio-plate |
+| `css:transform-cascade-precedence` | CSS transform overrides the transform attribute (presentation attribute specificity zero) | core | broad | guilloche-intaglio-plate |
+| `css:transform-transition-animation` | CSS transitions and @keyframes animating transform on SVG elements | core | broad | guilloche-intaglio-plate |
+| `pv:transform=matrix` | matrix(a b c d e f) general affine | core | broad | ship-lofting-floor |
+| `pv:transform=rotate` | rotate(angle) about the origin | core | broad | escapement-chronometer |
+| `pv:transform=rotate-cx-cy` | rotate(angle cx cy) three-argument form | core | broad | celestial-astrolabe-cabinet |
+| `pv:transform=scale` | scale(sx sy) | core | broad | guilloche-intaglio-plate |
+| `pv:transform=skewX` | skewX(angle) | core | broad | pipeline-mimic-board |
+| `pv:transform=skewY` | skewY(angle) | core | broad | pipeline-mimic-board |
+| `pv:transform=translate` | translate(tx ty) | core | broad | guilloche-intaglio-plate |
+| `api:DOMMatrixReadOnly.inverse` | DOMMatrix inverse / multiply / rotate / scale helpers | detail / `concept:mouse-to-svg-coordinates` | broad | seismic-drum-console |
+| `api:SVGSVGElement.createSVGMatrix` | createSVGMatrix / createSVGTransform / createSVGPoint legacy factories | detail / `api:SVGAnimatedTransformList.baseVal` | deprecated | seismic-drum-console |
+| `api:SVGTransformList.consolidate` | SVGTransformList.consolidate() collapses list into one matrix | detail / `api:SVGAnimatedTransformList.baseVal` | broad | seismic-drum-console |
+| `av:svg.preserveAspectRatio=defer` | preserveAspectRatio defer keyword removed | detail / `at:svg.preserveAspectRatio` | deprecated | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `av:svg.preserveAspectRatio=xMinYMin` | Alignment keywords xMin/xMid/xMax x YMin/YMid/YMax | detail / `at:svg.preserveAspectRatio` | broad | celestial-astrolabe-cabinet (via at:svg.preserveAspectRatio) |
+| `concept:bounding-box-algorithm` | Normative bounding box algorithm and objectBoundingBox | detail / `api:SVGGraphicsElement.getBBox` | broad | letterpress-type-specimen (via api:SVGGraphicsElement.getBBox) |
+| `concept:css-transform-on-pattern-gradient` | CSS transform on pattern and gradient elements | detail / `at:pattern.patternTransform` | partial | jacquard-loom-draft (via at:pattern.patternTransform), four-colour-press-check (via at:pattern.patternTransform) |
+| `concept:css-units-in-attributes` | CSS-only units (vw, vh, ch, Q) in geometry attributes | detail / `concept:length-units-absolute` | partial | ship-lofting-floor (via concept:length-units-absolute) |
+| `concept:filter-region-rotates-with-transform` | Filter primitives operate in the element's transformed user space | detail / `concept:nested-group-ctm-accumulation` | broad | guilloche-intaglio-plate (via concept:nested-group-ctm-accumulation) |
+| `concept:invalid-transform-attribute-ignored` | Parse error discards the whole transform attribute | detail / `pr:transform` | broad | guilloche-intaglio-plate |
+| `concept:invalid-viewbox-disables-rendering` | Zero or negative viewBox width/height disables rendering | detail / `at:svg.viewBox` | broad | celestial-astrolabe-cabinet (via at:svg.viewBox) |
+| `concept:large-coordinate-precision` | Floating-point precision loss with huge coordinates and tiny scales | detail / `concept:hairline-stroke-rendering` | partial | guilloche-intaglio-plate (via concept:hairline-stroke-rendering) |
+| `concept:nested-svg-transform-attribute` | transform on a nested <svg> element | detail / `at:svg.transform` | partial | celestial-astrolabe-cabinet (via at:svg.transform) |
+| `concept:non-uniform-scale-stroke-distortion` | Non-uniform scale turns the stroke pen into an ellipse | detail / `concept:stroke-scales-with-ctm` | broad | guilloche-intaglio-plate |
+| `concept:scale-about-point` | Scaling about a point via translate-scale-translate | detail / `pv:transform=scale` | broad | guilloche-intaglio-plate |
+| `concept:singular-transform-matrix` | Non-invertible transform (scale(0), degenerate matrix) | detail / `pv:transform=scale` | broad | guilloche-intaglio-plate (via pv:transform=scale) |
+| `concept:transform-attribute-syntax` | Attribute syntax: optional commas/whitespace, unitless numbers, degrees implied | detail / `pr:transform` | broad | guilloche-intaglio-plate (via pr:transform) |
+| `concept:transform-on-tspan-ignored` | transform on <tspan> is ignored | detail / `pr:transform` | none | guilloche-intaglio-plate (via pr:transform) |
+| `concept:transform-origin-default-svg-vs-html` | Default transform-origin is 0 0 for SVG content, 50% 50% for HTML | detail / `pr:transform-origin` | broad | guilloche-intaglio-plate (via pr:transform-origin) |
+| `concept:translate-vs-xy-positioning` | translate() versus x/y attributes for positioning | detail / `pv:transform=translate` | broad | guilloche-intaglio-plate (via pv:transform=translate) |
+| `concept:unitless-length-in-css` | Unitless numbers accepted for SVG properties in CSS | detail / `concept:length-units-absolute` | broad | ship-lofting-floor (via concept:length-units-absolute) |
+| `concept:units-inside-viewbox-scaled` | Physical units inside a viewBox are converted then rescaled | detail / `concept:length-units-absolute` | broad | ship-lofting-floor |
+| `concept:use-xy-appended-translate` | <use> x/y is an extra translate applied after its transform | detail / `concept:transform-list-composition-order` | broad | guilloche-intaglio-plate (via concept:transform-list-composition-order) |
+| `concept:viewbox-intrinsic-aspect-ratio` | viewBox-only root svg sizes responsively via intrinsic aspect ratio | detail / `at:svg.viewBox` | broad | celestial-astrolabe-cabinet (via at:svg.viewBox) |
+| `css:transform-3d-on-svg` | 3D transforms (rotateX/rotateY/perspective) on inner SVG elements | detail / `css:individual-transform-properties` | partial | guilloche-intaglio-plate (via css:individual-transform-properties) |
+| `css:transform-attribute-css-syntax` | CSS units and functions in the transform attribute | detail / `css:transform-cascade-precedence` | partial | guilloche-intaglio-plate (via css:transform-cascade-precedence) |
+| `css:transform-on-inline-svg-root` | CSS transform on the inline <svg> root behaves like an HTML box | detail / `at:svg.transform` | broad | celestial-astrolabe-cabinet (via at:svg.transform) |
+| `css:transform-syntax-differences` | CSS transform requires units (px, deg) and single-angle rotate | detail / `css:transform-cascade-precedence` | broad | guilloche-intaglio-plate (via css:transform-cascade-precedence) |
+| `css:zoom` | CSS zoom property on SVG content | detail / `at:svg.transform` | partial | celestial-astrolabe-cabinet (via at:svg.transform) |
+| `pv:transform-box=content-box` | transform-box: content-box / border-box on SVG elements | detail / `pr:transform-box` | broad | guilloche-intaglio-plate (via pr:transform-box) |
 
-### SMIL 动画（`smil`，核心 44 项 / 细节 63 项）
+### 交互与无障碍
 
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:SVGAnimationElement.beginElement` | beginElement() scripted start/restart | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGSVGElement.pauseAnimations` | pauseAnimations() | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGSVGElement.setCurrentTime` | setCurrentTime() timeline scrubbing | 核心 | SVG 1.1 | 全平台 | ★escapement-chronometer |
-| `at:animate.begin` | begin attribute (start time list) | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.by` | by relative delta animation | 核心 | SMIL | 全平台 | mycelium-culture-chamber |
-| `at:animate.dur` | dur simple duration | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.end` | end attribute (event, syncbase or offset) | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.from` | from/to pair | 核心 | SMIL | 全平台 | core-sample-stratigraphy |
-| `at:animate.href` | href targeting a non-parent element | 核心 | SVG 2 | 全平台 | escapement-chronometer |
-| `at:animate.keySplines` | keySplines cubic-Bezier easing per segment | 核心 | SMIL | 全平台 | ★escapement-chronometer |
-| `at:animate.keyTimes` | keyTimes pacing of values | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.repeatCount` | repeatCount (number or indefinite) | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.restart` | restart (always / whenNotActive / never) | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.values` | values list (multi-keyframe) | 核心 | SMIL | 全平台 | auroral-spectrograph |
-| `at:animateMotion.keyPoints` | animateMotion keyPoints with keyTimes | 核心 | SVG 1.1 | 全平台 | ★escapement-chronometer |
-| `at:animateMotion.path` | animateMotion inline path attribute | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `av:animate.accumulate=sum` | accumulate sum across repeats | 核心 | SMIL | 全平台 | ★mycelium-culture-chamber |
-| `av:animate.additive=sum` | additive sum on attribute animations | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `av:animate.begin=event` | event-based begin (click, mouseover, focusin, id.event) | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `av:animate.begin=indefinite` | begin indefinite (script-only start) | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `av:animate.begin=syncbase` | syncbase begin id.begin / id.end + offset | 核心 | SMIL | 全平台 | ★escapement-chronometer |
-| `av:animate.calcMode=discrete` | calcMode discrete (frame flipping) | 核心 | SMIL | 全平台 | escapement-chronometer |
-| `av:animate.calcMode=paced` | calcMode paced (constant velocity) | 核心 | SMIL | 全平台 | forge-metallography-bench |
-| `av:animate.fill=freeze` | fill freeze (hold end value) | 核心 | SMIL | 全平台 | core-sample-stratigraphy |
-| `av:animateMotion.rotate=auto` | animateMotion rotate auto | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `av:animateTransform.additive=sum` | stacked animateTransforms with additive=sum | 核心 | SVG 1.1 | 全平台 | ★escapement-chronometer |
-| `av:animateTransform.type=rotate` | animateTransform type rotate (angle cx cy) | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `concept:animate-color` | colour interpolation of fill/stroke/stop-color | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:animate-filter-basefrequency` | animating feTurbulence baseFrequency | 核心 | SVG 1.1 | 全平台 | ★mycelium-culture-chamber |
-| `concept:animate-filter-stddeviation` | animating feGaussianBlur stdDeviation | 核心 | SVG 1.1 | 全平台 | ★neon-sign-workshop |
-| `concept:animate-gradient-stop` | animating gradient stops and vector | 核心 | SVG 1.1 | 全平台 | auroral-spectrograph |
-| `concept:animate-in-use-shadow-tree` | animations inside use-instanced content | 核心 | SVG 1.1 | 部分支持 | celestial-astrolabe-cabinet |
-| `concept:animate-path-d-morph` | path d morphing with matching commands | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:animate-text-attributes` | animating text x/dx/rotate/font-size/textLength/startOffset | 核心 | SVG 1.1 | 全平台 | stele-rubbing-hall |
-| `concept:animate-use-href` | animating href of use (symbol swap) | 核心 | SVG 2 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:animate-viewbox` | animating viewBox (camera pan/zoom) | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `concept:smil-2026-support-status` | SMIL browser support status 2026 | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `concept:smil-events` | beginEvent / endEvent / repeatEvent DOM events | 核心 | SVG 1.1 | 全平台 | ★escapement-chronometer |
-| `el:animate` | animate element | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `el:animateMotion` | animateMotion element | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `el:animateTransform` | animateTransform element | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `el:discard` | discard element (remove element at time) | 核心 | SVG 2 | 部分支持 | escapement-chronometer |
-| `el:mpath` | mpath (reference an existing path for motion) | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `el:set` | set element (discrete value switch) | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGAnimatedLength.animVal` | animVal vs baseVal while animating | 细节（父 `el:animate`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGAnimationElement.beginElementAt` | beginElementAt(offset) | 细节（父 `api:SVGAnimationElement.beginElement`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGAnimationElement.endElement` | endElement() scripted stop | 细节（父 `api:SVGAnimationElement.beginElement`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGAnimationElement.getCurrentTime` | SVGAnimationElement.getCurrentTime() | 细节（父 `api:SVGAnimationElement.beginElement`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGAnimationElement.getSimpleDuration` | getSimpleDuration() | 细节（父 `api:SVGAnimationElement.beginElement`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGAnimationElement.getStartTime` | getStartTime() | 细节（父 `api:SVGAnimationElement.beginElement`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGAnimationElement.targetElement` | targetElement property | 细节（父 `api:SVGAnimationElement.beginElement`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGSVGElement.animationsPaused` | animationsPaused() | 细节（父 `api:SVGSVGElement.pauseAnimations`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGSVGElement.getCurrentTime` | SVGSVGElement.getCurrentTime() document time | 细节（父 `api:SVGSVGElement.setCurrentTime`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:SVGSVGElement.unpauseAnimations` | unpauseAnimations() | 细节（父 `api:SVGSVGElement.pauseAnimations`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `api:TimeEvent` | TimeEvent interface (detail) | 细节（父 `concept:smil-events`） | Deprecated | 已废弃 | escapement-chronometer |
-| `at:animate.attributeName` | attributeName target attribute/property | 细节（父 `el:animate`） | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.attributeType` | attributeType CSS / XML / auto | 细节（父 `el:animate`） | Deprecated | 已废弃 | escapement-chronometer |
-| `at:animate.max` | max active duration | 细节（父 `at:animate.dur`） | SMIL | 部分支持 | 经 `at:animate.dur` |
-| `at:animate.min` | min active duration | 细节（父 `at:animate.dur`） | SMIL | 部分支持 | 经 `at:animate.dur` |
-| `at:animate.onbegin` | onbegin/onend/onrepeat event attributes | 细节（父 `concept:smil-events`） | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.repeatDur` | repeatDur total repeat time | 细节（父 `at:animate.repeatCount`） | SMIL | 全平台 | escapement-chronometer |
-| `at:animate.to` | to-only animation (blend from base value) | 细节（父 `at:animate.from`） | SMIL | 全平台 | core-sample-stratigraphy |
-| `at:animateMotion.origin` | animateMotion origin attribute | 细节（父 `el:animateMotion`） | SMIL | 未实现 | 经 `el:animateMotion` |
-| `at:animateTransform.type` | animateTransform type selector | 细节（父 `el:animateTransform`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `at:discard.begin` | discard begin time | 细节（父 `el:discard`） | SVG 2 | 部分支持 | escapement-chronometer |
-| `at:discard.href` | discard href target | 细节（父 `el:discard`） | SVG 2 | 部分支持 | escapement-chronometer |
-| `at:mpath.href` | mpath href | 细节（父 `el:mpath`） | SVG 2 | 全平台 | escapement-chronometer |
-| `at:set.to` | set to value | 细节（父 `el:set`） | SMIL | 全平台 | escapement-chronometer |
-| `at:svg.timelinebegin` | timelinebegin | 细节（父 `api:SVGSVGElement.setCurrentTime`） | SVG 2 | 未实现 | 经 `api:SVGSVGElement.setCurrentTime` |
-| `av:animate.begin=accessKey` | accessKey(key) begin | 细节（父 `at:animate.begin`） | SMIL | 部分支持 | 经 `at:animate.begin` |
-| `av:animate.begin=negative-offset` | negative begin offset (start mid-way) | 细节（父 `at:animate.begin`） | SMIL | 全平台 | 经 `at:animate.begin` |
-| `av:animate.begin=offset` | begin clock-value offset | 细节（父 `at:animate.begin`） | SMIL | 全平台 | escapement-chronometer |
-| `av:animate.begin=repeat` | syncbase on repeat iteration id.repeat(n) | 细节（父 `at:animate.begin`） | SMIL | 部分支持 | escapement-chronometer |
-| `av:animate.begin=wallclock` | wallclock() begin | 细节（父 `at:animate.begin`） | SMIL | 未实现 | 经 `at:animate.begin` |
-| `av:animate.calcMode=linear` | calcMode linear (default) | 细节（父 `at:animate.values`） | SMIL | 全平台 | 经 `at:animate.values` |
-| `av:animate.calcMode=spline` | calcMode spline | 细节（父 `at:animate.keySplines`） | SMIL | 全平台 | escapement-chronometer |
-| `av:animate.dur=media` | dur media | 细节（父 `at:animate.dur`） | SMIL | 未实现 | 经 `at:animate.dur` |
-| `av:animate.fill=remove` | fill remove (default snap-back) | 细节（父 `av:animate.fill=freeze`） | SMIL | 全平台 | core-sample-stratigraphy |
-| `av:animate.repeatCount=indefinite` | repeatCount indefinite | 细节（父 `at:animate.repeatCount`） | SMIL | 全平台 | escapement-chronometer |
-| `av:animate.restart=never` | restart never | 细节（父 `at:animate.restart`） | SMIL | 全平台 | escapement-chronometer |
-| `av:animate.restart=whenNotActive` | restart whenNotActive | 细节（父 `at:animate.restart`） | SMIL | 全平台 | escapement-chronometer |
-| `av:animateMotion.rotate=angle` | animateMotion fixed rotate angle | 细节（父 `av:animateMotion.rotate=auto`） | SVG 1.1 | 全平台 | 经 `av:animateMotion.rotate=auto` |
-| `av:animateMotion.rotate=auto-reverse` | animateMotion rotate auto-reverse | 细节（父 `av:animateMotion.rotate=auto`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `av:animateTransform.accumulate=sum` | animateTransform accumulate across repeats | 细节（父 `av:animate.accumulate=sum`） | SVG 1.1 | 全平台 | 经 `av:animate.accumulate=sum` |
-| `av:animateTransform.type=scale` | animateTransform type scale | 细节（父 `el:animateTransform`） | SVG 1.1 | 全平台 | 经 `el:animateTransform` |
-| `av:animateTransform.type=skewX` | animateTransform type skewX | 细节（父 `el:animateTransform`） | SVG 1.1 | 全平台 | 经 `el:animateTransform` |
-| `av:animateTransform.type=skewY` | animateTransform type skewY | 细节（父 `el:animateTransform`） | SVG 1.1 | 全平台 | 经 `el:animateTransform` |
-| `av:animateTransform.type=translate` | animateTransform type translate | 细节（父 `el:animateTransform`） | SVG 1.1 | 全平台 | 经 `el:animateTransform` |
-| `concept:animate-light-position` | animating fePointLight/feSpotLight x y z | 细节（父 `concept:animate-filter-stddeviation`） | SVG 1.1 | 全平台 | 经 `concept:animate-filter-stddeviation` |
-| `concept:animate-path-d-mismatch-discrete` | d command mismatch falls back to discrete | 细节（父 `concept:animate-path-d-morph`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:animate-points` | animating polygon/polyline points | 细节（父 `concept:animate-path-d-morph`） | SVG 1.1 | 全平台 | 经 `concept:animate-path-d-morph` |
-| `concept:animate-transform-requires-animatetransform` | animate on transform is ignored; animateTransform required | 细节（父 `el:animateTransform`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `concept:animatemotion-paced-default` | animateMotion defaults to calcMode paced | 细节（父 `av:animate.calcMode=paced`） | SVG 1.1 | 全平台 | 经 `av:animate.calcMode=paced` |
-| `concept:animatemotion-transform-stacking` | motion transform composed after the transform attribute | 细节（父 `el:animateMotion`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `concept:animatemotion-values-coordinates` | animateMotion via from/to/values coordinate pairs | 细节（父 `el:animateMotion`） | SVG 1.1 | 全平台 | 经 `el:animateMotion` |
-| `concept:animatetransform-base-transform-preserved` | additive=sum keeps the static transform attribute | 细节（父 `av:animateTransform.additive=sum`） | SVG 1.1 | 全平台 | escapement-chronometer |
-| `concept:animation-sandwich-priority` | animation sandwich model (later animation wins) | 细节（父 `av:animate.additive=sum`） | SMIL | 全平台 | escapement-chronometer |
-| `concept:dynamic-animate-insertion` | script-inserted animation elements start running | 细节（父 `api:SVGAnimationElement.beginElement`） | SMIL | 全平台 | 经 `api:SVGAnimationElement.beginElement` |
-| `concept:multiple-begin-values` | semicolon-separated begin list | 细节（父 `at:animate.begin`） | SMIL | 全平台 | escapement-chronometer |
-| `concept:set-visibility-toggle` | set on visibility/display to show or hide at a time | 细节（父 `el:set`） | SMIL | 全平台 | escapement-chronometer |
-| `concept:smil-in-img` | SMIL runs inside img and CSS background | 细节（父 `concept:smil-2026-support-status`） | SVG 1.1 | 全平台 | 经 `concept:smil-2026-support-status` |
-| `concept:smil-in-resource-documents` | animations do not run in resource documents | 细节（父 `concept:smil-2026-support-status`） | SVG 2 | 全平台 | 经 `concept:smil-2026-support-status` |
-| `concept:smil-overrides-css` | SMIL animated value beats author CSS | 细节（父 `el:animate`） | SVG 2 | 部分支持 | escapement-chronometer |
-| `concept:view-element-animations` | animation elements inside view | 细节（父 `at:animate.begin`） | SVG 2 | 未实现 | 经 `at:animate.begin` |
-| `el:animateColor` | animateColor element | 细节（父 `concept:animate-color`） | Deprecated | 已废弃 | 经 `concept:animate-color` |
-| `el:animation` | nested SVG animation element (SVG Tiny 1.2) | 细节（父 `el:animate`） | Deprecated | 已废弃 | 经 `el:animate` |
-| `el:prefetch` | prefetch resource element (SVG Tiny 1.2) | 细节（父 `el:animate`） | Deprecated | 已废弃 | 经 `el:animate` |
-
-### CSS 动画、CSS 变换与脚本 API（`css-script`，核心 31 项 / 细节 50 项）
-
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:DOMMatrix` | DOMMatrix construction and multiplication | 核心 | DOM | 全平台 | ★seismic-drum-console |
-| `api:DOMPoint.matrixTransform` | DOMPoint.matrixTransform | 核心 | DOM | 全平台 | seismic-drum-console |
-| `api:Element.animate` | Web Animations API on SVG elements | 核心 | DOM | 全平台 | seismic-drum-console |
-| `api:IntersectionObserver.observe` | IntersectionObserver with SVG elements | 核心 | DOM | 全平台 | seismic-drum-console |
-| `api:ResizeObserver.observe` | ResizeObserver on SVG elements | 核心 | DOM | 全平台 | seismic-drum-console |
-| `api:SVGAnimatedRect.baseVal` | viewBox.baseVal scripted pan and zoom | 核心 | SVG 1.1 | 全平台 | ★seismic-drum-console |
-| `api:SVGElement.dataset` | dataset and data-* attributes on SVG elements | 核心 | SVG 2 | 全平台 | seismic-drum-console |
-| `api:SVGGraphicsElement.getCTM` | getCTM | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `api:SVGGraphicsElement.getScreenCTM` | getScreenCTM | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor, guilloche-intaglio-plate, four-colour-press-check, ★seismic-drum-console |
-| `api:SVGSVGElement.checkIntersection` | checkIntersection / checkEnclosure | 核心 | SVG 1.1 | 部分支持 | seismic-drum-console |
-| `api:SVGTransformList` | transform.baseVal SVGTransformList manipulation | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `api:Window.getComputedStyle` | Reading computed paint values | 核心 | DOM | 全平台 | letterpress-type-specimen |
-| `api:Window.requestAnimationFrame` | requestAnimationFrame-driven attribute updates | 核心 | DOM | 全平台 | ship-lofting-floor, ★seismic-drum-console |
-| `concept:pointer-to-user-space` | Mapping pointer coordinates to SVG user space | 核心 | DOM | 全平台 | seismic-drum-console |
-| `concept:presentation-attribute-cascade` | Presentation attribute vs CSS cascade precedence | 核心 | SVG 2 | 全平台 | letterpress-type-specimen |
-| `concept:svg-script-security-context` | Script execution context of embedded SVG | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:svg-to-canvas-rasterization` | Serialize SVG and draw to canvas / export PNG | 核心 | DOM | 全平台 | museum-label-panel |
-| `css:3d-transforms` | 3D transform functions on SVG elements | 核心 | CSS | 部分支持 | guilloche-intaglio-plate |
-| `css:animation-timeline-scroll` | Scroll-driven animations on SVG | 核心 | CSS | 部分支持 | seismic-drum-console |
-| `css:geometry-properties` | Geometry attributes as CSS properties (x, y, width, height, cx, cy, r, rx, ry) | 核心 | SVG 2 | 部分支持 | ship-lofting-floor |
-| `css:keyframes-on-svg` | CSS @keyframes on SVG presentation properties | 核心 | CSS | 全平台 | letterpress-type-specimen |
-| `css:keyframes-paint-animation` | CSS keyframe animation of fill, stroke, opacity, dashoffset | 核心 | CSS | 全平台 | letterpress-type-specimen |
-| `css:presentation-attribute-specificity` | Presentation attributes lose to any CSS rule | 核心 | SVG 1.1 | 全平台 | museum-label-panel, ★letterpress-type-specimen |
-| `css:transitions` | CSS transitions on SVG presentation properties | 核心 | CSS | 全平台 | letterpress-type-specimen |
-| `pr:offset-distance` | offset-distance | 核心 | CSS | 全平台 | seismic-drum-console |
-| `pr:offset-path` | offset-path: path() motion path | 核心 | CSS | 全平台 | ★seismic-drum-console |
-| `pr:offset-rotate` | offset-rotate auto / reverse / angle | 核心 | CSS | 全平台 | seismic-drum-console |
-| `pr:rotate` | Individual transform properties rotate / scale / translate | 核心 | CSS | 全平台 | guilloche-intaglio-plate |
-| `pr:transform` | CSS transform property on SVG elements | 核心 | CSS | 全平台 | guilloche-intaglio-plate |
-| `pr:transform-box` | transform-box reference box | 核心 | CSS | 全平台 | guilloche-intaglio-plate |
-| `pr:transform-origin` | transform-origin on SVG | 核心 | CSS | 全平台 | guilloche-intaglio-plate |
-| `api:Animation.playbackRate` | Animation object control (pause, reverse, playbackRate, currentTime) | 细节（父 `api:Element.animate`） | DOM | 全平台 | seismic-drum-console |
-| `api:CSSStyleDeclaration.fill` | Setting paint via element.style | 细节（父 `css:presentation-attribute-specificity`） | DOM | 全平台 | letterpress-type-specimen |
-| `api:Document.getAnimations` | document.getAnimations / element.getAnimations | 细节（父 `api:Element.animate`） | DOM | 全平台 | seismic-drum-console |
-| `api:Element.classList` | classList on SVG elements | 细节（父 `api:SVGAnimatedLength.baseVal`） | DOM | 全平台 | ship-lofting-floor |
-| `api:Element.getBoundingClientRect` | getBoundingClientRect on SVG elements | 细节（父 `api:SVGGraphicsElement.getBBox`） | DOM | 全平台 | 经 `api:SVGGraphicsElement.getBBox` |
-| `api:ElementCSSInlineStyle.style` | el.style inline property writes on SVG elements | 细节（父 `api:Window.getComputedStyle`） | DOM | 全平台 | 经 `api:Window.getComputedStyle` |
-| `api:SVGAnimatedString.baseVal` | href.baseVal / className.baseVal | 细节（父 `api:SVGAnimatedLength.baseVal`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `api:SVGAnimationElement.onbegin` | beginEvent / endEvent / repeatEvent listeners | 细节（父 `api:SVGAnimationElement.beginElement`） | SMIL | 全平台 | escapement-chronometer |
-| `api:SVGBoundingBoxOptions.stroke` | getBBox with SVGBoundingBoxOptions (fill/stroke/markers/clipped) | 细节（父 `api:SVGGraphicsElement.getBBox`） | SVG 2 | 部分支持 | letterpress-type-specimen |
-| `api:SVGElement.getPresentationAttribute` | getPresentationAttribute, SVGPaint, SVGColor removed | 细节（父 `api:Window.getComputedStyle`） | Deprecated | 已废弃 | letterpress-type-specimen |
-| `api:SVGElementInstance` | SVGElementInstance / SVGElementInstanceList removed | 细节（父 `el:script`） | Deprecated | 已废弃 | 经 `el:script` |
-| `api:SVGGraphicsElement.getTransformToElement` | getTransformToElement removed | 细节（父 `api:SVGGraphicsElement.getCTM`） | Deprecated | 已废弃 | 经 `api:SVGGraphicsElement.getCTM` |
-| `api:SVGGraphicsElement.nearestViewportElement` | nearestViewportElement / farthestViewportElement | 细节（父 `api:SVGGraphicsElement.getCTM`） | Deprecated | 已废弃 | seismic-drum-console |
-| `api:SVGLength.convertToSpecifiedUnits` | SVGLength unit conversion | 细节（父 `api:SVGAnimatedLength.baseVal`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `api:SVGMatrix` | SVGMatrix / SVGPoint / SVGRect legacy interfaces | 细节（父 `api:DOMMatrix`） | Deprecated | 已废弃 | seismic-drum-console |
-| `api:SVGSVGElement.createSVGPoint` | createSVGPoint / createSVGMatrix / createSVGLength legacy factories | 细节（父 `api:DOMPoint.matrixTransform`） | SVG 1.1 | 全平台 | seismic-drum-console |
-| `api:SVGSVGElement.createSVGRect` | createSVGRect | 细节（父 `api:SVGSVGElement.checkIntersection`） | SVG 1.1 | 全平台 | seismic-drum-console |
-| `api:SVGSVGElement.createSVGTransformFromMatrix` | createSVGTransform / createSVGTransformFromMatrix | 细节（父 `api:SVGTransformList`） | SVG 1.1 | 全平台 | seismic-drum-console |
-| `api:SVGSVGElement.currentView` | currentView / useCurrentView / SVGViewSpec / pixelUnitToMillimeterX | 细节（父 `api:SVGSVGElement.currentScale`） | Deprecated | 已废弃 | 经 `api:SVGSVGElement.currentScale` |
-| `api:SVGSVGElement.suspendRedraw` | suspendRedraw / unsuspendRedraw / forceRedraw / deselectAll | 细节（父 `api:Window.requestAnimationFrame`） | Deprecated | 已废弃 | 经 `api:Window.requestAnimationFrame` |
-| `api:SVGTransform.setRotate` | SVGTransform setRotate / setTranslate / setScale / setMatrix | 细节（父 `api:SVGTransformList`） | SVG 1.1 | 全平台 | seismic-drum-console |
-| `api:SVGUnknownElement` | SVGUnknownElement interface | 细节（父 `api:Document.createElementNS`） | SVG 2 | 未实现 | mycelium-culture-chamber |
-| `api:SVGZoomEvent` | SVGZoomEvent removed | 细节（父 `api:SVGSVGElement.currentScale`） | Deprecated | 已废弃 | 经 `api:SVGSVGElement.currentScale` |
-| `at:script.crossorigin` | script crossorigin | 细节（父 `el:script`） | SVG 2 | 全平台 | 经 `el:script` |
-| `at:style.type` | style element type | 细节（父 `el:style`） | SVG 1.1 | 全平台 | letterpress-type-specimen |
-| `at:svg.contentStyleType` | contentStyleType | 细节（父 `el:style`） | Deprecated | 已废弃 | 经 `el:style` |
-| `av:script.type=module` | module scripts in SVG | 细节（父 `el:script`） | SVG 2 | 部分支持 | 经 `el:script` |
-| `concept:animation-in-img-context` | CSS/SMIL animations run inside img but scripts do not | 细节（父 `concept:svg-script-security-context`） | SVG 2 | 全平台 | museum-label-panel |
-| `concept:cross-document-svg-scripting` | Scripting an embedded SVG via contentDocument | 细节（父 `concept:svg-script-security-context`） | DOM | 全平台 | museum-label-panel |
-| `concept:getbbox-unrendered-element` | getBBox on display:none or detached elements | 细节（父 `api:SVGGraphicsElement.getBBox`） | SVG 2 | 全平台 | 经 `api:SVGGraphicsElement.getBBox` |
-| `concept:innerhtml-svg-parsing` | innerHTML / insertAdjacentHTML inside an svg element | 细节（父 `api:Document.createElementNS`） | DOM | 全平台 | 经 `api:Document.createElementNS` |
-| `concept:presentation-attributes-any-element` | Presentation attributes allowed on any SVG element | 细节（父 `concept:presentation-attribute-cascade`） | SVG 2 | 全平台 | 经 `concept:presentation-attribute-cascade` |
-| `concept:transform-attribute-css-syntax` | CSS unit syntax inside transform attribute | 细节（父 `pr:transform`） | SVG 2 | 部分支持 | guilloche-intaglio-plate |
-| `concept:waapi-non-css-attribute-animation` | WAAPI cannot animate non-CSS SVG attributes | 细节（父 `api:Element.animate`） | DOM | 未实现 | seismic-drum-console |
-| `concept:xlink-namespace-setattribute` | setAttributeNS with the xlink namespace for href | 细节（父 `api:Document.createElementNS`） | Deprecated | 已废弃 | 经 `api:Document.createElementNS` |
-| `css:animating-stop-color` | CSS animation of gradient stops inside defs | 细节（父 `css:keyframes-on-svg`） | CSS | 全平台 | 经 `css:keyframes-on-svg` |
-| `css:animation-composition` | animation-composition add / accumulate | 细节（父 `css:keyframes-on-svg`） | CSS | 全平台 | 经 `css:keyframes-on-svg` |
-| `css:hover-fill-transition` | :hover state with fill/stroke transition | 细节（父 `css:keyframes-paint-animation`） | CSS | 全平台 | 经 `css:keyframes-paint-animation` |
-| `css:property-registered-animation` | @property registered custom property animation | 细节（父 `css:custom-properties`） | CSS | 全平台 | museum-label-panel |
-| `css:starting-style` | @starting-style entry transitions | 细节（父 `css:transitions`） | CSS | 全平台 | 经 `css:transitions` |
-| `css:transition-behavior-allow-discrete` | transition-behavior: allow-discrete | 细节（父 `css:transitions`） | CSS | 全平台 | 经 `css:transitions` |
-| `pr:offset-anchor` | offset-anchor | 细节（父 `pr:offset-path`） | CSS | 全平台 | 经 `pr:offset-path` |
-| `pr:offset-position` | offset-position | 细节（父 `pr:offset-path`） | CSS | 部分支持 | 经 `pr:offset-path` |
-| `pr:perspective` | perspective on SVG children | 细节（父 `css:3d-transforms`） | CSS | 部分支持 | guilloche-intaglio-plate |
-| `pv:offset-path=ray` | offset-path: ray() | 细节（父 `pr:offset-path`） | CSS | 部分支持 | 经 `pr:offset-path` |
-| `pv:offset-path=url` | offset-path: url(#shape) and basic shapes with coord-box | 细节（父 `pr:offset-path`） | CSS | 部分支持 | 经 `pr:offset-path` |
-| `pv:transform-box=fill-box` | transform-box: fill-box | 细节（父 `pr:transform-box`） | CSS | 全平台 | guilloche-intaglio-plate |
-| `pv:transform-box=stroke-box` | transform-box: stroke-box | 细节（父 `pr:transform-box`） | CSS | 部分支持 | guilloche-intaglio-plate |
-| `pv:transform-box=view-box` | transform-box: view-box (default) | 细节（父 `pr:transform-box`） | CSS | 全平台 | guilloche-intaglio-plate |
-| `pv:transform-style=preserve-3d` | transform-style: preserve-3d inside SVG | 细节（父 `css:3d-transforms`） | CSS | 未实现 | 经 `css:3d-transforms` |
-
-### 变换与坐标系（`transforms`，核心 30 项 / 细节 30 项）
-
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:SVGAnimatedTransformList.baseVal` | element.transform.baseVal list manipulation | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `av:svg.preserveAspectRatio=slice` | meetOrSlice = slice (cover and crop) | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `concept:hairline-stroke-rendering` | Sub-device-pixel strokes and zero width under downscale | 核心 | SVG 1.1 | 全平台 | ★guilloche-intaglio-plate |
-| `concept:half-pixel-crisp-alignment` | translate(0.5 0.5) for crisp 1px lines | 核心 | SVG 1.1 | 全平台 | four-colour-press-check |
-| `concept:isometric-projection-matrix` | Isometric / axonometric projection via matrix() | 核心 | SVG 1.1 | 全平台 | ★ship-lofting-floor |
-| `concept:length-units-absolute` | Absolute units px, mm, cm, in, pt, pc at 96 dpi | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:length-units-font-relative` | em and rem lengths on geometry | 核心 | SVG 2 | 全平台 | letterpress-type-specimen |
-| `concept:mouse-to-svg-coordinates` | Screen to user space via getScreenCTM().inverse() and DOMPoint | 核心 | DOM | 全平台 | ship-lofting-floor, four-colour-press-check, ★seismic-drum-console |
-| `concept:nearest-viewport-percentage-resolution` | Percentages resolve against the nearest viewport, not the root | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `concept:negative-scale-mirroring` | Mirroring with negative scale | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:nested-group-ctm-accumulation` | Nested <g> transforms accumulate into the CTM | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:nested-svg-viewport` | Nested <svg> with x/y/width/height and its own viewBox | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `concept:objectboundingbox-unit-skew` | objectBoundingBox units stretch with non-square bounding boxes | 核心 | SVG 1.1 | 全平台 | jacquard-loom-draft |
-| `concept:percentage-diagonal-formula` | Non-axis percentages use the normalized diagonal sqrt((w²+h²)/2) | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `concept:stroke-scales-with-ctm` | Stroke width and dashes scale with the transform | 核心 | SVG 1.1 | 全平台 | ★guilloche-intaglio-plate |
-| `concept:transform-list-composition-order` | Transform list composition order (right-to-left application) | 核心 | SVG 1.1 | 全平台 | ★guilloche-intaglio-plate |
-| `concept:viewbox-camera-pan` | viewBox min-x / min-y as camera offset | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `concept:viewbox-camera-zoom` | Smaller viewBox magnifies (zoom in), larger shrinks (zoom out) | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `concept:viewbox-negative-origin` | Negative viewBox origin centring (0,0) in the viewport | 核心 | SVG 1.1 | 全平台 | seismic-drum-console |
-| `concept:y-down-clockwise-angles` | y axis points down, positive angles rotate clockwise | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `css:individual-transform-properties` | CSS translate / rotate / scale properties on SVG elements | 核心 | CSS | 全平台 | guilloche-intaglio-plate |
-| `css:transform-cascade-precedence` | CSS transform overrides the transform attribute (presentation attribute specificity zero) | 核心 | SVG 2 | 全平台 | guilloche-intaglio-plate |
-| `css:transform-transition-animation` | CSS transitions and @keyframes animating transform on SVG elements | 核心 | CSS | 全平台 | guilloche-intaglio-plate |
-| `pv:transform=matrix` | matrix(a b c d e f) general affine | 核心 | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `pv:transform=rotate` | rotate(angle) about the origin | 核心 | SVG 1.1 | 全平台 | escapement-chronometer |
-| `pv:transform=rotate-cx-cy` | rotate(angle cx cy) three-argument form | 核心 | SVG 1.1 | 全平台 | celestial-astrolabe-cabinet |
-| `pv:transform=scale` | scale(sx sy) | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `pv:transform=skewX` | skewX(angle) | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `pv:transform=skewY` | skewY(angle) | 核心 | SVG 1.1 | 全平台 | pipeline-mimic-board |
-| `pv:transform=translate` | translate(tx ty) | 核心 | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `api:DOMMatrixReadOnly.inverse` | DOMMatrix inverse / multiply / rotate / scale helpers | 细节（父 `concept:mouse-to-svg-coordinates`） | DOM | 全平台 | seismic-drum-console |
-| `api:SVGSVGElement.createSVGMatrix` | createSVGMatrix / createSVGTransform / createSVGPoint legacy factories | 细节（父 `api:SVGAnimatedTransformList.baseVal`） | Deprecated | 已废弃 | seismic-drum-console |
-| `api:SVGTransformList.consolidate` | SVGTransformList.consolidate() collapses list into one matrix | 细节（父 `api:SVGAnimatedTransformList.baseVal`） | SVG 1.1 | 全平台 | seismic-drum-console |
-| `av:svg.preserveAspectRatio=defer` | preserveAspectRatio defer keyword removed | 细节（父 `at:svg.preserveAspectRatio`） | Deprecated | 已废弃 | 经 `at:svg.preserveAspectRatio` |
-| `av:svg.preserveAspectRatio=xMinYMin` | Alignment keywords xMin/xMid/xMax x YMin/YMid/YMax | 细节（父 `at:svg.preserveAspectRatio`） | SVG 1.1 | 全平台 | 经 `at:svg.preserveAspectRatio` |
-| `concept:bounding-box-algorithm` | Normative bounding box algorithm and objectBoundingBox | 细节（父 `api:SVGGraphicsElement.getBBox`） | SVG 2 | 全平台 | 经 `api:SVGGraphicsElement.getBBox` |
-| `concept:css-transform-on-pattern-gradient` | CSS transform on pattern and gradient elements | 细节（父 `at:pattern.patternTransform`） | SVG 2 | 部分支持 | 经 `at:pattern.patternTransform` |
-| `concept:css-units-in-attributes` | CSS-only units (vw, vh, ch, Q) in geometry attributes | 细节（父 `concept:length-units-absolute`） | SVG 2 | 部分支持 | 经 `concept:length-units-absolute` |
-| `concept:filter-region-rotates-with-transform` | Filter primitives operate in the element's transformed user space | 细节（父 `concept:nested-group-ctm-accumulation`） | SVG 1.1 | 全平台 | 经 `concept:nested-group-ctm-accumulation` |
-| `concept:invalid-transform-attribute-ignored` | Parse error discards the whole transform attribute | 细节（父 `pr:transform`） | SVG 2 | 全平台 | guilloche-intaglio-plate |
-| `concept:invalid-viewbox-disables-rendering` | Zero or negative viewBox width/height disables rendering | 细节（父 `at:svg.viewBox`） | SVG 1.1 | 全平台 | 经 `at:svg.viewBox` |
-| `concept:large-coordinate-precision` | Floating-point precision loss with huge coordinates and tiny scales | 细节（父 `concept:hairline-stroke-rendering`） | SVG 1.1 | 部分支持 | 经 `concept:hairline-stroke-rendering` |
-| `concept:nested-svg-transform-attribute` | transform on a nested <svg> element | 细节（父 `at:svg.transform`） | SVG 2 | 部分支持 | 经 `at:svg.transform` |
-| `concept:non-uniform-scale-stroke-distortion` | Non-uniform scale turns the stroke pen into an ellipse | 细节（父 `concept:stroke-scales-with-ctm`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:scale-about-point` | Scaling about a point via translate-scale-translate | 细节（父 `pv:transform=scale`） | SVG 1.1 | 全平台 | guilloche-intaglio-plate |
-| `concept:singular-transform-matrix` | Non-invertible transform (scale(0), degenerate matrix) | 细节（父 `pv:transform=scale`） | SVG 1.1 | 全平台 | 经 `pv:transform=scale` |
-| `concept:transform-attribute-syntax` | Attribute syntax: optional commas/whitespace, unitless numbers, degrees implied | 细节（父 `pr:transform`） | SVG 1.1 | 全平台 | 经 `pr:transform` |
-| `concept:transform-on-tspan-ignored` | transform on <tspan> is ignored | 细节（父 `pr:transform`） | SVG 2 | 未实现 | 经 `pr:transform` |
-| `concept:transform-origin-default-svg-vs-html` | Default transform-origin is 0 0 for SVG content, 50% 50% for HTML | 细节（父 `pr:transform-origin`） | CSS | 全平台 | 经 `pr:transform-origin` |
-| `concept:translate-vs-xy-positioning` | translate() versus x/y attributes for positioning | 细节（父 `pv:transform=translate`） | SVG 1.1 | 全平台 | 经 `pv:transform=translate` |
-| `concept:unitless-length-in-css` | Unitless numbers accepted for SVG properties in CSS | 细节（父 `concept:length-units-absolute`） | SVG 2 | 全平台 | 经 `concept:length-units-absolute` |
-| `concept:units-inside-viewbox-scaled` | Physical units inside a viewBox are converted then rescaled | 细节（父 `concept:length-units-absolute`） | SVG 1.1 | 全平台 | ship-lofting-floor |
-| `concept:use-xy-appended-translate` | <use> x/y is an extra translate applied after its transform | 细节（父 `concept:transform-list-composition-order`） | SVG 1.1 | 全平台 | 经 `concept:transform-list-composition-order` |
-| `concept:viewbox-intrinsic-aspect-ratio` | viewBox-only root svg sizes responsively via intrinsic aspect ratio | 细节（父 `at:svg.viewBox`） | CSS | 全平台 | 经 `at:svg.viewBox` |
-| `css:transform-3d-on-svg` | 3D transforms (rotateX/rotateY/perspective) on inner SVG elements | 细节（父 `css:individual-transform-properties`） | CSS | 部分支持 | 经 `css:individual-transform-properties` |
-| `css:transform-attribute-css-syntax` | CSS units and functions in the transform attribute | 细节（父 `css:transform-cascade-precedence`） | SVG 2 | 部分支持 | 经 `css:transform-cascade-precedence` |
-| `css:transform-on-inline-svg-root` | CSS transform on the inline <svg> root behaves like an HTML box | 细节（父 `at:svg.transform`） | CSS | 全平台 | 经 `at:svg.transform` |
-| `css:transform-syntax-differences` | CSS transform requires units (px, deg) and single-angle rotate | 细节（父 `css:transform-cascade-precedence`） | CSS | 全平台 | 经 `css:transform-cascade-precedence` |
-| `css:zoom` | CSS zoom property on SVG content | 细节（父 `at:svg.transform`） | CSS | 部分支持 | 经 `at:svg.transform` |
-| `pv:transform-box=content-box` | transform-box: content-box / border-box on SVG elements | 细节（父 `pr:transform-box`） | CSS | 全平台 | 经 `pr:transform-box` |
-
-### 交互与无障碍（`interaction`，核心 27 项 / 细节 53 项）
-
-| 特性键 | 名称 | 层级 | 规范 | 支持 | 演示 |
-|---|---|---|---|---|---|
-| `api:Element.setPointerCapture` | Element.setPointerCapture / releasePointerCapture / gotpointercapture | 核心 | DOM | 全平台 | forge-metallography-bench |
-| `api:SVGElement.focus` | SVGElement.focus() / blur() / tabIndex | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `at:svg.tabindex` | tabindex on SVG elements (root and shapes focusable) | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:aria-live` | aria-live region announcing SVG state changes | 核心 | SVG 2 | 全平台 | ★museum-label-panel |
-| `concept:drag-with-pointer-events` | Dragging shapes with pointerdown/move/up and translate updates | 核心 | DOM | 全平台 | forge-metallography-bench |
-| `concept:hit-test-invisible-stroke` | Invisible wide stroke enlarging hit area of thin lines | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:hit-test-transparent-fill` | fill=transparent vs fill=none hit-testing difference | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:keyboard-events` | keydown/keyup on focused SVG elements (arrow-key movement, Enter/Space activation) | 核心 | DOM | 全平台 | museum-label-panel |
-| `concept:mouse-events` | Mouse events on SVG elements (click, dblclick, mousedown/up/move, mouseover/out) | 核心 | DOM | 全平台 | forge-metallography-bench |
-| `concept:pointer-events-api` | Pointer events (pointerdown/move/up, pointerType, pressure) | 核心 | DOM | 全平台 | seismic-drum-console |
-| `concept:role-button-keyboard` | role=button + tabindex + Enter/Space handling on shapes (aria-pressed) | 核心 | SVG 2 | 全平台 | ★museum-label-panel |
-| `concept:role-group` | role=group / list / listitem on <g> structuring screen-reader navigation | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:screen-reader-reading-order` | Reading order follows DOM order, not visual position (aria-owns / reordering) | 核心 | SVG 2 | 全平台 | museum-label-panel |
-| `concept:touch-events` | Touch events (touchstart/move/end, TouchList) | 核心 | DOM | 部分支持 | seismic-drum-console |
-| `concept:use-shadow-event-retargeting` | Event retargeting: events inside <use> instances report the <use> as target | 核心 | SVG 2 | 全平台 | ★celestial-astrolabe-cabinet |
-| `concept:wheel-zoom` | wheel event driven zoom/pan of the viewBox | 核心 | DOM | 全平台 | ★seismic-drum-console |
-| `css:checked-sibling-toggle` | Checkbox/radio hack: input:checked ~ svg or :has(:checked) toggling SVG state | 核心 | CSS | 全平台 | museum-label-panel |
-| `css:focus` | :focus pseudo-class on SVG elements | 核心 | CSS | 全平台 | museum-label-panel |
-| `css:focus-visible` | :focus-visible (keyboard-only focus ring) | 核心 | CSS | 全平台 | museum-label-panel |
-| `css:has` | :has() relational selector for state propagation | 核心 | CSS | 全平台 | museum-label-panel |
-| `css:hover` | :hover on SVG elements and groups | 核心 | CSS | 全平台 | pipeline-mimic-board |
-| `css:target` | :target pseudo-class driven by URL fragment | 核心 | CSS | 全平台 | celestial-astrolabe-cabinet |
-| `css:user-select` | user-select and native text selection of SVG <text> | 核心 | CSS | 全平台 | stele-rubbing-hall |
-| `pr:pointer-events` | pointer-events property | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pr:touch-action` | touch-action on the <svg> viewport | 核心 | CSS | 全平台 | seismic-drum-console |
-| `pv:pointer-events=bounding-box` | pointer-events: bounding-box | 核心 | SVG 2 | 部分支持 | core-sample-stratigraphy |
-| `pv:pointer-events=none` | pointer-events: none (pass-through, inherited) | 核心 | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `api:Document.elementFromPoint` | document.elementFromPoint / elementsFromPoint on SVG content | 细节（父 `api:SVGGeometryElement.isPointInFill`） | DOM | 全平台 | 经 `api:SVGGeometryElement.isPointInFill` |
-| `api:MouseEvent.offsetX` | MouseEvent.offsetX/offsetY on SVG targets | 细节（父 `api:SVGGraphicsElement.getScreenCTM`） | DOM | 部分支持 | seismic-drum-console |
-| `api:PointerEvent.getCoalescedEvents` | PointerEvent.getCoalescedEvents / getPredictedEvents | 细节（父 `concept:pointer-events-api`） | DOM | 全平台 | seismic-drum-console |
-| `at:a.hreflang` | a hreflang / type link metadata | 细节（父 `el:a`） | SVG 2 | 全平台 | 经 `el:a` |
-| `at:a.ping` | a ping | 细节（父 `el:a`） | SVG 2 | 部分支持 | 经 `el:a` |
-| `at:a.referrerpolicy` | a referrerpolicy | 细节（父 `el:a`） | SVG 2 | 部分支持 | 经 `el:a` |
-| `at:a.xlink:href` | a xlink:href (legacy) | 细节（父 `el:a`） | Deprecated | 已废弃 | 经 `el:a` |
-| `at:svg.autofocus` | autofocus on SVG elements | 细节（父 `at:svg.tabindex`） | SVG 2 | 全平台 | 经 `at:svg.tabindex` |
-| `at:svg.onload` | onload on <svg> root (SVGLoad renamed to load) | 细节（父 `concept:mouse-events`） | SVG 1.1 | 全平台 | 经 `concept:mouse-events` |
-| `concept:clip-path-hit-testing` | clip-path removes clipped regions from hit testing; mask and opacity do not | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | 经 `pr:pointer-events` |
-| `concept:contextmenu-event` | contextmenu event (right-click) on SVG elements | 细节（父 `concept:mouse-events`） | DOM | 全平台 | 经 `concept:mouse-events` |
-| `concept:custom-tooltip` | Script-positioned SVG tooltip following the pointer | 细节（父 `el:title`） | DOM | 全平台 | museum-label-panel |
-| `concept:embedding-mode-interactivity` | Interactivity depends on embedding: <img>/CSS background inert, <object>/<iframe>/inline interactive | 细节（父 `concept:mouse-events`） | SVG 1.1 | 全平台 | 经 `concept:mouse-events` |
-| `concept:event-delegation-on-group` | Event bubbling and delegation on a parent <g> via event.target | 细节（父 `concept:mouse-events`） | DOM | 全平台 | forge-metallography-bench |
-| `concept:focus-events` | focus/blur/focusin/focusout on SVG elements (replacing DOMFocusIn/Out) | 细节（父 `at:svg.tabindex`） | DOM | 全平台 | museum-label-panel |
-| `concept:fragment-link-to-view` | In-document links to #id, <view> and svgView(viewBox()) fragments | 细节（父 `el:a`） | SVG 1.1 | 部分支持 | celestial-astrolabe-cabinet |
-| `concept:hidden-elements-hit-testing` | display:none removes from hit-testing; visibility:hidden depends on pointer-events value | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:hit-test-overlay-rect` | Transparent overlay rect capturing all events for a plot area | 细节（父 `concept:hit-test-transparent-fill`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `concept:hover-state-transition` | CSS transitions on presentation properties for hover/focus states | 细节（父 `css:hover`） | CSS | 全平台 | pipeline-mimic-board |
-| `concept:html-controls-via-foreignObject` | Keyboard-operable HTML controls inside <foreignObject> | 细节（父 `concept:role-button-keyboard`） | SVG 1.1 | 部分支持 | museum-label-panel |
-| `concept:html-drag-and-drop-on-svg` | HTML draggable / dragstart on SVG elements | 细节（父 `concept:drag-with-pointer-events`） | DOM | 部分支持 | 经 `concept:drag-with-pointer-events` |
-| `concept:inline-event-handler-attributes` | Inline on* event attributes (onclick, onmouseover, onkeydown) | 细节（父 `concept:mouse-events`） | SVG 1.1 | 全平台 | 经 `concept:mouse-events` |
-| `concept:markers-not-hittable` | Marker, pattern and gradient content never receive events | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | 经 `pr:pointer-events` |
-| `concept:mouseenter-vs-mouseover` | mouseenter/mouseleave vs bubbling mouseover/mouseout on nested groups | 细节（父 `concept:mouse-events`） | DOM | 全平台 | forge-metallography-bench |
-| `concept:multi-touch-gesture` | Multi-touch pinch-zoom / rotate with pointer or touch events | 细节（父 `concept:touch-events`） | DOM | 全平台 | seismic-drum-console |
-| `concept:nested-viewport-hit-clipping` | Content outside a nested <svg> viewport is not hittable | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | 经 `pr:pointer-events` |
-| `concept:role-graphics-document` | WAI-ARIA Graphics roles (graphics-document, graphics-object, graphics-symbol) | 细节（父 `concept:role-group`） | SVG 2 | 部分支持 | museum-label-panel |
-| `concept:role-slider` | role=slider / progressbar with aria-valuenow on SVG controls | 细节（父 `concept:role-button-keyboard`） | SVG 2 | 全平台 | 经 `concept:role-button-keyboard` |
-| `concept:svg-1.1-dom-events` | SVG 1.1 events (SVGZoom, SVGScroll, SVGResize, DOMActivate, DOMFocusIn, mutation events, onzoom) | 细节（父 `concept:mouse-events`） | Deprecated | 已废弃 | 经 `concept:mouse-events` |
-| `concept:tabindex-focus-order` | Focus order control (tabindex=0 DOM order, positive values, -1 script-only) | 细节（父 `at:svg.tabindex`） | SVG 2 | 全平台 | museum-label-panel |
-| `concept:text-hit-testing` | Text hit-testing by glyph cells, not bounding box or painted pixels | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | 经 `pr:pointer-events` |
-| `concept:text-link` | <a> inside <text> wrapping tspans | 细节（父 `el:a`） | SVG 1.1 | 全平台 | 经 `el:a` |
-| `css:active` | :active pressed state | 细节（父 `css:hover`） | CSS | 全平台 | pipeline-mimic-board |
-| `css:focus-within` | :focus-within on ancestor <g> | 细节（父 `css:focus`） | CSS | 全平台 | museum-label-panel |
-| `css:hover-inside-use` | :hover / :active styling of <use> instances and cloned children | 细节（父 `concept:use-shadow-event-retargeting`） | SVG 2 | 全平台 | celestial-astrolabe-cabinet |
-| `css:link-pseudo` | :link / :any-link / :visited on SVG <a> | 细节（父 `el:a`） | CSS | 部分支持 | 经 `el:a` |
-| `css:media-hover-pointer` | @media (hover) / (pointer: coarse) adaptive hit targets | 细节（父 `concept:hit-test-invisible-stroke`） | CSS | 全平台 | 经 `concept:hit-test-invisible-stroke` |
-| `css:outline` | outline / outline-offset on SVG shapes for focus rings | 细节（父 `css:focus`） | CSS | 全平台 | museum-label-panel |
-| `css:selection-pseudo` | ::selection styling of SVG text | 细节（父 `css:user-select`） | CSS | 部分支持 | stele-rubbing-hall |
-| `css:system-colors` | System colour keywords (CanvasText, Highlight, LinkText) as fill/stroke | 细节（父 `css:forced-colors`） | CSS | 全平台 | museum-label-panel |
-| `css:tap-highlight-color` | -webkit-tap-highlight-color on tappable SVG links | 细节（父 `pr:touch-action`） | CSS | 部分支持 | 经 `pr:touch-action` |
-| `el:handler` | <handler> element (SVG Tiny 1.2) | 细节（父 `concept:mouse-events`） | Deprecated | 已废弃 | 经 `concept:mouse-events` |
-| `el:listener` | <listener> element (SVG Tiny 1.2) | 细节（父 `concept:mouse-events`） | Deprecated | 已废弃 | 经 `concept:mouse-events` |
-| `pv:pointer-events=all` | pointer-events: all | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:pointer-events=auto` | pointer-events: auto (CSS alias of visiblePainted on SVG) | 细节（父 `pr:pointer-events`） | CSS | 全平台 | core-sample-stratigraphy |
-| `pv:pointer-events=fill` | pointer-events: fill | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:pointer-events=painted` | pointer-events: painted | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:pointer-events=stroke` | pointer-events: stroke | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:pointer-events=visible` | pointer-events: visible | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:pointer-events=visibleFill` | pointer-events: visibleFill | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:pointer-events=visiblePainted` | pointer-events: visiblePainted (default) | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:pointer-events=visibleStroke` | pointer-events: visibleStroke | 细节（父 `pr:pointer-events`） | SVG 1.1 | 全平台 | core-sample-stratigraphy |
-| `pv:touch-action=none` | touch-action: none / manipulation / pan-x / pinch-zoom values | 细节（父 `pr:touch-action`） | CSS | 全平台 | seismic-drum-console |
+| 特性键 | 名称 | 层级 / 父特性 | 支持 | 演示 |
+|---|---|---|---|---|
+| `api:Element.setPointerCapture` | Element.setPointerCapture / releasePointerCapture / gotpointercapture | core | broad | forge-metallography-bench |
+| `api:SVGElement.focus` | SVGElement.focus() / blur() / tabIndex | core | broad | museum-label-panel |
+| `at:svg.tabindex` | tabindex on SVG elements (root and shapes focusable) | core | broad | museum-label-panel |
+| `concept:aria-live` | aria-live region announcing SVG state changes | core | broad | museum-label-panel |
+| `concept:drag-with-pointer-events` | Dragging shapes with pointerdown/move/up and translate updates | core | broad | forge-metallography-bench |
+| `concept:hit-test-invisible-stroke` | Invisible wide stroke enlarging hit area of thin lines | core | broad | core-sample-stratigraphy |
+| `concept:hit-test-transparent-fill` | fill=transparent vs fill=none hit-testing difference | core | broad | core-sample-stratigraphy |
+| `concept:keyboard-events` | keydown/keyup on focused SVG elements (arrow-key movement, Enter/Space activation) | core | broad | museum-label-panel |
+| `concept:mouse-events` | Mouse events on SVG elements (click, dblclick, mousedown/up/move, mouseover/out) | core | broad | forge-metallography-bench |
+| `concept:pointer-events-api` | Pointer events (pointerdown/move/up, pointerType, pressure) | core | broad | seismic-drum-console |
+| `concept:role-button-keyboard` | role=button + tabindex + Enter/Space handling on shapes (aria-pressed) | core | broad | museum-label-panel |
+| `concept:role-group` | role=group / list / listitem on <g> structuring screen-reader navigation | core | broad | museum-label-panel |
+| `concept:screen-reader-reading-order` | Reading order follows DOM order, not visual position (aria-owns / reordering) | core | broad | museum-label-panel |
+| `concept:touch-events` | Touch events (touchstart/move/end, TouchList) | core | partial | seismic-drum-console |
+| `concept:use-shadow-event-retargeting` | Event retargeting: events inside <use> instances report the <use> as target | core | broad | celestial-astrolabe-cabinet |
+| `concept:wheel-zoom` | wheel event driven zoom/pan of the viewBox | core | broad | seismic-drum-console |
+| `css:checked-sibling-toggle` | Checkbox/radio hack: input:checked ~ svg or :has(:checked) toggling SVG state | core | broad | museum-label-panel |
+| `css:focus` | :focus pseudo-class on SVG elements | core | broad | museum-label-panel |
+| `css:focus-visible` | :focus-visible (keyboard-only focus ring) | core | broad | museum-label-panel |
+| `css:has` | :has() relational selector for state propagation | core | broad | museum-label-panel |
+| `css:hover` | :hover on SVG elements and groups | core | broad | pipeline-mimic-board |
+| `css:target` | :target pseudo-class driven by URL fragment | core | broad | celestial-astrolabe-cabinet |
+| `css:user-select` | user-select and native text selection of SVG <text> | core | broad | stele-rubbing-hall |
+| `pr:pointer-events` | pointer-events property | core | broad | core-sample-stratigraphy |
+| `pr:touch-action` | touch-action on the <svg> viewport | core | broad | seismic-drum-console |
+| `pv:pointer-events=bounding-box` | pointer-events: bounding-box | core | partial | core-sample-stratigraphy |
+| `pv:pointer-events=none` | pointer-events: none (pass-through, inherited) | core | broad | core-sample-stratigraphy |
+| `api:Document.elementFromPoint` | document.elementFromPoint / elementsFromPoint on SVG content | detail / `api:SVGGeometryElement.isPointInFill` | broad | ship-lofting-floor (via api:SVGGeometryElement.isPointInFill) |
+| `api:MouseEvent.offsetX` | MouseEvent.offsetX/offsetY on SVG targets | detail / `api:SVGGraphicsElement.getScreenCTM` | partial | seismic-drum-console |
+| `api:PointerEvent.getCoalescedEvents` | PointerEvent.getCoalescedEvents / getPredictedEvents | detail / `concept:pointer-events-api` | broad | seismic-drum-console |
+| `at:a.hreflang` | a hreflang / type link metadata | detail / `el:a` | broad | celestial-astrolabe-cabinet (via el:a) |
+| `at:a.ping` | a ping | detail / `el:a` | partial | celestial-astrolabe-cabinet (via el:a) |
+| `at:a.referrerpolicy` | a referrerpolicy | detail / `el:a` | partial | celestial-astrolabe-cabinet (via el:a) |
+| `at:a.xlink:href` | a xlink:href (legacy) | detail / `el:a` | deprecated | celestial-astrolabe-cabinet (via el:a) |
+| `at:svg.autofocus` | autofocus on SVG elements | detail / `at:svg.tabindex` | broad | museum-label-panel (via at:svg.tabindex) |
+| `at:svg.onload` | onload on <svg> root (SVGLoad renamed to load) | detail / `concept:mouse-events` | broad | forge-metallography-bench (via concept:mouse-events) |
+| `concept:clip-path-hit-testing` | clip-path removes clipped regions from hit testing; mask and opacity do not | detail / `pr:pointer-events` | broad | core-sample-stratigraphy (via pr:pointer-events) |
+| `concept:contextmenu-event` | contextmenu event (right-click) on SVG elements | detail / `concept:mouse-events` | broad | forge-metallography-bench (via concept:mouse-events) |
+| `concept:custom-tooltip` | Script-positioned SVG tooltip following the pointer | detail / `el:title` | broad | museum-label-panel |
+| `concept:embedding-mode-interactivity` | Interactivity depends on embedding: <img>/CSS background inert, <object>/<iframe>/inline interactive | detail / `concept:mouse-events` | broad | forge-metallography-bench (via concept:mouse-events) |
+| `concept:event-delegation-on-group` | Event bubbling and delegation on a parent <g> via event.target | detail / `concept:mouse-events` | broad | forge-metallography-bench |
+| `concept:focus-events` | focus/blur/focusin/focusout on SVG elements (replacing DOMFocusIn/Out) | detail / `at:svg.tabindex` | broad | museum-label-panel |
+| `concept:fragment-link-to-view` | In-document links to #id, <view> and svgView(viewBox()) fragments | detail / `el:a` | partial | celestial-astrolabe-cabinet |
+| `concept:hidden-elements-hit-testing` | display:none removes from hit-testing; visibility:hidden depends on pointer-events value | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `concept:hit-test-overlay-rect` | Transparent overlay rect capturing all events for a plot area | detail / `concept:hit-test-transparent-fill` | broad | core-sample-stratigraphy |
+| `concept:hover-state-transition` | CSS transitions on presentation properties for hover/focus states | detail / `css:hover` | broad | pipeline-mimic-board |
+| `concept:html-controls-via-foreignObject` | Keyboard-operable HTML controls inside <foreignObject> | detail / `concept:role-button-keyboard` | partial | museum-label-panel |
+| `concept:html-drag-and-drop-on-svg` | HTML draggable / dragstart on SVG elements | detail / `concept:drag-with-pointer-events` | partial | forge-metallography-bench (via concept:drag-with-pointer-events) |
+| `concept:inline-event-handler-attributes` | Inline on* event attributes (onclick, onmouseover, onkeydown) | detail / `concept:mouse-events` | broad | forge-metallography-bench (via concept:mouse-events) |
+| `concept:markers-not-hittable` | Marker, pattern and gradient content never receive events | detail / `pr:pointer-events` | broad | core-sample-stratigraphy (via pr:pointer-events) |
+| `concept:mouseenter-vs-mouseover` | mouseenter/mouseleave vs bubbling mouseover/mouseout on nested groups | detail / `concept:mouse-events` | broad | forge-metallography-bench |
+| `concept:multi-touch-gesture` | Multi-touch pinch-zoom / rotate with pointer or touch events | detail / `concept:touch-events` | broad | seismic-drum-console |
+| `concept:nested-viewport-hit-clipping` | Content outside a nested <svg> viewport is not hittable | detail / `pr:pointer-events` | broad | core-sample-stratigraphy (via pr:pointer-events) |
+| `concept:role-graphics-document` | WAI-ARIA Graphics roles (graphics-document, graphics-object, graphics-symbol) | detail / `concept:role-group` | partial | museum-label-panel |
+| `concept:role-slider` | role=slider / progressbar with aria-valuenow on SVG controls | detail / `concept:role-button-keyboard` | broad | museum-label-panel (via concept:role-button-keyboard) |
+| `concept:svg-1.1-dom-events` | SVG 1.1 events (SVGZoom, SVGScroll, SVGResize, DOMActivate, DOMFocusIn, mutation events, onzoom) | detail / `concept:mouse-events` | deprecated | forge-metallography-bench (via concept:mouse-events) |
+| `concept:tabindex-focus-order` | Focus order control (tabindex=0 DOM order, positive values, -1 script-only) | detail / `at:svg.tabindex` | broad | museum-label-panel |
+| `concept:text-hit-testing` | Text hit-testing by glyph cells, not bounding box or painted pixels | detail / `pr:pointer-events` | broad | core-sample-stratigraphy (via pr:pointer-events) |
+| `concept:text-link` | <a> inside <text> wrapping tspans | detail / `el:a` | broad | celestial-astrolabe-cabinet (via el:a) |
+| `css:active` | :active pressed state | detail / `css:hover` | broad | pipeline-mimic-board |
+| `css:focus-within` | :focus-within on ancestor <g> | detail / `css:focus` | broad | museum-label-panel |
+| `css:hover-inside-use` | :hover / :active styling of <use> instances and cloned children | detail / `concept:use-shadow-event-retargeting` | broad | celestial-astrolabe-cabinet |
+| `css:link-pseudo` | :link / :any-link / :visited on SVG <a> | detail / `el:a` | partial | celestial-astrolabe-cabinet (via el:a) |
+| `css:media-hover-pointer` | @media (hover) / (pointer: coarse) adaptive hit targets | detail / `concept:hit-test-invisible-stroke` | broad | core-sample-stratigraphy (via concept:hit-test-invisible-stroke) |
+| `css:outline` | outline / outline-offset on SVG shapes for focus rings | detail / `css:focus` | broad | museum-label-panel |
+| `css:selection-pseudo` | ::selection styling of SVG text | detail / `css:user-select` | partial | stele-rubbing-hall |
+| `css:system-colors` | System colour keywords (CanvasText, Highlight, LinkText) as fill/stroke | detail / `css:forced-colors` | broad | museum-label-panel |
+| `css:tap-highlight-color` | -webkit-tap-highlight-color on tappable SVG links | detail / `pr:touch-action` | partial | seismic-drum-console (via pr:touch-action) |
+| `el:handler` | <handler> element (SVG Tiny 1.2) | detail / `concept:mouse-events` | deprecated | forge-metallography-bench (via concept:mouse-events) |
+| `el:listener` | <listener> element (SVG Tiny 1.2) | detail / `concept:mouse-events` | deprecated | forge-metallography-bench (via concept:mouse-events) |
+| `pv:pointer-events=all` | pointer-events: all | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:pointer-events=auto` | pointer-events: auto (CSS alias of visiblePainted on SVG) | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:pointer-events=fill` | pointer-events: fill | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:pointer-events=painted` | pointer-events: painted | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:pointer-events=stroke` | pointer-events: stroke | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:pointer-events=visible` | pointer-events: visible | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:pointer-events=visibleFill` | pointer-events: visibleFill | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:pointer-events=visiblePainted` | pointer-events: visiblePainted (default) | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:pointer-events=visibleStroke` | pointer-events: visibleStroke | detail / `pr:pointer-events` | broad | core-sample-stratigraphy |
+| `pv:touch-action=none` | touch-action: none / manipulation / pan-x / pinch-zoom values | detail / `pr:touch-action` | broad | seismic-drum-console |
 

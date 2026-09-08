@@ -151,8 +151,8 @@ tspan:lang(arc) { fill: ${P.indigo}; }
   });
   zhengwen.append(...colTexts);
   // pr:text-orientation — the two Latin columns side by side: mixed (letters turned sideways) vs upright (stacked)
-  zhengwen.append(el('text', { x: COL_X(3), y: 390, 'font-size': 11, 'font-family': FONT_MONO, 'text-anchor': 'middle', fill: P.gamboge }, 'mixed'));
-  zhengwen.append(el('text', { x: COL_X(4), y: 390, 'font-size': 11, 'font-family': FONT_MONO, 'text-anchor': 'middle', fill: P.gamboge }, 'upright'));
+  rubbing.append(el('text', { x: COL_X(3), y: 390, 'font-size': 11, 'font-family': FONT_MONO, 'text-anchor': 'middle', fill: P.gamboge }, 'mixed'));
+  rubbing.append(el('text', { x: COL_X(4), y: 390, 'font-size': 11, 'font-family': FONT_MONO, 'text-anchor': 'middle', fill: P.gamboge }, 'upright'));
 
   // the shared arc and its three riders
   const arcE = el('path', { id: 'arc-e', d: ARC_D, fill: 'none', stroke: P.cinnabar, 'stroke-opacity': .18, 'stroke-width': 1.5 });

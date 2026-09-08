@@ -33,7 +33,7 @@ export function buildClipCard(c: Ctx): SVGGElement {
   g.append(ghost(548, 156, 40, 54));
   g.append(el('rect', { x: 444, y: 160, width: 116, height: 46, rx: 6, fill: 'none', stroke: ACCENT, 'stroke-width': .9, 'stroke-dasharray': '4 3', 'pointer-events': 'none' }));
   note(600, 172, '窗口 116×46 固定在', INK); note(600, 186, '画布坐标（uSOU）', INK); note(600, 202, '40×54 片几乎切光');
-  note(434, 222, '行1 clipPathUnits=userSpaceOnUse（默认）· 同一窗口 · 120×54 vs 40×54');
+  note(434, 222, '行1 userSpaceOnUse · 固定窗口，片宽不同');
   leader(186, 12);
 
   // Row 2 — av:clipPath.clipPathUnits=objectBoundingBox: a 0..1 circle scales to each target → proportional
@@ -44,7 +44,7 @@ export function buildClipCard(c: Ctx): SVGGElement {
   g.append(chip(rand, 566, 245, 72, 40, { 'clip-path': 'url(#cp-obb)' }));
   g.append(chip(rand, 650, 252, 44, 26, { 'clip-path': 'url(#cp-obb)' }));
   const enumUsou = cpUsou.clipPathUnits.baseVal, enumObb = cpObb.clipPathUnits.baseVal;
-  note(434, 300, `行2 objectBoundingBox 0..1 圆 → 三种尺寸各得等比椭圆窗 · clipPathUnits.baseVal = ${enumUsou} / ${enumObb}`);
+  note(434, 300, `行2 objectBoundingBox · 枚举 ${enumUsou}/${enumObb}`);
   leader(268, 26);
 
   // Row 3 — concept:objectboundingbox-zero-bbox-trap: a zero-height contact line + oBB clip vanishes (its bbox
@@ -54,7 +54,7 @@ export function buildClipCard(c: Ctx): SVGGElement {
   g.append(el('line', { x1: 440, y1: 322, x2: 560, y2: 322, stroke: ACCENT, 'stroke-width': 3, 'clip-path': 'url(#cp-obb-line)' }));
   g.append(el('line', { x1: 440, y1: 322, x2: 560, y2: 322, stroke: MUTED, 'stroke-width': .8, 'stroke-dasharray': '2 4', opacity: .5, 'pointer-events': 'none' }));
   g.append(el('path', { d: 'M580 322h120v.01', stroke: ACCENT, 'stroke-width': 3, fill: 'none', 'clip-path': 'url(#cp-obb-fix)' }));
-  note(434, 340, '行3 零 bbox 陷阱：0 高层界 + oBB 裁切 → 整条消失 ｜ 补 0.01 高度 → 可见');
+  note(434, 340, '行3 零高消失 ｜ 补 0.01 高度后可见');
   leader(322, 52);
 
   // Row 4 — at:clipPath.transform + concept:clip-follows-target-transform + concept:getbbox-ignores-clip:
@@ -62,9 +62,9 @@ export function buildClipCard(c: Ctx): SVGGElement {
   // sit in 12°-tilted layer groups so the windows rotate with the target user space. Dashed = getBBox() (unclipped).
   defs.append(el('clipPath', { id: 'cp-sq' }, el('rect', { x: 478, y: 426, width: 44, height: 44 })));
   defs.append(el('clipPath', { id: 'cp-sq-rot', transform: 'rotate(45 650 448)' }, el('rect', { x: 628, y: 426, width: 44, height: 44 })));
-  note(434, 360, '行4 同一 44 px 方窗 · 右 clipPath transform=rotate(45) → 菱形');
-  note(434, 374, '两目标各置 12° 倾角层组 → 裁切随目标坐标系旋转');
-  note(434, 388, '虚线框 = getBBox()，忽略裁切，明显大于可见部分');
+  note(434, 360, '行4 方窗 44 px ｜ 右窗旋转 45°');
+  note(434, 374, '目标旋转 12°，裁切随其坐标系旋转');
+  note(434, 388, '虚线 getBBox：范围不随裁切收缩');
   const tiltL = el('g', { transform: 'rotate(12 500 448)' }), tiltR = el('g', { transform: 'rotate(12 650 448)' });
   const chipL = chip(rand, 440, 421, 120, 54, { 'clip-path': 'url(#cp-sq)' });
   const chipR = chip(rand, 590, 421, 120, 54, { id: 'p3-r4-diamond', 'clip-path': 'url(#cp-sq-rot)' });
@@ -86,8 +86,8 @@ export function buildClipCard(c: Ctx): SVGGElement {
   defs.append(el('clipPath', { id: 'cp-star-eo' }, el('path', { d: pentagram(540, 522, 24), 'clip-rule': 'evenodd' })));
   g.append(el('image', { href: photo, x: 440, y: 498, width: 48, height: 48, preserveAspectRatio: 'xMidYMid slice', 'clip-path': 'url(#cp-star-nz)' }));
   g.append(el('image', { href: photo, x: 516, y: 498, width: 48, height: 48, preserveAspectRatio: 'xMidYMid slice', 'clip-path': 'url(#cp-star-eo)' }));
-  note(590, 512, 'clip-rule 只作用于 clipPath', INK); note(590, 526, '子元素；直接写在图形上', INK); note(590, 540, '无效（此处两星均是子元素）');
-  note(434, 556, '行5 clip-rule：黄铁矿双晶 · nonzero 整颗填满 ｜ evenodd 中心掏空');
+  note(590, 512, 'clip-rule 只对', INK); note(590, 526, '裁切子元素生效', INK); note(590, 540, '左实心 / 右空心');
+  note(434, 556, '行5 nonzero 填满 ｜ evenodd 掏空');
   leader(524, 84);
 
   // Row 6 — concept:use-in-clippath (use→path works, use→g yields an empty clip) and
@@ -111,7 +111,7 @@ export function buildClipCard(c: Ctx): SVGGElement {
     return grp;
   };
   g.append(frags(574, false), frags(644, true));
-  note(434, 622, '行6 use→path ✓ ｜ use→g 空裁切 ｜ 整组开一窗 ｜ 逐块各开一窗');
+  note(434, 622, '行6 path / g ｜ 整组 / 逐块');
   leader(588, 106);
   return g;
 }
@@ -130,7 +130,7 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
     <linearGradient id="g-fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
     <linearGradient id="g-feather" gradientUnits="userSpaceOnUse" x1="0" y1="149" x2="0" y2="167"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
     <radialGradient id="g-vig" cx=".5" cy=".5" r=".72"><stop offset=".45" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>
-    <g id="mask-art"><rect width="1" height="1" fill="url(#g-mask-wb)"/><ellipse cx=".72" cy=".5" rx=".2" ry=".2" fill="#e0533e"/></g>`));
+    <g id="mask-art"><rect width="1" height="1" fill="url(#g-mask-wb)"/><ellipse cx=".72" cy=".5" rx=".2" ry=".2" fill="#ff0000"/></g>`));
 
   // Row A — pr:mask-type / pv:mask-type=luminance / pv:mask-type=alpha / concept:mask-luminance-colorspace:
   // the same content read two ways. The red spot passes ~0.21 (sRGB luminance) vs 1.0 (alpha); black hides vs shows.
@@ -138,15 +138,15 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
     <mask id="m-lum" mask-type="luminance" maskContentUnits="objectBoundingBox"><use href="#mask-art"/></mask>
     <mask id="m-alpha" mask-type="alpha" maskContentUnits="objectBoundingBox"><use href="#mask-art"/></mask>`));
   g.append(seg(0, 0, { id: 'p4-lum', mask: 'url(#m-lum)' }), seg(1, 0, { id: 'p4-alpha', mask: 'url(#m-alpha)' }));
-  c.refs.lum = cap(0, 0, 'luminance 红斑 α=…', 'lbl-lum', INK);
-  c.refs.alpha = cap(1, 0, 'alpha 红斑 α=…', 'lbl-alpha', INK);
+  c.refs.lum = cap(0, 0, '亮度红斑', 'lbl-lum', INK);
+  c.refs.alpha = cap(1, 0, '透明红斑', 'lbl-alpha', INK);
   // concept:gradient-feathered-mask: white→black linearGradient feathers the sand/mud contact within 18 px, a
   // radialGradient vignette (nested mask) rounds the edges, and the mask content itself carries feGaussianBlur.
   defs.append(fragment(`
     <mask id="m-vig" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#g-vig)"/></mask>
     <mask id="m-feather"><g mask="url(#m-vig)"><rect x="922" y="144" width="78" height="46" fill="url(#g-feather)" filter="url(#f-soft)"/></g></mask>`));
   g.append(seg(2, 0, { mask: 'url(#m-feather)' }));
-  cap(2, 0, '羽化 18 px + 暗角 + 模糊');
+  cap(2, 0, '羽化+暗角');
 
   // Row B — av:feColorMatrix.type=luminanceToAlpha: the core photo becomes its own lithology mask (bright
   // limestone → opaque, dark mud → transparent). The output is black + alpha, so it only works with mask-type=alpha.
@@ -156,8 +156,8 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
   l2aMask('m-l2a-a', 0, 'alpha', 'f-l2a'); l2aMask('m-l2a-l', 1, 'luminance', 'f-l2a'); l2aMask('m-l2a-s', 2, 'alpha', 'f-l2a-srgb');
   g.append(seg(0, 1, { mask: 'url(#m-l2a-a)' }), seg(1, 1, { mask: 'url(#m-l2a-l)' }), seg(2, 1, { mask: 'url(#m-l2a-s)' }));
   g.append(ghost(COLS[1], ROWS[1], W, H));
-  cap(0, 1, 'l2a 照片 · alpha ✓', undefined, INK); cap(1, 1, 'l2a · luminance 全黑', undefined, RED);
-  c.refs.l2a = cap(2, 1, 'sRGB …', 'lbl-l2a');
+  cap(0, 1, 'l2a + alpha', undefined, INK); cap(1, 1, 'l2a 全黑', undefined, RED);
+  c.refs.l2a = cap(2, 1, 'sRGB 对照', 'lbl-l2a');
 
   // Row C — concept:mask-on-group-vs-element + pr:mask (attribute form): three overlapping lithology bands
   // masked once as a group (continuous fade) vs each band masked with the same bbox-relative mask (seams).
@@ -170,22 +170,22 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
   };
   g.append(bands(COLS[0], false), bands(COLS[1] + 4, true));
   g.append(seg(2, 2, { mask: 'url(#m-fade)' }));
-  cap(0, 2, '整组一张遮罩 · 连续'); cap(1, 2, '逐片同一遮罩 · 接缝'); cap(2, 2, 'mask="url(#m-fade)" 属性');
+  cap(0, 2, '组上连续'); cap(1, 2, '逐片接缝'); cap(2, 2, '属性引用');
 
   // Row D — CSS form (.fade{mask:url(#m-fade)} inside @supports; label prints getComputedStyle().maskImage),
   // concept:invalid-mask-reference (style="mask:url(#nope)" renders unmasked) and
   // concept:mask-content-opacity | concept:nested-mask (both halves land at ≈0.50).
   const cssSeg = seg(0, 3, { class: 'fade', id: 'p4-css' });
   g.append(cssSeg);
-  const cssLbl = cap(0, 3, 'CSS mask-image: …');
-  c.after.push(() => { const mi = getComputedStyle(cssSeg).maskImage; cssLbl.textContent = mi && mi !== 'none' ? 'CSS mask-image: url(#m-fade)' : 'CSS mask-image: none'; });
+  const cssLbl = cap(0, 3, 'CSS 遮罩');
+  c.after.push(() => { const mi = getComputedStyle(cssSeg).maskImage; cssLbl.textContent = mi && mi !== 'none' ? 'CSS 有效' : 'CSS 无效'; });
   g.append(seg(1, 3, { style: 'mask:url(#nope)' }));
-  cap(1, 3, 'mask:url(#nope) 依引擎', undefined, RED);
+  cap(1, 3, '无效引用', undefined, RED);
   defs.append(fragment(`
     <mask id="m-grey50" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="#808080"/></mask>
     <mask id="m-dual" maskContentUnits="objectBoundingBox"><rect x="0" y="0" width=".5" height="1" fill="#fff" fill-opacity=".5"/><rect x=".5" y="0" width=".5" height="1" fill="#fff" mask="url(#m-grey50)"/></mask>`));
   g.append(seg(2, 3, { mask: 'url(#m-dual)' }));
-  cap(2, 3, 'fill-opacity .5 ｜ 嵌套遮罩');
+  cap(2, 3, '半透 / 嵌套');
 
   // Row E — mask regions. at:mask.x / at:mask.y: x=.25 (bbox units) leaves the left quarter invisible although the
   // content covers it (the hover probe at (756,414) lands here: invisible yet still hit).
@@ -193,7 +193,7 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
   const x25 = seg(0, 4, { id: 'p4-x25', mask: 'url(#m-x25)' });
   g.append(x25, ghost(COLS[0] + W * .25, ROWS[4], W * .75, H, ACCENT));
   c.probes.push({ id: 'P4 x=.25', el: x25, kind: 'mask', alphaAt: (cx) => { const r = x25.getBoundingClientRect(); return cx < r.left + r.width * .25 ? 0 : 1; } });
-  cap(0, 4, 'mask x=.25 → 左 ¼ 不可见', undefined, INK);
+  cap(0, 4, '左 ¼ 遮掉', undefined, INK);
   // at:mask.maskUnits / av:mask.maskUnits=userSpaceOnUse: same region in absolute coordinates — the short segment
   // lies entirely outside it and is wiped out.
   defs.append(el('mask', { id: 'm-usou', maskUnits: 'userSpaceOnUse', x: COLS[1], y: ROWS[4], width: W, height: 24 },
@@ -201,7 +201,7 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
   g.append(el('use', { href: '#core-seg', transform: `translate(${COLS[1]},${ROWS[4]}) scale(.46,1)`, mask: 'url(#m-usou)' }));
   g.append(el('use', { href: '#core-seg', transform: `translate(${COLS[1] + 42},${ROWS[4] + 26}) scale(.46,.43)`, mask: 'url(#m-usou)' }));
   g.append(ghost(COLS[1] + 42, ROWS[4] + 26, 36, 20), ghost(COLS[1], ROWS[4], W, 24, ACCENT));
-  cap(1, 4, 'maskUnits=uSOU 矮段切光');
+  cap(1, 4, '固定区域');
   // at:mask.width / at:mask.height: a glowing fault trace (filter halo) — the default −10%/120% region cuts the
   // halo, x/y=−50% width/height=200% keeps it.
   defs.append(fragment(`
@@ -216,7 +216,7 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
       el('path', { d, stroke: '#5a3a08', 'stroke-width': 1, fill: 'none' }));
   };
   g.append(trace(2, 4, 'm-halo-def'), trace(0, 5, 'm-halo-big'));
-  cap(2, 4, '光晕 · 默认区域 -10%/120%'); cap(0, 5, '区域 -50% / 200% 保住光晕');
+  cap(2, 4, '区域 120%'); cap(0, 5, '区域 200%');
 
   // Row F — at:mask.maskContentUnits (default userSpaceOnUse: 24 px white circles open equal holes on a tall and
   // a short segment) vs av:mask.maskContentUnits=objectBoundingBox (0..1 circle scales with each bbox).
@@ -229,7 +229,7 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
     el('circle', { cx: COLS[1] + 18, cy: ROWS[5] + 23, r: 12, fill: '#fff' }), el('circle', { cx: COLS[1] + 60, cy: ROWS[5] + 24, r: 12, fill: '#fff' })));
   defs.append(el('mask', { id: 'm-hole-obb', maskContentUnits: 'objectBoundingBox' }, el('circle', { cx: .5, cy: .5, r: .45, fill: '#fff' })));
   tallShort(1, 'm-hole-us'); tallShort(2, 'm-hole-obb');
-  cap(1, 5, 'contentUnits uSOU 同尺寸孔'); cap(2, 5, 'contentUnits oBB 等比孔');
+  cap(1, 5, '同尺寸孔'); cap(2, 5, '等比孔');
 
   // Row G — concept:mask-smil-animation: the sampling lamp (white circle, r 0→46, fill=freeze) leaves the strip
   // fully open after freezing; the scan band (fill=remove) snaps back to its start value. Plus an explicit
@@ -242,6 +242,6 @@ export function buildMaskStrip(c: Ctx): SVGGElement {
   defs.append(el('mask', { id: 'm-scan', maskContentUnits: 'userSpaceOnUse' }, band));
   defs.append(fragment(`<mask id="m-grey" mask-type="luminance" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="#808080"/></mask>`));
   g.append(seg(0, 6, { mask: 'url(#m-lamp)' }), seg(1, 6, { mask: 'url(#m-scan)' }), ghost(COLS[1], ROWS[6], W, H), seg(2, 6, { mask: 'url(#m-grey)' }));
-  cap(0, 6, '取样灯 animate fill=freeze'); cap(1, 6, '扫描带 animate fill=remove'); cap(2, 6, 'luminance 50% 灰 α≈.50');
+  cap(0, 6, 'freeze 留下'); cap(1, 6, 'remove 复位'); cap(2, 6, '灰度 50%');
   return g;
 }

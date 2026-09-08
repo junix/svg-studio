@@ -51,7 +51,7 @@ export function buildSection(c: Ctx, layers: Layer[]): SVGGElement {
   if (!supportsBB) g.append(el('rect', { x: 1282, y: 178, width: 28, height: 28, fill: 'transparent', class: 'tie-fallback' }));
   g.append(el('polygon', { points: star(1296, 192, 14), fill: ACCENT, class: 'tie-star', id: 'tie-star', 'pointer-events': 'bounding-box' }));
   g.append(ghost(1282, 178, 28, 28, CYAN));
-  g.append(label(1296, 224, supportsBB ? '井震标定点 · bounding-box' : '井震标定点 · Safari 兜底', { anchor: 'middle', fill: CYAN, halo: true }));
+  g.append(label(1296, 224, supportsBB ? '标定点 · bbox' : '井震标定点 · Safari 兜底', { anchor: 'middle', fill: CYAN, halo: true }));
 
   // pv:pointer-events=none: interpretation notes lie on top of the section but never block picking.
   g.append(el('g', { 'pointer-events': 'none', class: 'notes' },
@@ -167,18 +167,20 @@ export function buildPickBar(): SVGGElement {
       default: node = el('rect', { ...base, fill: sand, stroke: ink, 'stroke-width': 1.5, 'pointer-events': v });
     }
     g.append(node);
-    g.append(label(cx, 870, tag, { size: 11, anchor: 'middle', fill: MUTED, mono: true }));
+    const short = v.replace('visiblePainted','visPainted').replace('visibleStroke','visStroke').replace('visibleFill','visFill').replace('bounding-box','bbox');
+    const caption = label(cx, 870, short, { size: 11, anchor: 'middle', fill: MUTED, mono: true });
+    caption.append(el('title', {}, tag)); g.append(caption);
   });
   // concept:hit-test-transparent-fill: fill=transparent reacts on its interior, fill=none only on its outline.
   const ex = (i: number) => 158 + 88 * (values.length + i);
-  g.append(el('rect', { class: 'pe-chip', 'data-pe': 'fill=transparent', x: ex(0) - 28, y: 826, width: 56, height: 28, rx: 4, fill: 'transparent', stroke: CYAN, 'stroke-width': 1.5 }));
-  g.append(label(ex(0), 870, 'fill=transparent', { size: 11, anchor: 'middle', fill: MUTED, mono: true }));
+  g.append(el('rect', { class: 'pe-chip', 'data-pe': '透明填充', x: ex(0) - 28, y: 826, width: 56, height: 28, rx: 4, fill: 'transparent', stroke: CYAN, 'stroke-width': 1.5 }));
+  g.append(label(ex(0), 870, '透明填充', { size: 11, anchor: 'middle', fill: MUTED, mono: true }));
   g.append(el('rect', { class: 'pe-chip', 'data-pe': 'fill=none', x: ex(1) - 28, y: 826, width: 56, height: 28, rx: 4, fill: 'none', stroke: CYAN, 'stroke-width': 1.5 }));
-  g.append(label(ex(1), 870, 'fill=none 仅描边', { size: 11, anchor: 'middle', fill: MUTED, mono: true }));
+  g.append(label(ex(1), 870, '仅描边', { size: 11, anchor: 'middle', fill: MUTED, mono: true }));
   // concept:hit-test-overlay-rect: Safari fallback for bounding-box — a transparent rect over the star catches hits.
   g.append(el('polygon', { points: star(ex(2), 840, 15), fill: sand, stroke: ink, 'pointer-events': 'none' }));
   g.append(el('rect', { class: 'pe-chip pe-overlay', 'data-pe': 'overlay rect (Safari 兜底)', x: ex(2) - 16, y: 824, width: 32, height: 32, fill: 'transparent' }));
   g.append(ghost(ex(2) - 16, 824, 32, 32, CYAN));
-  g.append(label(ex(2), 870, '覆盖矩形 兜底', { size: 11, anchor: 'middle', fill: MUTED, mono: true }));
+  g.append(label(ex(2), 870, '覆盖矩形', { size: 11, anchor: 'middle', fill: MUTED, mono: true }));
   return g;
 }

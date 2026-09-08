@@ -25,7 +25,7 @@ export function header(): SVGGElement {
   g.append(
     label(r.x + 8, r.y + 40, '地震记录鼓控制台', 28, C.cream, 'start', { 'font-weight': 700 }),
     el('text', { x: r.x + 262, y: r.y + 40, 'font-family': FONT_SERIF, 'font-style': 'italic', 'font-size': 19, fill: C.amber }, 'Seismic Drum Console'),
-    label(r.x + 8, r.y + 68, '一段记录的坐标真相究竟住在 viewBox 里、CTM 里，还是指针里？— 三条换算链对同一个采样点各报一次走时，逐位相同校验灯才亮绿。', 13, C.muted),
+    label(r.x + 8, r.y + 68, '一段记录的坐标真相究竟住在 viewBox 里、CTM 里，还是指针里？— 三条换算链对同一个采样点各报一次走时，误差低于 0.001 纸单位时亮绿。', 13, C.muted),
     el('line', { x1: r.x, y1: r.y + 82, x2: r.x + r.w, y2: r.y + 82, stroke: C.panelEdge, 'stroke-width': 1 }),
     // the three coordinate layers every readout names
     mono(r.x + r.w, r.y + 22, '屏幕空间  client px  (clientX, clientY)', 11, C.blue, 'end'),
@@ -68,7 +68,7 @@ export function overflowTriplet(): SVGGElement {
   const cells: { mode: 'hidden' | 'visible' | 'scroll'; note: string; colour: string }[] = [
     { mode: 'hidden', note: '裁在框内', colour: C.blue },
     { mode: 'visible', note: '溢到台面上', colour: C.magenta },
-    { mode: 'scroll', note: '实测 ≡ hidden，无滚动条', colour: C.green },
+    { mode: 'scroll', note: '裁切 · 无滚动条', colour: C.green },
   ];
   cells.forEach((cell, i) => {
     const x = R.overflow.x + i * 140, y = R.overflow.y;
@@ -110,7 +110,7 @@ export function calibrationTarget(): Target {
   const { k, tx, ty } = fitViewport(r.x, r.y, r.w, r.h, -50, -50, 100, 100);
   const o = new DOMPoint(0, 0).matrixTransform(new DOMMatrix().translateSelf(tx, ty).scaleSelf(k, k));
   originMark.setAttribute('transform', `translate(${o.x} ${o.y})`);
-  const originText = mono(r.x + r.w / 2, r.y + r.h - 6, `手算原点 (${f2(o.x)}, ${f2(o.y)}) ✓ 正中`, 11, C.green, 'middle');
+  const originText = mono(r.x + r.w / 2, r.y + r.h - 6, `手算原点 (${f2(o.x)}, ${f2(o.y)}) ✓ 正中`, 9, C.green, 'middle');
   g.append(v, originMark,
     mono(r.x + 4, r.y + 12, 'viewBox -50 -50 100 100', 11, C.muted),
     mono(r.x + r.w - 4, r.y + 12, 'I', 11, C.dim, 'end'), mono(r.x + 4, r.y + r.h - 20, 'III', 11, C.dim), mono(r.x + r.w - 4, r.y + r.h - 20, 'IV', 11, C.dim, 'end'),

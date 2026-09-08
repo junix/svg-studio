@@ -289,7 +289,7 @@ export function render(stage: SVGSVGElement): void {
   const inspNames = ['α SourceAlpha', 'α blur 2.6', 'S exp 1', 'S exp 24', 'P z 24', 'P z 180'];
   const inspIds = ['alpha', 'alpha-blur', 'spec-1', 'spec-24', 'point-24', 'point-180'];
   INSPECT.forEach((t, i) => {
-    bench.append(el('g', { id: `insp-${inspIds[i]}`, class: 'tile', 'data-tile': '', filter: `url(#insp-${inspIds[i]})` }, el('use', { href: '#insp-src', x: t.x + 4, y: t.y + 7 })),
+    bench.append(el('g', { id: `insp-tile-${inspIds[i]}`, class: 'tile', 'data-tile': '', filter: `url(#insp-${inspIds[i]})` }, el('use', { href: '#insp-src', x: t.x + 4, y: t.y + 7 })),
       el('rect', { x: t.x - .5, y: t.y - .5, width: t.w + 1, height: t.h + 1, fill: 'none', stroke: '#5a6570' }),
       label(t.x, t.y + t.h + 13, inspNames[i], { class: i >= 2 ? 'amber' : 'dim' }));
   });

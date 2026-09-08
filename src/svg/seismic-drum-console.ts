@@ -380,11 +380,11 @@ export async function render(stage: SVGSVGElement): Promise<void> {
     const kc = Math.min(aw / avw, ah / avh);
     const MC = new DOMMatrix().translateSelf(rect.x, rect.y).scaleSelf(sx, sy).translateSelf(ax + (aw - avw * kc) / 2, ay + (ah - avh * kc) / 2).scaleSelf(kc, kc).translateSelf(-avx, -avy);
     const c = new DOMPoint(cx, cy).matrixTransform(MC.inverse());
-    // Legacy footnote: the same hand chain through createSVGPoint()/createSVGMatrix() (SVGMatrix is a DOMMatrix alias)
+    // Legacy footnote: compare coordinates separately from constructor identity.
     const sp = stage.createSVGPoint(); sp.x = cx; sp.y = cy;
     const sm = stage.createSVGMatrix().translate(rect.x, rect.y).scaleNonUniform(sx, sy).translate(ax + (aw - avw * kc) / 2, ay + (ah - avh * kc) / 2).scale(kc).translate(-avx, -avy);
     const lp = sp.matrixTransform(sm.inverse());
-    const legacyOk = Math.abs(lp.x - c.x) < 1e-6 && Math.abs(lp.y - c.y) < 1e-6 && stage.createSVGMatrix() instanceof DOMMatrix;
+    const legacyOk = Math.abs(lp.x - c.x) < 1e-3 && Math.abs(lp.y - c.y) < 1e-3;
     // Naive chain: offsetX·vw/width — forgets the letterbox and the viewBox origin (api:MouseEvent.offsetX)
     const ox = offsetX ?? stagePt.x, oy = offsetY ?? stagePt.y;
     const naive = new DOMPoint((ox - ax) * avw / aw, (oy - ay) * avh / ah);
@@ -395,23 +395,27 @@ export async function render(stage: SVGSVGElement): Promise<void> {
   let currentScaleLine = '';
   const refreshReadout = (s: Sample) => {
     const tA = travelSeconds(s.a.x, s.a.y), tB = travelSeconds(s.b.x, s.b.y), tC = travelSeconds(s.c.x, s.c.y), tN = travelSeconds(s.naive.x, s.naive.y);
-    const match = Math.abs(tA - tB) < 1e-6 && Math.abs(tA - tC) < 1e-6;
+    // SVGMatrix-backed paths in Chromium round some affine components to float32.
+    // Compare paper coordinates at 0.001 units (0.0025 s), below the 0.01-unit contract.
+    const error = Math.max(Math.hypot(s.a.x-s.b.x,s.a.y-s.b.y), Math.hypot(s.a.x-s.c.x,s.a.y-s.c.y));
+    const match = error < 1e-3;
+    stage.dataset.coordinateError = String(error);
     checks++; if (!match) mismatches++;
     lamp.dataset.verdict = match ? 'match' : 'mismatch';
     const hour = s.rowEl.dataset.hour, state = s.rowEl.dataset.state;   // api:SVGElement.dataset
     const sel = selectedRow ? ` · 选中 ${selectedRow.dataset.hour} 时行 · ${selectedRow.dataset.state}` : '';
-    roTitle.textContent = `采样 屏幕(${f2(s.client.x)}, ${f2(s.client.y)}) → 台面(${f2(s.stagePt.x)}, ${f2(s.stagePt.y)}) · 经 ${hour} 行(${state})${sel} · 合并事件 ${s.coalesced}`;
-    roLines[0].textContent = `A 相机链  ${fmtTime(tA)}   纸(${s.a.x.toFixed(3)}, ${s.a.y.toFixed(3)})  viewBox.baseVal + meet 手推 k`;
-    roLines[1].textContent = `B 变换链  ${fmtTime(tB)}   纸(${s.b.x.toFixed(3)}, ${s.b.y.toFixed(3)})  getScreenCTM⁻¹ → getCTM → camera.getCTM⁻¹`;
-    roLines[2].textContent = `C 手算链  ${fmtTime(tC)}   纸(${s.c.x.toFixed(3)}, ${s.c.y.toFixed(3)})  DOMMatrix 链 · 校验 ${checks} 次 / 失配 ${mismatches}`;
+    roTitle.textContent = `采样 (${s.client.x.toFixed(0)},${s.client.y.toFixed(0)}) px → (${s.stagePt.x.toFixed(0)},${s.stagePt.y.toFixed(0)}) · ${hour}h ${state}${sel}`;
+    roLines[0].textContent = `A 相机链  ${fmtTime(tA)}   纸(${s.a.x.toFixed(3)}, ${s.a.y.toFixed(3)})  viewBox + meet`;
+    roLines[1].textContent = `B 变换链  ${fmtTime(tB)}   纸(${s.b.x.toFixed(3)}, ${s.b.y.toFixed(3)})  CTM⁻¹`;
+    roLines[2].textContent = `C 手算链  ${fmtTime(tC)}   纸(${s.c.x.toFixed(3)}, ${s.c.y.toFixed(3)})  DOMMatrix`;
     roLines[2].setAttribute('fill', match ? C.green : C.red);
     const drift = Math.abs(tN - tA) > 1e-3;
-    roLines[3].textContent = `D 天真链  ${fmtTime(tN)}   Δ ${signed(tN - tA)} s  offsetX·vw/w 漏了信箱边与 viewBox 原点`;
+    roLines[3].textContent = `D 天真链  ${fmtTime(tN)}   Δ ${signed(tN - tA)} s  offsetX 漏算信箱边`;
     roLines[3].setAttribute('fill', drift ? C.red : C.muted);
     roLines[3].dataset.verdict = drift ? 'drift' : 'coincide';
-    const nearestOk = (traceEls[0].nearestViewportElement === camera);
-    roLines[4].textContent = `createSVGPoint/createSVGMatrix 复算 ${s.legacyOk ? '✓ 同值' : '✗ 不同'} · trace.nearestViewportElement === camera ${nearestOk ? '✓' : '✗'} · SVGMatrix instanceof DOMMatrix ✓`;
-    roLines[5].textContent = `getAnimations() ${animCount.total} 条 · CSS 09 行 ${animCount.css} · WAAPI 10 行 ${animCount.waapi} · 卷筒 scroll ${animCount.feed} · rAF 11 行 0（不在列表）· playbackRate ${animCount.rate.toFixed(2)}`;
+    const nearestOk = ('nearestViewportElement' in traceEls[0] && traceEls[0].nearestViewportElement === camera);
+    roLines[4].textContent = `SVGMatrix ${s.legacyOk ? '✓' : '✗'} · viewport ${nearestOk ? '✓' : '✗'} · ε ${error.toExponential(1)} · 失配 ${mismatches}/${checks}`;
+    roLines[5].textContent = `动画 ${animCount.total} · CSS 09h / WAAPI 10h / rAF 11h（列表外）`;
     roLines[6].textContent = currentScaleLine;
     roLines[6].setAttribute('fill', C.muted);
     // crosshair at the pointer (台面) and the chain-B getCTM round trip (green dot must sit on the same spot)
@@ -567,12 +571,12 @@ export async function render(stage: SVGSVGElement): Promise<void> {
   const fmtPct = (v: number) => `${v.toFixed(1)}%`;
   const sView = slider(stage, { x: CX, y: R.controls.y + 40, w: CW, label: '取景 viewBox.x', min: -720, max: 1440, value: 0, format: v => v.toFixed(0), onChange: v => { view.vx = v; applyView(); } });
   const sWidth = slider(stage, { x: CX, y: R.controls.y + 86, w: CW, label: '取景 viewBox.width', min: 180, max: 2880, value: PAPER_W, format: v => v.toFixed(0), onChange: v => { const c = view.vx + view.vw / 2, cy = view.vy + view.vh / 2; view.vw = v; view.vh = v * PAPER_H / PAPER_W; view.vx = c - v / 2; view.vy = cy - view.vh / 2; applyView(); } });
-  const sCam = slider(stage, { x: CX, y: R.controls.y + 132, w: CW, label: '台面宽度 camera width', min: 720, max: 1120, value: R.camera.w, format: v => `${v.toFixed(0)} px`, onChange: v => {
+  const sCam = slider(stage, { x: CX, y: R.controls.y + 132, w: CW, label: '台面宽度', min: 720, max: 1120, value: R.camera.w, format: v => `${v.toFixed(0)} px`, onChange: v => {
     camera.setAttribute('width', v.toFixed(0)); cameraFrame.setAttribute('width', v.toFixed(0)); refreshAll();
   } });
-  const sPen = slider(stage, { x: CX, y: R.controls.y + 178, w: CW, label: '笔位 offset-distance (调试笔)', min: 0, max: 100, value: 30, format: fmtPct, onChange: v => penDebug.pieces.forEach(p => { p.style.offsetDistance = `${v}%`; }) });
+  const sPen = slider(stage, { x: CX, y: R.controls.y + 178, w: CW, label: 'offset-distance', min: 0, max: 100, value: 30, format: fmtPct, onChange: v => penDebug.pieces.forEach(p => { p.style.offsetDistance = `${v}%`; }) });
   let rafRate = 1;
-  const sRate = slider(stage, { x: CX, y: R.controls.y + 224, w: CW, label: '走纸速度 playbackRate', min: 0.25, max: 4, value: 1, format: v => `×${v.toFixed(2)}`, onChange: v => {
+  const sRate = slider(stage, { x: CX, y: R.controls.y + 224, w: CW, label: 'playbackRate', min: 0.25, max: 4, value: 1, format: v => `×${v.toFixed(2)}`, onChange: v => {
     // api:Animation.playbackRate — CSS and WAAPI pens through their Animation objects, the rAF pen through its own clock
     for (const a of document.getAnimations()) if (camera.contains(((a.effect as KeyframeEffect).target as Element))) a.playbackRate = v;
     rafRate = v; animCount.rate = v; sampleAt(lastClient.x, lastClient.y);
@@ -645,14 +649,18 @@ export async function render(stage: SVGSVGElement): Promise<void> {
   const tlList = tlGlyph.transform.baseVal;
   const TL_NAMES: Record<number, string> = { 1: 'MATRIX', 2: 'TRANSLATE', 3: 'SCALE', 4: 'ROTATE' };
   const handShift = new DOMMatrix().translate(18, 0);                  // api:DOMMatrix
+  // Chromium still requires its legacy SVGMatrix wrapper at this DOM boundary.
+  // Copy the affine components instead of assuming DOMMatrix is a runtime alias.
+  const svgShift = stage.createSVGMatrix();
+  for (const key of ['a', 'b', 'c', 'd', 'e', 'f'] as const) svgShift[key] = handShift[key];
   const tlStep = (step: number) => {
     tlList.clear();
-    if (step >= 1) tlList.appendItem(stage.createSVGTransformFromMatrix(handShift));
+    if (step >= 1) tlList.appendItem(stage.createSVGTransformFromMatrix(svgShift));
     if (step >= 2) { const t = stage.createSVGTransform(); t.setRotate(28, 0, 0); tlList.appendItem(t); }
     if (step >= 3) { const t = stage.createSVGTransform(); t.setScale(1.25, 1.25); tlList.appendItem(t); }
     const types = Array.from({ length: tlList.numberOfItems }, (_, i) => TL_NAMES[tlList.getItem(i).type]).join(' · ');
-    tlLines[0].textContent = `SVGTransformList 演示台 · 步 ${Math.min(step, 3)}/3 · numberOfItems: ${tlList.numberOfItems}`;
-    tlLines[1].textContent = types ? `[${types}]  appendItem(createSVGTransformFromMatrix) → setRotate(28) → setScale(1.25)` : '(空列表) 每秒推进一步：平移 → 旋转 → 缩放 → consolidate()';
+    tlLines[0].textContent = `SVGTransformList · 步 ${Math.min(step, 3)}/3 · ${tlList.numberOfItems} 项`;
+    tlLines[1].textContent = types ? `[${types}] · appendItem → rotate → scale` : '(空列表) 每秒推进一步：平移 → 旋转 → 缩放 → consolidate()';
     if (step === 4) {
       const one = tlList.consolidate();                                 // api:SVGTransformList.consolidate
       const m = one?.matrix;
@@ -671,7 +679,7 @@ export async function render(stage: SVGSVGElement): Promise<void> {
     const a1 = stage.getScreenCTM()!.a;
     stage.currentScale = 1;
     const effective = Math.abs(a1 - a0) > 1e-9;
-    currentScaleLine = `currentScale 写入 2.000 / 读回 ${readBack.toFixed(3)} / 生效：${effective ? '是' : '否'}（getScreenCTM().a ${a0.toFixed(2)}→${a1.toFixed(2)}，已复位；真实缩放一律由 viewBox 承担）· currentTranslate (${stage.currentTranslate.x}, ${stage.currentTranslate.y})`;
+    currentScaleLine = `currentScale 2 → ${readBack.toFixed(1)} · CTM ${a0.toFixed(1)} → ${a1.toFixed(1)} · ${effective ? '生效' : '无效'}（已复位）`;
   }
 
   // ------------------------------------------------------------------ observers
@@ -684,7 +692,9 @@ export async function render(stage: SVGSVGElement): Promise<void> {
     const parts: string[] = [];
     if (cam) parts.push(`#camera bbox ${f2(cam.contentRect.width)}×${f2(cam.contentRect.height)} (viewBox 单位)`);
     if (frame) parts.push(`#camera-frame contentRect ${f2(frame.contentRect.width)}×${f2(frame.contentRect.height)}`);
-    roText = `ResizeObserver #${roFired} · ${parts.join(' · ') || '(root)'}`;
+    stage.dataset.resizeMeasurements = parts.join(' · ');
+    const bounds = cameraFrame.getBoundingClientRect();
+    roText = `ResizeObserver #${roFired} · frame ${f2(bounds.width)}×${f2(bounds.height)}`;
     stage.dataset.resizeCallbacks = String(roFired);
     refreshRuler();
   });

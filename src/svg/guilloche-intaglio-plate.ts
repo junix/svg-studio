@@ -380,10 +380,10 @@ function leftColumn(): SVGGElement {
   g.append(label(218, 469, '语法错→忽略', { 'text-anchor': 'middle' }));
 
   // auto-radius check ring: rx omitted (auto) → Chrome/Firefox draw a circle of radius ry; Safari draws nothing
-  g.append(el('ellipse', { cx: 170, cy: 526, ry: 40, fill: 'none', stroke: 'currentColor', 'stroke-width': 0.9, class: 'auto-rx' }));
+  g.append(el('ellipse', { cx: 170, cy: 526, style: 'rx:auto', ry: 40, fill: 'none', stroke: 'currentColor', 'stroke-width': 0.9, class: 'auto-rx' }));
   g.append(el('circle', { cx: 170, cy: 526, r: 40, fill: 'none', stroke: INK, 'stroke-width': 0.6, 'stroke-dasharray': '0 3', 'stroke-linecap': 'round', class: 'auto-ref' }));
-  g.append(mono(170, 522, '<ellipse ry=40>', { 'text-anchor': 'middle' }));
-  g.append(label(170, 536, 'rx 省略 = auto', { 'text-anchor': 'middle' }));
+  g.append(mono(170, 522, 'CSS rx:auto', { 'text-anchor': 'middle' }));
+  g.append(label(170, 536, 'auto → 使用 ry=40', { 'text-anchor': 'middle' }));
   g.append(label(170, 580, '点线参照 <circle r=40>', { 'text-anchor': 'middle' }));
 
   // ink trough: tall narrow ellipse (ry ≫ rx) — the el:ellipse counterpart of the wide window ellipse

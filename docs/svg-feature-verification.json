@@ -1,0 +1,1433 @@
+{
+  "browser": "152.0.7977.82",
+  "coverageGate": {
+    "positive": 1,
+    "mutations": 4,
+    "passed": true
+  },
+  "scenes": [
+    {
+      "scene": "botanical",
+      "width": 1400,
+      "height": 900,
+      "transparent": 976962,
+      "visible": 282723,
+      "colorful": 268542,
+      "captureMs": 51,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "6d4ea2fa5c5f4b844e9aa568606ed68bfcffec57b7d74138c1fcdbc42770f1f6"
+    },
+    {
+      "scene": "metro",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1150534,
+      "visible": 107392,
+      "colorful": 103043,
+      "captureMs": 27,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "f7f833a748206b431898e4461b64f14782b25eb801f7bde75dc0d70af4c6a317"
+    },
+    {
+      "scene": "orbits",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1198950,
+      "visible": 47765,
+      "colorful": 43517,
+      "captureMs": 35,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "0ccd38e360c37f32a3064012acd58d815bbbf354cc3754ec58240528a0af49af"
+    },
+    {
+      "scene": "topology",
+      "width": 1400,
+      "height": 900,
+      "transparent": 684307,
+      "visible": 575264,
+      "colorful": 573000,
+      "captureMs": 30,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "15f429ae66165812b11c9df8a8133429a04f828158699e9320137e18468ce532"
+    },
+    {
+      "scene": "isometric-city",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1072878,
+      "visible": 186764,
+      "colorful": 185025,
+      "captureMs": 32,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "b56c39f7d4f578b39f72e8746769bc7a4ea3ab323e6fa5ac24d9d60d862c6e91"
+    },
+    {
+      "scene": "wave-lab",
+      "width": 1400,
+      "height": 900,
+      "transparent": 623872,
+      "visible": 635803,
+      "colorful": 635391,
+      "captureMs": 35,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "2d9d94686328e1b1058775d1c451097de461f5c645f69562f0c2d4e67b1982e8"
+    },
+    {
+      "scene": "contour-map",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1196156,
+      "visible": 55694,
+      "colorful": 54865,
+      "captureMs": 29,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "478e9da2a65fa754dd9fc5e284bf1a78857b75f3d8763572b632922fae348909"
+    },
+    {
+      "scene": "circuit",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1024073,
+      "visible": 235497,
+      "colorful": 234859,
+      "captureMs": 29,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "9a315b90f7dcca23aa98eee48c40bff36747bdf2210b1b7a8474f9ab9f42015e"
+    },
+    {
+      "scene": "timeline",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1161873,
+      "visible": 85603,
+      "colorful": 83775,
+      "captureMs": 29,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "8703716b8b5e6d9def3d5d95a475a6bec92b94f531c192d4bce08c2f658efee0"
+    },
+    {
+      "scene": "molecule",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1144178,
+      "visible": 109053,
+      "colorful": 106566,
+      "captureMs": 44,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "df7cf053bbeb7009519dbe53a9d0a2d2c4d0de0b2e6828ed75549ee9303f4374"
+    },
+    {
+      "scene": "loom",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1035434,
+      "visible": 217700,
+      "colorful": 216879,
+      "captureMs": 34,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "000ceae215179a0692c544deaa3b89daabb94e451d53171477b0fcff6714a5b1"
+    },
+    {
+      "scene": "type-system",
+      "width": 1400,
+      "height": 900,
+      "transparent": 1183015,
+      "visible": 57828,
+      "colorful": 47992,
+      "captureMs": 38,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "739e3f33e4f3acf1137429bada5a91af98801580d9b0e09c8366017faebcbbd6"
+    },
+    {
+      "scene": "arrow-library",
+      "width": 1400,
+      "height": 900,
+      "transparent": 359374,
+      "visible": 899790,
+      "colorful": 881268,
+      "captureMs": 47,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "8c93ad5df23fc554f91127755e9858b2ff9bc031440acba4752cfafdd1af9398"
+    },
+    {
+      "scene": "icon-library",
+      "width": 1400,
+      "height": 900,
+      "transparent": 365571,
+      "visible": 893693,
+      "colorful": 876837,
+      "captureMs": 52,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "542896f2672676ab06e2686300289f9ac1d022991d664db0e7d519dd58a4e9d8"
+    },
+    {
+      "scene": "arrow-components",
+      "width": 1400,
+      "height": 900,
+      "transparent": 398342,
+      "visible": 860214,
+      "colorful": 842278,
+      "captureMs": 46,
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "f18fb8e3bab38acb9c2b68710db28b710aa6a5f5b3cbf4504864c9bce6fbaf95"
+    },
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "width": 1400,
+      "height": 900,
+      "transparent": 402570,
+      "visible": 855846,
+      "colorful": 789272,
+      "captureMs": 1125,
+      "coverage": {
+        "checked": 42,
+        "missing": [],
+        "declared": 21,
+        "marked": 21,
+        "elements": 2801
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "celestial-astrolabe-cabinet"
+        },
+        {
+          "name": "nine reusable star masters",
+          "evidence": 9
+        },
+        {
+          "name": "seeded catalogue and 24 zone windows",
+          "evidence": 1676
+        },
+        {
+          "name": "fragment selection reuses existing geometry",
+          "evidence": "zone-18"
+        },
+        {
+          "name": "selected slip is visible",
+          "evidence": "1"
+        },
+        {
+          "name": "fragment capability probe completed",
+          "evidence": "SVGVIEW: HONORED"
+        },
+        {
+          "name": "fixed SMIL phase",
+          "evidence": 4.800000190734863
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "21d78919ba8689ad8a3051b6b7ae0f0531a52b81fc63358352f0f72b479cc4f7"
+    },
+    {
+      "scene": "museum-label-panel",
+      "width": 1400,
+      "height": 900,
+      "transparent": 198752,
+      "visible": 1060551,
+      "colorful": 595247,
+      "captureMs": 109,
+      "coverage": {
+        "checked": 43,
+        "missing": [],
+        "declared": 32,
+        "marked": 59,
+        "elements": 618
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "museum-label-panel"
+        },
+        {
+          "name": "wrapped HTML and controls in SVG",
+          "evidence": 12
+        },
+        {
+          "name": "same-origin standalone SVG documents loaded",
+          "evidence": 5
+        },
+        {
+          "name": "semantic accessible exhibit list",
+          "evidence": 9
+        },
+        {
+          "name": "Tab follows accession order",
+          "evidence": [
+            "M-01",
+            "M-02",
+            "M-03",
+            "M-04",
+            "M-05",
+            "M-06",
+            "M-07"
+          ]
+        },
+        {
+          "name": "three arrow keys advance measuring cursor",
+          "evidence": {
+            "before": 138,
+            "after": 174
+          }
+        },
+        {
+          "name": "Space toggles semantic state and section visibility",
+          "evidence": "block"
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "24c7f109078230a8a672bbf4a4562d69432a4aa90b61ab0044a4a72f4122ba08"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "width": 1400,
+      "height": 900,
+      "transparent": 194788,
+      "visible": 1065074,
+      "colorful": 1055359,
+      "captureMs": 84,
+      "coverage": {
+        "checked": 40,
+        "missing": [],
+        "declared": 21,
+        "marked": 48,
+        "elements": 400
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "ship-lofting-floor"
+        },
+        {
+          "name": "three keel spellings describe the same geometry",
+          "evidence": {
+            "lengths": [
+              762.2318115234375,
+              762.2318115234375,
+              762.2318115234375
+            ],
+            "maxError": 0
+          }
+        },
+        {
+          "name": "path commands cover the full drawing grammar",
+          "evidence": 76
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "f83aebebe45964f7e62870f0c4f0bed60555416572ed0a7767451edb54a63a81"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "width": 1400,
+      "height": 900,
+      "transparent": 795639,
+      "visible": 418273,
+      "colorful": 349898,
+      "captureMs": 132,
+      "coverage": {
+        "checked": 31,
+        "missing": [],
+        "declared": 10,
+        "marked": 29,
+        "elements": 381
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "guilloche-intaglio-plate"
+        },
+        {
+          "name": "four generative curve families",
+          "evidence": 7
+        },
+        {
+          "name": "hairline strokes stay constant under transforms",
+          "evidence": 84
+        },
+        {
+          "name": "auto radius follows the other radius",
+          "evidence": {
+            "width": 80,
+            "height": 80
+          }
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "cce66994b1b8d56d505f73bd532260a82e1e3f3a7a26f9dfb24ef860eeb88f44"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "width": 1400,
+      "height": 900,
+      "transparent": 177938,
+      "visible": 1082039,
+      "colorful": 654453,
+      "captureMs": 189,
+      "coverage": {
+        "checked": 28,
+        "missing": [],
+        "declared": 10,
+        "marked": 18,
+        "elements": 842
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "auroral-spectrograph"
+        },
+        {
+          "name": "44 curtains share one master",
+          "evidence": 44
+        },
+        {
+          "name": "pointer changes master stop offset",
+          "evidence": {
+            "a": 0.23363137245178223,
+            "b": 0.44636863470077515
+          }
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "7f3b94db0effcbb5a3f3f85dd94a5caabd0f4ff23daffd8e629bcff782a2c46a"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "width": 1400,
+      "height": 900,
+      "transparent": 156588,
+      "visible": 1103384,
+      "colorful": 726399,
+      "captureMs": 89,
+      "coverage": {
+        "checked": 26,
+        "missing": [],
+        "declared": 9,
+        "marked": 18,
+        "elements": 444
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "jacquard-loom-draft"
+        },
+        {
+          "name": "pattern variants inherit their tile artwork",
+          "evidence": [
+            "dent12",
+            "dent16",
+            "satin5-24",
+            "satin5-36",
+            "laneBB"
+          ]
+        },
+        {
+          "name": "one bitmap demonstrates two rasterization modes",
+          "evidence": true
+        },
+        {
+          "name": "weave coordinates update on pointer input",
+          "evidence": "经 #34 · 纬 #19 · 3/1 斜纹右斜面 · 经浮"
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "ee3aa5421378fb4e17e2228ab9481d5be8e0281c5adb76adde17f291a7ddcad6"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "width": 1400,
+      "height": 900,
+      "transparent": 365965,
+      "visible": 893426,
+      "colorful": 220182,
+      "captureMs": 77,
+      "coverage": {
+        "checked": 29,
+        "missing": [],
+        "declared": 8,
+        "marked": 21,
+        "elements": 409
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "stele-rubbing-hall"
+        },
+        {
+          "name": "eight vertical text columns",
+          "evidence": 8
+        },
+        {
+          "name": "glyph rotation is authored per character",
+          "evidence": [
+            7,
+            7,
+            7,
+            7,
+            7,
+            7,
+            7,
+            7
+          ]
+        },
+        {
+          "name": "language switch contains explicit fallback",
+          "evidence": 5
+        },
+        {
+          "name": "text follows reusable paths",
+          "evidence": 9
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "d18b2ccd0bc54e5435e984513756934efeb49b830e69a31de69f709db58aecc6"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "width": 1400,
+      "height": 900,
+      "transparent": 188100,
+      "visible": 1071845,
+      "colorful": 874809,
+      "captureMs": 102,
+      "coverage": {
+        "checked": 37,
+        "missing": [],
+        "declared": 17,
+        "marked": 37,
+        "elements": 763
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "letterpress-type-specimen"
+        },
+        {
+          "name": "embedded specimen font available",
+          "evidence": true
+        },
+        {
+          "name": "both width adjustment modes are present",
+          "evidence": 6
+        },
+        {
+          "name": "text metrics are measurable",
+          "evidence": [
+            277.09,
+            320,
+            277.09,
+            260,
+            277.09,
+            200
+          ]
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "9551be006c41b109d1a97dd9276535ac082e8b5959774db327ad5c095cd27d5b"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "width": 1400,
+      "height": 900,
+      "transparent": 131827,
+      "visible": 1128121,
+      "colorful": 63300,
+      "captureMs": 106,
+      "coverage": {
+        "checked": 40,
+        "missing": [],
+        "declared": 14,
+        "marked": 54,
+        "elements": 334
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "pipeline-mimic-board"
+        },
+        {
+          "name": "one auto-start-reverse marker serves both ends",
+          "evidence": 7
+        },
+        {
+          "name": "valve marker is defined once",
+          "evidence": 1
+        },
+        {
+          "name": "context paint is used inside markers",
+          "evidence": true
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "a000bf6714131714ffc921bd6b0dcbeb773642c7244ea50661f56f9d9fb01153"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "width": 1400,
+      "height": 900,
+      "transparent": 337381,
+      "visible": 916723,
+      "colorful": 245751,
+      "captureMs": 122,
+      "coverage": {
+        "checked": 29,
+        "missing": [],
+        "declared": 9,
+        "marked": 22,
+        "elements": 1177
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "four-colour-press-check"
+        },
+        {
+          "name": "overprint filter inputs resolve in order",
+          "evidence": []
+        },
+        {
+          "name": "CMYK arithmetic product uses three composites",
+          "evidence": true
+        },
+        {
+          "name": "tone curve has nine editable samples",
+          "evidence": 9
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "f5dfaa88931638894fb0cc389a246ced61a917cdd547e0280dfbabc40fe9b188"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "width": 1400,
+      "height": 900,
+      "transparent": 306400,
+      "visible": 952002,
+      "colorful": 27336,
+      "captureMs": 169,
+      "coverage": {
+        "checked": 28,
+        "missing": [],
+        "declared": 10,
+        "marked": 21,
+        "elements": 560
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "forge-metallography-bench"
+        },
+        {
+          "name": "diffuse and specular lighting share bump depth",
+          "evidence": 18
+        },
+        {
+          "name": "convolution comparison has distinct kernels",
+          "evidence": 9
+        },
+        {
+          "name": "all convolution edge modes present",
+          "evidence": true
+        },
+        {
+          "name": "depth control updates both lights and measured HUD",
+          "evidence": [
+            -12,
+            -12,
+            -12
+          ]
+        },
+        {
+          "name": "real pointer capture drives and releases lamp handle",
+          "evidence": {
+            "captured": true,
+            "released": true,
+            "before": "translate(661.09 194.69)",
+            "after": "translate(811.09 274.69)"
+          }
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "6d96a00ba9fb0de591b00214652a1b41e64067e1dcbe23f74752f640513f8d29"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "width": 1400,
+      "height": 900,
+      "transparent": 269896,
+      "visible": 990103,
+      "colorful": 416583,
+      "captureMs": 262,
+      "coverage": {
+        "checked": 26,
+        "missing": [],
+        "declared": 14,
+        "marked": 14,
+        "elements": 332
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "mycelium-culture-chamber"
+        },
+        {
+          "name": "seeded L-system generates real SVG geometry",
+          "evidence": {
+            "paths": 72,
+            "segments": 37748
+          }
+        },
+        {
+          "name": "group and per-path filters are distinct",
+          "evidence": true
+        },
+        {
+          "name": "noise consumers follow their specified ratios",
+          "evidence": {
+            "master": 0.018240001052618027,
+            "warp": 0.018240002915263176,
+            "bleed": 0.04012800753116608,
+            "grain": 0.7680000066757202
+          }
+        },
+        {
+          "name": "wrong namespace control remains in DOM",
+          "evidence": true
+        },
+        {
+          "name": "CDATA control parses only with escaping",
+          "evidence": "true"
+        },
+        {
+          "name": "export phase is fixed",
+          "evidence": 7.800000190734863
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "7eb4a9c51f1baf5f798991f4da9083576714c84f60ff685f92b7c2c2a4c06dad"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "width": 1400,
+      "height": 900,
+      "transparent": 210118,
+      "visible": 1049866,
+      "colorful": 535070,
+      "captureMs": 128,
+      "coverage": {
+        "checked": 37,
+        "missing": [],
+        "declared": 24,
+        "marked": 34,
+        "elements": 365
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "neon-sign-workshop"
+        },
+        {
+          "name": "one shared SVG clip for CSS shape comparisons",
+          "evidence": 1
+        },
+        {
+          "name": "pointer controls both glow stages",
+          "evidence": {
+            "a": [
+              2.142857074737549,
+              5.599999904632568
+            ],
+            "b": [
+              7.857142925262451,
+              14.933333396911621
+            ]
+          }
+        },
+        {
+          "name": "HTML board shares SVG effects",
+          "evidence": "url(\"#ns-f-neon\")"
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "678b82b281bca1dd275e8b2f50797791f39bf947a7b417fcb95d8fcec63cd209"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "width": 1400,
+      "height": 900,
+      "transparent": 661857,
+      "visible": 592529,
+      "colorful": 410824,
+      "captureMs": 108,
+      "coverage": {
+        "checked": 33,
+        "missing": [],
+        "declared": 6,
+        "marked": 37,
+        "elements": 746
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "escapement-chronometer"
+        },
+        {
+          "name": "clock freezes at the intended phase",
+          "evidence": 7.400000095367432
+        },
+        {
+          "name": "timeline records all event types",
+          "evidence": [
+            "endEvent",
+            "beginEvent",
+            "endEvent",
+            "beginEvent",
+            "beginEvent",
+            "repeatEvent",
+            "repeatEvent",
+            "beginEvent"
+          ]
+        },
+        {
+          "name": "timeline can seek backwards",
+          "evidence": 2.0499989986419678
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "22bde4c139f6c1fbeb55a1b2c64e1cdd85ee6e88d1de591e1a155387a05ce980"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "width": 1400,
+      "height": 900,
+      "transparent": 429572,
+      "visible": 819117,
+      "colorful": 301128,
+      "captureMs": 80,
+      "coverage": {
+        "checked": 34,
+        "missing": [],
+        "declared": 13,
+        "marked": 13,
+        "elements": 682
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "core-sample-stratigraphy"
+        },
+        {
+          "name": "clip and mask examples are complete",
+          "evidence": {
+            "clips": 30,
+            "masks": 21
+          }
+        },
+        {
+          "name": "clipping removes hits; masking retains hits",
+          "evidence": [
+            0.431,
+            0.431,
+            0.431,
+            0.974
+          ]
+        },
+        {
+          "name": "reveal freezes partway through the fifth layer",
+          "evidence": 3.200000047683716
+        },
+        {
+          "name": "invisible masked region is still picked",
+          "evidence": {
+            "clip": "裁切之外 · 未命中",
+            "mask": "P4 x=.25 · 掩码不可见 · 仍命中"
+          }
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "empty recovery clip reveals transparency",
+          "evidence": 0
+        },
+        {
+          "name": "clip-path none keeps the adjacent interval opaque",
+          "evidence": 255
+        },
+        {
+          "name": "fifth reveal front lies between 1230 and 1260",
+          "evidence": 1238
+        },
+        {
+          "name": "isolated red luminance mask versus alpha mask",
+          "evidence": {
+            "luminance": 0.21176470588235294,
+            "alpha": 1
+          }
+        }
+      ],
+      "png_sha256": "71898c0789c4568ff70867a941b41f15612606b982898bfd271098c8ddcc1679"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "width": 1400,
+      "height": 900,
+      "transparent": 277344,
+      "visible": 980317,
+      "colorful": 622718,
+      "captureMs": 70,
+      "coverage": {
+        "checked": 35,
+        "missing": [],
+        "declared": 28,
+        "marked": 43,
+        "elements": 875
+      },
+      "acceptance": [
+        {
+          "name": "unique SVG IDs",
+          "evidence": []
+        },
+        {
+          "name": "embedded fonts loaded",
+          "evidence": "loaded"
+        },
+        {
+          "name": "no placeholder scene",
+          "evidence": "seismic-drum-console"
+        },
+        {
+          "name": "camera coordinate chains agree",
+          "evidence": {
+            "verdict": "match",
+            "error": "0.00004502415464879815"
+          }
+        },
+        {
+          "name": "wheel changes the view while coordinate chains agree",
+          "evidence": "114.314 149.531 839.565 489.746"
+        },
+        {
+          "name": "CSS and WAAPI animations are observable",
+          "evidence": 30
+        },
+        {
+          "name": "resize observer initialized the ruler",
+          "evidence": "1"
+        }
+      ],
+      "pixelChecks": [
+        {
+          "name": "four transparent corners",
+          "evidence": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "png_sha256": "bcb9a9513f0a699261c33bb0d42a99d937814155f6fb9e809d00e3dc0eacf70e"
+    }
+  ],
+  "failures": [],
+  "date": "2026-09-08",
+  "source_sha256": {
+    "catalog.json": "50e10dd50da3a99a534eea361b659bee1b323d03fedf581a182888fa683f8f73",
+    "docs/svg-feature-demos.json": "0bc453d3f7e05d86b3bf086fb08e7cee163687abdcbe78eaaa1d0c34edd18a8d",
+    "package-lock.json": "845b57f629144772890baef784d438bf28101ae58b3d3ac5e3cca97ab899f58c",
+    "package.json": "ebdcb9a6d4fee1c96729a8747135624719e20e71de94a77a1e70a34c67372300",
+    "public/celestial-astrolabe-cabinet/atlas-plates.svg": "a4fbed3296e7f14b08f98fc4cca615e20a3be618c3d5018304b02706d1aa3114",
+    "public/celestial-astrolabe-cabinet/probe.svg": "658675ce287c0bf10c1e25994e62e7affa69bb56caf6e7455e2dab9f0626a04c",
+    "public/letterpress-type-specimen/specimen-micro.woff2": "eea41d16847f53508b2b278e87e8be6f13c35c445ef3757e5f0863fdb2618b21",
+    "public/museum-label-panel/museum-label-bare.svg": "dbf9add67bb43c63a2e2f2bd25ceb06ebd723d94c9a5920d1c8eae3a08d6c835",
+    "public/museum-label-panel/museum-label-malformed.svg": "39fb03cbd45e2660ffd623cf8870860e54580acc0654d3e9a6452c50384cfe97",
+    "public/museum-label-panel/museum-label-noxmlns.svg": "04226033c1c441c026acf841faa552fc2ba5d885a04b79b86a5f7d3586f342db",
+    "public/museum-label-panel/museum-label-ratio.svg": "e39f3f322fc3578de74dd26acc20067ae7ac716af5b6876e94f6502857c60f9e",
+    "public/museum-label-panel/museum-label.svg": "dd9955683005ed26e26954c0e735be2027753b0f2fa0177ec3a5e604a98f7c55",
+    "public/mycelium-culture-chamber/culture-pair.svg": "8642d926d0793fa9e8187ad77609cfedcf005c9816a7eeeeedc2d4f0ffe1ba50",
+    "scripts/acceptance.mjs": "6886b88e8343d617b8477fa471ff231747c17f5b6c434a59edc9ae4b6ba43c70",
+    "scripts/build-fonts.mjs": "4feae5e3af73164e88c7d0b1ecab76e30e7f2f00066553478f8e805c1caa088b",
+    "scripts/capture.mjs": "ff37d4c0637e40098e9a87f0d542a617789de6fa18427a3bc6de22eb0a8a1a79",
+    "scripts/coverage.mjs": "03aaf178367daefc25cf3e91342bc4ec846b48da2d482038fe0bcd01456c6464",
+    "scripts/coverage.test.mjs": "9035be60aaac05b80533ffec9cc9ee560482b9ce4be57bbeface6e68c13ac869",
+    "scripts/pixels.mjs": "e6198978aae874798d678fa502baa474f710e5d169c256e6b42186ed6b61787e",
+    "scripts/render-plan.mjs": "99555a32d68fc5bad0636b830c68a746530cfb8998307a829b8c36894206ea26",
+    "src/arrow-components.ts": "e9ff901877dc275d277084cda5a929d2a4481070dde9d7df0c05f0feace94a13",
+    "src/arrow-library.ts": "75d0155958703429dd9bca4999988c5546389957150dbf874e965f83c7965208",
+    "src/icon-library.ts": "53ac2998fff9740e65ed55694684981dafa8cf0dae8ecd06ab8987407aad4138",
+    "src/main.ts": "262e6b33ada71fa8a8e5b95510d4f03ce2aca636a9ed26794038b87ae176a025",
+    "src/style.css": "8d022281a691d9d74579e72620a994e91913dd4b30669daebe612795250cd661",
+    "src/svg/auroral-spectrograph-deck.ts": "830436da6d33c4d6d1eb1847e6f43dcc12549389cbb23fa46c3b6697436c76ed",
+    "src/svg/auroral-spectrograph.ts": "a7d88483db04e9a4e8da6583c9f43e3e1a9a933ae30dcb7e43ca825ea7d62aed",
+    "src/svg/celestial-astrolabe-cabinet-catalogue.ts": "f69a414240ba74cc70331b758934c1709f2fda9fdb0b40df43f07a63d37e2794",
+    "src/svg/celestial-astrolabe-cabinet-panels.ts": "1c9f5672469cd2a548e45cf76ef44ef496b5707d780362d75e0687522eb3ee34",
+    "src/svg/celestial-astrolabe-cabinet.ts": "eb01eb11a39f3ac2d11f21d0c534e2bcfdd385bd33f8b90b265f3c7c7ae23d5e",
+    "src/svg/core-sample-stratigraphy-bench.ts": "795fa59b13b40075a9cc4074534c0430f1505c193f1cbb5963afe15d98da3b05",
+    "src/svg/core-sample-stratigraphy-cards.ts": "7af201bb508fe978c96af86b19e7f8ef848b0b937e3a14ddf668012bef0a42eb",
+    "src/svg/core-sample-stratigraphy-data.ts": "52fd27295a0109035c58af12bd067c4502a6766908450c42548b3d6ac0610aae",
+    "src/svg/core-sample-stratigraphy.ts": "4f6063db2be94a2fa5e2a699b06c0314857f0a18cde612eb6a7934fe11cf607e",
+    "src/svg/escapement-chronometer-parts.ts": "a31bf88c51ea7117f9805ac9d96628273d56674da5ec884fd9a286c8f0ad9768",
+    "src/svg/escapement-chronometer.ts": "0bed5036d4688bf9e6c3fc6d8027d14fbf945974ba5414111484bf4c53c73184",
+    "src/svg/font-data.ts": "cfcd6ae29592309400f1c9c7b3799d80178cd4a756e56b47ad1bf2d97151a5f4",
+    "src/svg/forge-metallography-bench-filters.ts": "e2ed49b728763f6c5316fb0303e9df3bafda0f74a8e0928ac7595675c2c98e15",
+    "src/svg/forge-metallography-bench-geometry.ts": "e470cb39156ea32bb8169a41da00a84fcc43daa1d41fd8e8b8a868f05fe857ed",
+    "src/svg/forge-metallography-bench.ts": "7c8c1cfe96ee4b8de2b79508391dc02e541b8a30d3d2a877e0fde82b80eca6cb",
+    "src/svg/four-colour-press-check-bitmaps.ts": "c506709ddfc5981cc90736d262b7a9bf8fd9a12e918b50a713ca0ac39a7eddc6",
+    "src/svg/four-colour-press-check-filters.ts": "54820b542f6a1213143d493a295b6b8b5f15a1179488c6f25ddf765328058bf9",
+    "src/svg/four-colour-press-check-measure.ts": "3e7f09d41582c0cb11622afd7423f935196c88dcb427bc9fdf43e6e1c445c070",
+    "src/svg/four-colour-press-check.ts": "fe1473860d49eee28373d07cae344e2b0c9a0364a794ab7357244c86dc1b3164",
+    "src/svg/guilloche-intaglio-plate-curves.ts": "66b60321db95f01bef77c110bd503d0112ca770e13e3c11d863c6df758cc5828",
+    "src/svg/guilloche-intaglio-plate.ts": "660f20e23dbbc23a368dd25c9c0ba446136dfb5e280ca48fb53b283afdbc3c7b",
+    "src/svg/index.ts": "32a27744456aa0e7d0239717e811266d396e5f30186b45f2e7252bed48e96a17",
+    "src/svg/jacquard-loom-draft-assets.ts": "fb370e9965d611b60ba6960aea4170cdc6890082f188fa58076f8c88ce8953bf",
+    "src/svg/jacquard-loom-draft.ts": "ba0863eed829e8f1a6a0fc1ef42595e98276353d8ef6a08903d2c8db96369683",
+    "src/svg/letterpress-type-specimen-cards.ts": "ef52439ecc99f463e9124f7f3dc80c9faa25571b94f102d91e83a01bb514414d",
+    "src/svg/letterpress-type-specimen-font.ts": "b816d6c9115edc80c9d2701235e6a91675f927c3bf406190afe62c1d771ed692",
+    "src/svg/letterpress-type-specimen-kit.ts": "73c7adb48316534a1b3a69bda85a877e88daf4997fc02da79f98ab694d422436",
+    "src/svg/letterpress-type-specimen-left.ts": "d307593d30473d2921b2f10f9923ec865f99978204c8a61e006cf568f7521373",
+    "src/svg/letterpress-type-specimen-right.ts": "1b4b105100cd1ce8aacd68dfa9498d85280a9f22da720257f7d3f3b145796455",
+    "src/svg/letterpress-type-specimen.ts": "4b2e9f86f11d316c1c91d74f5ed11ea44f969f877379b0f8533a84968682d792",
+    "src/svg/lib.ts": "da760728c914efe75cd2f61797be4e4b3aa1491fe42d3ac53d4b63aba2b2dc2c",
+    "src/svg/museum-label-panel-doc.ts": "730b1f5bfcaa4fceb385c9e3cb5b546b5f015302f01ec681cd624faf6566ec59",
+    "src/svg/museum-label-panel.ts": "28baa44b846c53581132eac045d52abf186d6adf55e6c914a82d1ae25c4be97d",
+    "src/svg/mycelium-culture-chamber-script.ts": "1de2abe671870fa637148dfb0597d75191e75f4c28c889a20382c5eeb4073d48",
+    "src/svg/mycelium-culture-chamber.ts": "36035772a6ae73363203314f4cbab02086cc921bc74bb2196700e20f0dbbb085",
+    "src/svg/neon-sign-workshop-css.ts": "495838fc4517d54c1469ca1f8ddc15c6b6f03c80b5a2fdc4b193174c67258d5c",
+    "src/svg/neon-sign-workshop.ts": "b75d6e207ec2adf4fbf1bf8bdc7ee9f1bbe93bc3e44ce473a6e8536ebfebf7aa",
+    "src/svg/pipeline-mimic-board-anatomy.ts": "5169f386be063e5233babcab6645fc86ceaa1204cbe285238baf5d31a291bbae",
+    "src/svg/pipeline-mimic-board-band.ts": "a9c2cdd699c1d2139ae8576c7c059bbc81df8c14c1f5c9025720a8753042a614",
+    "src/svg/pipeline-mimic-board-interact.ts": "51543205184cd686dd7b1dca589e980ffda047c78dba08591339f7040e7ad49c",
+    "src/svg/pipeline-mimic-board.ts": "153a8b2ea8c08505cf0e171117b1991f9d419ac4992a357d5e617900df763de2",
+    "src/svg/seismic-drum-console-data.ts": "3b62df8fed37c46bd896c18b4c606c8de5eabd2f66d8b6404a737fa4a19abb25",
+    "src/svg/seismic-drum-console-panels.ts": "66e610a585e21ec16ba7503632ef8318db345b2337bee89a08c1282287aa9893",
+    "src/svg/seismic-drum-console.ts": "9d76358aa1966eb904cf06087104f0f74df77899744de027cf493571dba9f3f8",
+    "src/svg/ship-lofting-floor-cards.ts": "7822207c7ce056fba29e507f7c5f1446b1a4f7f79c66c15b515e6e1835259e19",
+    "src/svg/ship-lofting-floor-matrix.ts": "a0cf81fb3b899881ed85db49b2043c334a1d2fde3aa548730b02442c61acb78b",
+    "src/svg/ship-lofting-floor-path.ts": "5f770be00eafe0642c335212242c1ac809f4587f0db1ea4e4704e4a65b57fd65",
+    "src/svg/ship-lofting-floor-shelf.ts": "4171ef049526adf4cec30fa83d57a34f0c756903fe8634e7c9c824f39054ea25",
+    "src/svg/ship-lofting-floor-ui.ts": "448a2b12ca5e9fa4d8b3ec7f763d0528d5b1cc0fbb91eb245672184738dcf2a4",
+    "src/svg/ship-lofting-floor.ts": "936083a4a3de1ffac108647f712663bb544f8ba696a186d295c70e7e60af29da",
+    "src/svg/stele-rubbing-hall-card.ts": "09ab6791146e5be23d2ed64edd24f7cbdeb3e7a0175443b9032c47b4ea9c9f76",
+    "src/svg/stele-rubbing-hall.ts": "a347a761f5419ef2785f0d8a9e3e459152940f18c6e7b40aee3221a6e7f854d0",
+    "src/vendor.d.ts": "5962675e76590d41d217b40bf141fa43022e62ccb4ecd20cb0853c62c870a41c"
+  }
+}

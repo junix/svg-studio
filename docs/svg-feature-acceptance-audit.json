@@ -1,0 +1,902 @@
+{
+  "date": "2026-09-08",
+  "scope": "Original 128 acceptance bullets, reviewed individually; partial is not a pass.",
+  "criteria": [
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "criterion": 1,
+      "status": "partial",
+      "requirement": "DOM：document.querySelectorAll('symbol').length === 9；#stage 内 use 元素 ≥ 1700；defs 之外直接书写的 circle|ellipse|polygon 星点数为 0——整份星表没有一颗星被重画。",
+      "review": "部分：九个母版、1675 个星表 use 已自动计数；星点仅实例化由源码复核。"
+    },
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "DOM：对 #zone-19 的 <a> 派发 click 后，#dial-window.viewBox.baseVal.x/y 变为 zone-19 矩形的起点，而 #stage.querySelectorAll('*').length 与点击前完全相同（换幅不重绘）。",
+      "review": "部分：切换片段与元素总数不变已测；自动测试用 zone-18，尚未测 zone-19 的真实点击路径。"
+    },
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "DOM：在一颗已知星的中心派发 pointermove，event.target.nodeName === 'use' 且 id 以 s- 开头；同时 getComputedStyle(document.querySelector('#gl-k .star-core')).fill 不是 rgb(255, 0, 0)，证明 use .star-core 规则够不到影子树，而写在母版子节点上的 #gl-var .pulse-ring 规则在全部变星实例上生效。",
+      "review": "部分：铭牌显示浏览器实际事件目标；实例根未由本引擎暴露，不能伪造该值。"
+    },
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "criterion": 4,
+      "status": "unverified",
+      "requirement": "PNG：24 个图签窗中心区域采样，同一枚 #gl-g 母版呈现 24 种不同色相（相邻格色相差 ≥ 12°、最大差 ≥ 180°）；而验色条里三个 fill 不同的 #gl-m 格，其朱砂芯像素 RGB 三格一致（各通道差 ≤ 4）。",
+      "review": "待测：24 色相间距及三颗朱砂芯逐通道误差没有量化。"
+    },
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "criterion": 5,
+      "status": "partial",
+      "requirement": "PNG + DOM：location.hash === '#zone-07'，被 :target 命中的那格铜牌高亮（其底板亮度较邻格高 ≥ 25%），且门腰凹槽里恰好一张取景卡的计算 opacity 为 1、其余 23 张为 0。",
+      "review": "部分：初始 zone-07 与唯一可见卡已目视；高亮亮度比未量化。"
+    },
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "PNG：校样条八格中，none 那格的圆形星晕被压扁成椭圆（水平/垂直直径比 ≥ 1.25），三格 slice 内容铺满且左右被裁，三格 meet 在上下留出铜色空档，xMinYMin 与 xMaxYMax 的空档落在相反侧。",
+      "review": "部分：meet/slice/none 已目视；直径比和留白边界未逐像素测量。"
+    },
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "PNG：溢版校样 B 格的彗尾像素越过其视口矩形右边界至少 12px，A 格在同一边界被整齐截断；层序校样中带 style=\"z-index:99\" 的铜签被后画的那枚压住。",
+      "review": "部分：溢版和画序反例可见；12 px 下限未量化。"
+    },
+    {
+      "scene": "celestial-astrolabe-cabinet",
+      "criterion": 8,
+      "status": "verified",
+      "requirement": "PNG + 像素统计：铭牌四行与 SVGVIEW: / EXTERNAL USE: 两行状态字样可读且非空；全图完全透明像素 ≥ 8%、alpha>20 的可见像素 ≥ 3.5%、彩色像素 ≥ 2500。",
+      "review": "已验：状态铭牌可读，SVGVIEW/EXTERNAL USE 有实际探测结果，RGBA 通过。"
+    },
+    {
+      "scene": "museum-label-panel",
+      "criterion": 1,
+      "status": "partial",
+      "requirement": "PNG 中 #fo-desc 的正文至少 4 行且全部落在 x=320–776 内；DOM 中同一句的对照 <text> 的 getComputedTextLength() > 456 且被 clipPath 裁于面板右缘——换行只发生在 foreignObject 一侧。",
+      "review": "部分：HTML 正文换行与 SVG 单行裁切已目视；行数/边界未逐项量化。"
+    },
+    {
+      "scene": "museum-label-panel",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "DOM：inline 副本内 foreignObject 数量 ≥ 6，#fo-form 内 input、select、input[type=checkbox]、button 各 ≥ 1，#fo-math 内存在 math > mfrac 且含 msqrt 与 msup；对应的 <img> 副本 naturalWidth > 0 却查不到任何表单节点或文本节点。",
+      "review": "部分：foreignObject 表单与 object 文档已自动检查；MathML 子树和 image 模式隔离待专门断言。"
+    },
+    {
+      "scene": "museum-label-panel",
+      "criterion": 3,
+      "status": "unverified",
+      "requirement": "身份墙五块瓦片在 PNG 中呈现五种不同的纸底/线色组合（逐块采样中心区域，两两色差 ΔE > 12），而五块引用的文件摘要（或归一化路径）完全一致。",
+      "review": "待测：身份墙的五组 Delta E 阈值未量化。"
+    },
+    {
+      "scene": "museum-label-panel",
+      "criterion": 4,
+      "status": "verified",
+      "requirement": "Tab 序列：document.querySelectorAll('[data-accession]') 的 DOM 序为 M-01…M-07，[data-paint-index] 的序列与之不同；从 M-01 连按 Tab，document.activeElement.dataset.accession 依次递增，且带 .kbd-focus 的焦点环在静帧里可见。",
+      "review": "已验：真实 Tab 顺序 M-01 至 M-07 通过，DOM 与绘制顺序分离。"
+    },
+    {
+      "scene": "museum-label-panel",
+      "criterion": 5,
+      "status": "partial",
+      "requirement": "播报区 #fo-live 具有 role=\"status\" 与 aria-live=\"polite\"，静帧里可读出包含当前编号（M-03）与身份名的文字；触发 pointermove 后 window.__INTERACTION_COUNT__ 增大。",
+      "review": "部分：aria-live 结构与交互计数已验；默认播报的编号文字未专门断言。"
+    },
+    {
+      "scene": "museum-label-panel",
+      "criterion": 6,
+      "status": "verified",
+      "requirement": "键盘：向 M-04 派发 3 次 ArrowRight 后测量游标的 x 增加 ≥ 24；派发 Space 后该热点 aria-pressed 由 false 变 true，且 .layer-section 的 getComputedStyle(display) 由 none 变 block。",
+      "review": "已验：三次 ArrowRight 游标前移、Space 切换 aria-pressed 与剖面 display 通过。"
+    },
+    {
+      "scene": "museum-label-panel",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "存档画布采样到非透明像素，自检徽章文本严格是「foreignObject 已参与栅格化」或「foreignObject 未参与栅格化」之一，且徽章结论与实际采样一致。",
+      "review": "部分：存档徽章可见；需单独采样存档 canvas 并核对结论。"
+    },
+    {
+      "scene": "museum-label-panel",
+      "criterion": 8,
+      "status": "unverified",
+      "requirement": "媒体查询真实性：在 emulateMedia({media:'print'}) 下，object 文档内 matchMedia('print').matches === true 且 #fo-form 的 getComputedStyle(display) === 'none'；把窄幅瓦片的 <img> 宽度设为 380 时其文档内 matchMedia('(max-width: 420px)').matches === true。",
+      "review": "待测：print 与嵌入图像内部媒体查询尚未在本次运行单独验证。"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "criterion": 1,
+      "status": "partial",
+      "requirement": "龙骨三写法核对：DOM 中 `#keel-verbose`、`#keel-compact`、`#keel-relative` 的 getTotalLength() 两两之差 < 0.5，PNG 中三者所在区域只见一根合并型线；`#keel-drift` 在第二段之后整体偏移 18，肉眼可辨为独立的橙色幽灵线。",
+      "review": "部分：三条龙骨 101 点几何误差通过，幽灵线可见；18 单位偏移未测。"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "弧命令卡：构件卡① 中同一对端点之间存在 4 条 path，其 d 的标志位分别为 `0 0`、`0 1`、`1 0`、`1 1`，四条曲线互不重合且两两成对属于两个候选椭圆；构件卡② 中 `A1 1 0 0 1` 那条弧的渲染包围盒高度为 50±1，即半径被放大到 50。",
+      "review": "部分：四种弧标志与半径校正卡可见；50±1 bbox 待测。"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "criterion": 3,
+      "status": "unverified",
+      "requirement": "反射控制点：默认预选段与指针命中段的 `#control-net` 中至少含 1 条控制多边形 polyline、2 个实心方块控制点与 1 个空心圆反射控制点；把指针移到 `#sheer` 的 S 段时，空心圆与前一段末控制点关于公共端点严格中心对称（坐标之和的一半等于端点坐标，误差 < 0.5）。",
+      "review": "待测：反射控制点随所选 S 段变化的坐标关系待专门验证。"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "criterion": 4,
+      "status": "partial",
+      "requirement": "绝对/相对并排：读数条同时存在以 `绝对  C` 开头与以 `相对  c` 开头的两行文本，且相对行的每对数值等于绝对行对应数值减去当前点坐标；验证小窗内由两串分别构建的 path 完全重合，标注 Δ=0。",
+      "review": "部分：绝对/相对读数可见；每对差值未逐项核验。"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "criterion": 5,
+      "status": "partial",
+      "requirement": "零长子路径与 pathLength：构件卡④ 的 round 行出现 6 个圆点、square 行出现 6 个方块，butt 行对应像素带在 PNG 中 alpha 全为 0；构件卡⑥ 的两条长度不同的曲线各自呈现恰好 4 段等长实线。",
+      "review": "部分：零长子路径和 dash 对照可见；6/6 点及 4 段长度未逐像素验证。"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "矩阵台：三面断面拼成闭合的轴测分段箱且共边无缝；`#iso-check-a` 与 `#iso-check-b` 的 getScreenCTM() 六个分量逐项之差 < 1e-6；左舷组的 transform 为 `matrix(-1 0 0 1 2290 0)`，其标签在 PNG 中为反写。",
+      "review": "部分：轴测箱和反写标签可见；两组 CTM 的 1e-6 比较未加入自动检查。"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "绝对单位：六根标尺的右端 x 在 PNG 中对齐（差 ≤ 1px），DOM 中 width 属性分别为 96px / 1in / 2.54cm / 25.4mm / 72pt / 6pc；嵌套 viewBox 内的 1in 尺渲染宽度明显不等于 96px。",
+      "review": "部分：绝对单位标尺已目视；六种单位右端 1 px 差未量化。"
+    },
+    {
+      "scene": "ship-lofting-floor",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "交互与静帧：无任何点击、仅两次 pointermove 后 `window.__INTERACTION_COUNT__` 增大；指针状态点在型内为绿、型外为红且读数条文字随之切换；SMIL 被 pauseAnimations()+setCurrentTime(2.4) 冻结后 `#dwl` 仍位于两条常驻虚线端态之间，截图透明像素 ≥ 8%。",
+      "review": "部分：固定静帧、交互计数、RGBA 已验；型内外指示切换待专门操作。"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "criterion": 1,
+      "status": "partial",
+      "requirement": "试印条 B 行六个倍率样块在 PNG 上量得的笔画宽度一致（约 0.6 设备像素，彼此差 <0.2px）；A 行 0.25× 样块的平均 alpha 低于 B 行同块的 1/3，4× 样块笔画明显加粗且虚线节距约为 1× 样块的四倍。DOM 中 B 行每条 path 的 `vector-effect` 计算值为 `non-scaling-stroke`，A 行为 `none`。",
+      "review": "部分：non-scaling-stroke DOM 已验；亚像素笔宽与 alpha 比未量化。"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "开窗处真 `<ellipse>` 的描边在四个方位粗细一致；紧邻的被 `scale(1.18,0.72)` 的 `<circle>` keyline 在左右两侧的描边宽度至少是上下两侧的 1.5 倍，可在 PNG 上直接量出。",
+      "review": "部分：圆/椭圆对照可见；四方向描边比待测。"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "团花右半（`paint-order: stroke fill markers`）花瓣的可见瓣宽明显大于左半，且外缘无描边侵蚀；左半瓣内侧存在一条描边与 0.4 填充相乘产生的深色带。DOM 中两个花瓣组的 `paint-order` 计算值不同。",
+      "review": "部分：paint-order 两半对照可见；乘色暗带待定点取样。"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "criterion": 4,
+      "status": "conflict",
+      "requirement": "轮位对照的两枚卫星玫瑰线自同一锚点出发落在不同位置，中心距 ≥ 120px；DOM 中两组的 `transform` 属性分别为 `translate(210 0) rotate(24)` 与 `rotate(24) translate(210 0)`。",
+      "review": "需修订：相同锚点上 translate(210 0)/rotate(24) 的交换差距是 2×210×sin(12°)≈87.3，不可能同时满足原文 ≥120。"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "criterion": 5,
+      "status": "partial",
+      "requirement": "套准十字的实心十字位于未平移处，与其虚线鬼影相距约 120px；DOM 中该元素同时存在 `transform=\"translate(120 0)\"` 属性与计算值为 `none` 的 CSS transform。",
+      "review": "部分：CSS 覆盖 transform 的样本可见；120 px 几何差待专门断言。"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "静帧（截图先于任何指针事件）中右栏读出面板已显示默认族 H-11 的 R/r/d/N 与 sx/sy，且 sx≠1（受 `#field` 的 scale 与整版 3D 微倾影响），末行为「笔宽 0.60 设备像素」。指针移入团花后 `window.__INTERACTION_COUNT__` 增加，且面板族名从 H-11 变为被命中环的族名。",
+      "review": "部分：默认 H-11 参数可读；命中特定团花后族名变化待专门断言。"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "criterion": 7,
+      "status": "unverified",
+      "requirement": "底纹带最内子带（行距 1.7px）在 PNG 中仍呈交替的着墨列与透明列，不是一块实色；四条子带的虚线节奏各不相同，其中 `stroke-dasharray=\"7\"` 那条呈现二倍周期的墨/空互换。",
+      "review": "待测：最细底纹的着墨/透明列和虚线周期未量化。"
+    },
+    {
+      "scene": "guilloche-intaglio-plate",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "摩尔纹对照 A 块的交叉点像素比其线条本身更暗（多次 alpha 叠加），B 块的交叉点与线条亮度一致；全图透明像素 ≥ 8%、可见像素 ≥ 3.5%、彩色像素 > 2500。",
+      "review": "部分：透明度/彩色像素通过；交点与线条 alpha 比尚未测量。"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "criterion": 1,
+      "status": "partial",
+      "requirement": "DOM：44 条幕带渐变、96 个色轮楔渐变与 #crestRamp/#titleRamp/#labelRamp 的 childElementCount 全为 0 且 href 解析到 #auroraStops；#auroraStops 内 <stop> 数为 7；document.querySelectorAll('image').length===0。",
+      "review": "部分：44 幕带共享母版已验；全部 96 色轮楔继承和无 image 断言待补。"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "criterion": 2,
+      "status": "unverified",
+      "requirement": "PNG：沿 y=300 横扫 B 族幕带区间，绿-红峰对称镜像出现 ≥6 次且相邻像素通道差始终 <12/255（reflect 无缝）；标定卡 repeat 样条同排采样出现 ≥10 处 >60/255 的硬跳变。",
+      "review": "待测：reflect 与 repeat 扫描线的通道跳变阈值未量化。"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "criterion": 3,
+      "status": "unverified",
+      "requirement": "PNG：③号球圆心 22px 半径内颜色标准差 <2（fr 实心内盘），④号 fr=0 孪生球同区域标准差 >25，且两球外缘直径相同。",
+      "review": "待测：两球内盘颜色标准差阈值未量化。"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "criterion": 4,
+      "status": "unverified",
+      "requirement": "PNG：②号光泽球最亮像素相对球心偏移 dx≤-8 且 dy≤-8，同时球外缘拟合圆的残差 <1px（焦点偏移不改变外缘形状）。",
+      "review": "待测：最亮像素位置与外缘圆残差未拟合。"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "criterion": 5,
+      "status": "unverified",
+      "requirement": "PNG：色轮沿 r=88 采样 352 点，色相单调推进且只跨越一次 0/360，相邻样本色相差 <6°、亮度无阶跃（96 段拼缝不可见），唯一断口是正上方 8° 零级缺口。",
+      "review": "待测：352 点色轮色相单调性未量化。"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "PNG：滤光片槽 A 内部为 #f2a154(±8) 而槽 B 内部 alpha=0，两者虚线框都完整可见。",
+      "review": "部分：滤光片正反例已目视；指定色值与 alpha 待定点采样。"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "PNG：主谱带在 x=200/700/1200 三列颜色随 x 单调推进，而正下方 objectBoundingBox 孪生条在同三列颜色互不相同且各自跨越整个色阶。",
+      "review": "部分：两种渐变坐标对照可见；指定三列单调性待取样。"
+    },
+    {
+      "scene": "auroral-spectrograph",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "动画与交互：export=1 下 svg.animationsPaused()===true 且 getCurrentTime()≈4.2，静帧仍可读；对比 setCurrentTime(0) 与 4.2 两帧，幕布区像素差异面积 >8%；派发 pointermove 到舞台 (0.54W,0.46H) 后 window.__INTERACTION_COUNT__≥1 且母版第 3 个 stop 的 offset.baseVal.value 相对初值改变 >0.02。",
+      "review": "部分：pointer 修改母版 stop 已自动检查；0/4.2 秒幕布差异面积未测。"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "criterion": 1,
+      "status": "verified",
+      "requirement": "DOM：#dent12 / #dent16 / #satin5-24 / #satin5-36 / #laneBB 五个 <pattern> 都只有 href 与覆盖属性、childElementCount === 0；PNG 上它们各自渲染出可见且互不相同的 tile。",
+      "review": "已验：五个继承 pattern 无子画稿，渲染纹样均可见。"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "criterion": 2,
+      "status": "unverified",
+      "requirement": "PNG：穿筘图四条带的线间距按 8:12:16 变化而线宽恒为 1.5，第四条呈十字交叉；量取相邻线中心距误差 ≤1px。",
+      "review": "待测：8/12/16 线距的 1 px 误差未量化。"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "PNG：接缝检验尺车道 1 主区可见规则的浅色接缝网格（周期 17.3），其正下方修正条同色同画稿而无任何缝隙；车道 2 的斜纹角与车道 1 明显不同；车道 3 主区全区无接缝。",
+      "review": "部分：三车道及修正条已目视；无缝条件需逐像素检验。"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "criterion": 4,
+      "status": "partial",
+      "requirement": "PNG：车道 3 修正条左右两半噪声粒感相近，但左半每 45 单位有一道横竖断纹，右半连续 —— 对应 stitchTiles=\"noStitch\" 与 \"stitch\"。",
+      "review": "部分：stitch/noStitch 对照可见；45 单位断纹的周期未测。"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "criterion": 5,
+      "status": "partial",
+      "requirement": "PNG：幅宽三条中同一枚花样由近圆逐步拉成横椭圆（宽高比随 96/168/240 单调增大），右侧 userSpaceOnUse 对照方块内仍为正圆。",
+      "review": "部分：幅宽三条的拉伸对照可见；宽高比尚未拟合。"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "PNG：足尺放大样同时可见 96 单位的缎纹棋盘块与 6 单位的浮长排线两级平铺，且底层亚麻扫描纹理在块间连续。",
+      "review": "部分：两级平铺与亚麻底纹可见；96/6 周期未测。"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "criterion": 7,
+      "status": "verified",
+      "requirement": "PNG/DOM：两枚 20 倍放大的 3×3 纹版孔精灵 href 相同、image-rendering 分别为 auto 与 pixelated；PNG 上左枚边缘为渐变过渡、右枚为硬直角方块。",
+      "review": "已验：href 相同、pixelated 设置已自动检查，软/硬边缘已目视。"
+    },
+    {
+      "scene": "jacquard-loom-draft",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "交互与静帧：dispatchEvent 一次 pointermove 到放大样内某点后，读数条文本匹配 /经 #\\d+ · 纬 #\\d+/ 且数值随坐标变化，三条车道的 patternTransform / feImage x 同步更新；pauseAnimations() + setCurrentTime(0) 后纹版带孔位与踏板行对齐，导出 PNG 的四角为完全透明像素。",
+      "review": "部分：真实命中目标上的 pointer 更新读数、四角透明通过；patternTransform 与 feImage 同步尚未专门断言。"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "criterion": 1,
+      "status": "partial",
+      "requirement": "主拓片为墨底白字：在墨区背景采样的像素亮度 < 40，字口采样 > 190；DOM 中 #zhengwen 下恰有 8 个 <text>，computed writing-mode 全为 vertical-rl，其中 1 列 text-orientation 为 mixed、其余为 upright，最右列列心 x ≈ 836。",
+      "review": "部分：恰好八列 vertical-rl 已自动检查；墨纸亮度与列心待取样。"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "题额与碑侧题记共用同一条弧：两个 textPath 引用的路径在几何上同圆心同半径（原生分支下 href 均为 #arc-e），其中一个带 side=\"right\"；PNG 中弧的外侧与内侧各有一行字，内侧一行的字符朝向与外侧相反；碑侧题记末尾至少一个字符因溢出未渲染（getNumberOfChars 大于实际有 extent 的字符数）。",
+      "review": "需实测：textPath side 的支持/替代路径因引擎而异；反向字形和末尾溢出字符数未逐字核验。"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "逐字旋转成立：每个正文 <text> 的 rotate.baseVal.numberOfItems ≥ 6，且同一列相邻字符的 getExtentOfChar 外接框宽高比互不相同，说明旋转逐字生效、末值向后重复。",
+      "review": "部分：逐列 rotate 列表长度已验；逐字 extent 长宽比待测。"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "criterion": 4,
+      "status": "partial",
+      "requirement": "朱拓小样是裁切窗口：笔画内部存在 R > 150 且 R−B > 60 的朱砂像素，而笔画外 6px 处像素与纸色的色差 < 12；DOM 中 clipPath#clip-zhu 的后代同时包含 <text> 与 <textPath>。",
+      "review": "部分：朱拓裁切样本已目视；指定内外色差未测。"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "criterion": 5,
+      "status": "unverified",
+      "requirement": "mask 的灰度可辨：主拓片中被标为「未拓透」的 4 个字，其笔画像素亮度落在 80–170 之间，既不等于全墨也不等于纸色，与二值裁切区分开。",
+      "review": "待测：四个未拓透字符的 80–170 亮度未取样。"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "条件处理只放行一个分支：<switch> 的 5 个子节点里 getBoundingClientRect().width > 0 的恰好 1 个，带 requiredExtensions 的诱饵分支为 0×0；语言分支账中被打勾的行与该子节点一致，且截图上打印了 navigator.language 原值。",
+      "review": "部分：systemLanguage 分支及默认分支已自动检查；恰有一个非零 bbox 待专门断言。"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "骑缝印绕满一周并压住接缝：两段环形 textPath 的首尾间隙 < 8px，印记包围盒同时跨过 x=898 与 x=920 两条版面边界。",
+      "review": "部分：骑缝印跨边可见；首尾间隙和边界跨度待量化。"
+    },
+    {
+      "scene": "stele-rubbing-hall",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "交互与可选性：pointermove 后 window.__INTERACTION_COUNT__ 增加，拓包圆心与指针换算所得用户坐标误差 ≤ 1，该处墨色比移动前更深；导出前 getSelection().toString().length ≥ 6，而 mask/clipPath 内克隆文本层的 computed user-select 为 'none'。",
+      "review": "部分：通用 pointer 计数通过；拓包坐标、墨色差、选中字符数待专门检查。"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "criterion": 1,
+      "status": "verified",
+      "requirement": "截图四周留有透明纸边（alpha=0 像素 ≥ 全图 12%），纸面为暖白 `#f4ead6`，四角十字规矩线与左缘毛边可见。",
+      "review": "已验：透明纸边和 RGBA 通过，暖白纸面及规矩线已目视。"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "DOM：`document.fonts.check('16px \"Praktika VF\"')` 为 true；字号阶梯六行印出的宽度与各自 `getComputedTextLength()` 相差 < 0.5，且六个数值严格递增。",
+      "review": "部分：字体加载与文本度量非零通过；六行读数的误差/单调性待逐项核验。"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "强制栏宽试验：`lengthAdjust=\"spacing\"` 样本的 `getExtentOfChar(0).width` 与自然样本相差 < 0.05 而实测跨距等于 textLength ±0.5；`spacingAndGlyphs` 样本的 `getExtentOfChar(0).width` ≤ 自然值的 0.9；两行盖出的判定印章文字分别为「字距被挤」与「字形被压」。",
+      "review": "部分：两种 lengthAdjust 及判定印章可见；首字 extent 精度阈值未测。"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "criterion": 4,
+      "status": "partial",
+      "requirement": "级联五行的 `getComputedStyle(el).fill` 依次为 `rgb(20,87,122)`、`rgb(179,39,30)`、`rgb(29,122,75)`、`rgb(122,63,160)`、`rgb(0,0,0)`，且每行色片元素的 fill 与该字符串逐字相同，旁边印出的 rgb() 文本一致。",
+      "review": "部分：五行级联对照可见；全部 computed fill 与色片字符串未逐条比对。"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "criterion": 5,
+      "status": "unverified",
+      "requirement": "截图中标签底板随文字长度张缩：最长栏目标题的底板像素宽度至少为最短者的 2 倍；底板为半透明（板内取样像素既不等于纯底板色也不等于纸色）。",
+      "review": "待测：底板宽度倍数和半透明合成色未量化。"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "标题的 getBBox 虚线框宽度与 `getComputedTextLength()` 相差 < 1，且该框外仍存在描边墨色像素（证明几何框不含 7u 描边）。",
+      "review": "部分：标题 bbox 外有描边已目视；宽度误差和外侧采样未自动验证。"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "criterion": 7,
+      "status": "unverified",
+      "requirement": "空白检验孪生对：`white-space:pre` 行与 `xml:space=\"preserve\"` 行的 `getComputedTextLength()` 相等（±0.5），且均 ≥ 折叠孪生行的 1.8 倍。",
+      "review": "待测：pre/xml:space 的长度相等与 1.8 倍阈值未实测。"
+    },
+    {
+      "scene": "letterpress-type-specimen",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "pointermove 之后 `window.__INTERACTION_COUNT__` 增加，游标读数栏的 textContent 变为命中字符的序号与实测前进宽；`?export=1` 静帧中该读数栏已有默认命中的 32pt 阶梯行读数，且动画层被冻结在同一帧（两次渲染像素一致）。",
+      "review": "部分：默认读数、pointer 与冻结通过；命中字符序号与两次渲染像素一致未专门验证。"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "criterion": 1,
+      "status": "verified",
+      "requirement": "回流支路的 marker-start 与 marker-end 在 DOM 中指向同一个 id（#mk-arrow），而 PNG 上两枚箭头分别朝向管线两端，方向相反。",
+      "review": "已验：同一 auto-start-reverse marker 服务两端，箭头相背已目视。"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "W1 中点标记的旋转角为入边与出边方向的平均（读数 45°±1°），与画出的两枚幽灵切向箭头都不重合；零长段样本的标记方向与其相邻非零段一致。",
+      "review": "部分：角平分线和零长段对照可见；45±1° 未拟合。"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "同一个 #mk-valve 在蒸汽管上取样像素接近 --steam(#e8792b)、在冷却水支管上接近 --cw(#7f9db0)，且 DOM 中两条管线的 marker-mid 解析为同一 id、场景中该 marker 只定义一次。",
+      "review": "部分：阀符只定义一次且使用 context paint 已自动验证；两管道采样色值待测。"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "criterion": 4,
+      "status": "partial",
+      "requirement": "W2 中 polygon 与 polyline 使用同一份 points（DOM 可比对字符串相等），但起点标记的渲染角度可见不同；奇数坐标样本只渲染到最后一个完整坐标对。",
+      "review": "部分：polygon/polyline/奇数坐标对照已目视；完整 points 字符串和渲染末点待专门核验。"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "criterion": 5,
+      "status": "unverified",
+      "requirement": "底带三条尺寸线（0°、90°、30°）的端撇与各自线的夹角均为 90°±2°；量程短撇整体位于管线下方（refY=0 生效），不跨过线心。",
+      "review": "待测：三个尺寸线端撇的 90±2° 未量化。"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "W3 中被 scale(3) 的管线描边在 PNG 上仍量得约 1px，而其箭头面积明显大于右侧未缩放孪生件的同款箭头。",
+      "review": "部分：缩放描边/marker 对照可见；1 px 与箭头面积未测。"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "调用 pauseAnimations() 并 setCurrentTime(2.4) 后，量程游标停在管段中部且不与端点重叠，#mk-cursor 的 refX.baseVal.value 读数非 0；同一时刻阀符处于半开姿态。",
+      "review": "部分：静帧游标与阀符姿态可见；refX 动画值待专门断言。"
+    },
+    {
+      "scene": "pipeline-mimic-board",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "在任一管段上派发 pointermove 后：该 polyline 带有 .live 类，getComputedStyle 的 markerMid 指向高亮标记 id，读数行出现该点 DN 与流向文字，PNG 上该整条线的符号换色。",
+      "review": "部分：pointer 计数通过；管段 live 类、markerMid 和换色联动待专门验证。"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "criterion": 1,
+      "status": "verified",
+      "requirement": "DOM：`#overprint` 内 `result=\"src\"` 被四条 ink 分支的 `in` 引用，三条 `feComposite[operator=\"arithmetic\"][k1=\"1\"][k2=\"0\"][k3=\"0\"][k4=\"0\"]` 把 cyanT/magT/yelT/blkT 串成 cmyk，且滤镜内所有 in/in2 要么是标准输入名要么指向已存在的 result（无悬空引用）。",
+      "review": "已验：滤镜所有命名输入按序解析，三个 arithmetic 乘积节点已自动核验。"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "criterion": 2,
+      "status": "unverified",
+      "requirement": "PNG：同空间回验片（sRGB）190×120 区域平均亮度 < 12/255；跨空间回验片（linearRGB 叠印）同区域 > 40/255，两者相差 ≥ 3 倍——分色可逆与“为什么发灰”同时成立。",
+      "review": "待测：sRGB/linearRGB 回验片平均亮度与三倍差未量化。"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "criterion": 3,
+      "status": "unverified",
+      "requirement": "PNG：一致性验版片（arithmetic 与 feBlend multiply 的 difference ×6）平均亮度 < 8/255，最大亮度 < 40/255。",
+      "review": "待测：arithmetic/multiply 差异片平均值与最大值未量化。"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "criterion": 4,
+      "status": "unverified",
+      "requirement": "PNG：沿 21 阶灰梯尺中线采样 300 点，能分出 21 个平台，平台内标准差 ≤ 2/255、相邻平台差 ≥ 8/255；同排加噪那条的相邻列亮度差方差高于 discrete 那条，证明抖动生效。",
+      "review": "待测：21 阶平台、阶内标准差、抖动方差未量化。"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "criterion": 5,
+      "status": "unverified",
+      "requirement": "PNG：放大镜圆内沿水平中线扫描，左半 pattern 网点每个点边缘的灰度过渡 ≤ 2 像素、右半 feImage 网屏 ≥ 4 像素，而两半的点心间距差 ≤ 1px——同一网线数，两种栅格化。",
+      "review": "待测：放大镜两侧网点过渡宽度和点心间距未测。"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "criterion": 6,
+      "status": "unverified",
+      "requirement": "PNG：半像素 ×8 对照区里，`translate(0.5 0.5)` 一侧的竖线只占 1 列且最暗值 ≤ 40/255；整数坐标一侧占 2 列且最暗值 ≥ 90/255。",
+      "review": "待测：半像素两侧线宽与亮度下限未测。"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "criterion": 7,
+      "status": "unverified",
+      "requirement": "PNG：四张分色片各取 40×40 实地区，青片 hue ∈ [185°,205°]、品红 ∈ [315°,335°]、黄 ∈ [45°,62°]，黑片饱和度 < 0.08。",
+      "review": "待测：四张分色片的指定实地区色相/饱和度未取样。"
+    },
+    {
+      "scene": "four-colour-press-check",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "DOM + PNG：两次 pointermove 后 `__INTERACTION_COUNT__` 增加、`#loupe` 的 transform 跟随指针；拖动品红曲线面板后 `#curve-m` 里 feFuncG 的 `tableValues.baseVal.numberOfItems` 保持 9 且第 5 项数值改变，同空间回验片平均亮度随之上升 ≥ 20/255。",
+      "review": "部分：pointer 与九点曲线结构通过；实际拖动第五点及回验片亮度变化未验证。"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "criterion": 1,
+      "status": "verified",
+      "requirement": "PNG：透明像素 ≥18%（板块缝隙与切角），可见像素 ≥60%，彩色像素 ≥2500（琥珀/青灯色带与 HUD 文字）；画面四周无因 lighting 输出未夹形而产生的不透明矩形。",
+      "review": "已验：透明 24% 左右、可见 75% 左右、彩色像素远超 2500，lighting 区无外溢矩形。"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "criterion": 2,
+      "status": "verified",
+      "requirement": "DOM：`#f-plate` 内 feDiffuseLighting 与 feSpecularLighting 的 `surfaceScale.baseVal` 相等，且与 HUD `#hud-surface-scale` 的文本数值一致；点击深度标尺第 1 片（−12）后三者同步变为 −12。",
+      "review": "已验：真实点击 -12 深度尺，两路 surfaceScale 和 HUD 同步为 -12。"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "DOM：读片框九块的 feConvolveMatrix 两两不同——第一行 `order` 全为 \"3 3\" 而 `kernelMatrix` 互异，第二行 `order` 依次为 3×3 / 5×5 / 7×1（末块 `targetX=\"6\"`），第三行 `edgeMode` 依次为 duplicate / wrap / none；每块下方打印的数字网格与 `kernelMatrix.baseVal` 逐项相等。",
+      "review": "部分：核矩阵种类与三种 edgeMode 已自动检查；九块打印数字逐项一致尚未核验。"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "criterion": 4,
+      "status": "unverified",
+      "requirement": "PNG：浮雕块左上亮、右下暗（沿光轴的亮度梯度符号相反）；边缘块的中位亮度显著低于源裁切且字形呈亮线；锐化块在字口边缘的梯度峰值高于源裁切（可见光晕）。",
+      "review": "待测：浮雕/边缘/锐化的方向梯度和峰值未量化。"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "criterion": 5,
+      "status": "unverified",
+      "requirement": "PNG：edgeMode 三块的边缘行为可测——wrap 块右上角出现源图左下角的橙色定位条，none 块外圈 8px 的平均亮度显著低于块中心，duplicate 块外圈无暗环且呈条纹拖影。",
+      "review": "待测：三种 edgeMode 的边缘均值及跨边定位条未取样。"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "DOM + PNG：把 `#lamp-head` 拖动 200px 后，feSpotLight 的 `x.baseVal/y.baseVal` 随之更新，`#cast-shadow` 的 transform 改变，重新截图时铭牌高光质心位移 >120px；把 limitingConeAngle 调到 8° 后，铭牌上锥外区域的平均亮度下降且出现清晰圆形边界。",
+      "review": "部分：实际拖动灯头 150/80 px 并观察 transform 改变；原 200 px 高光质心及 8° 锥角指标未测。"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "DOM：在任一手柄上 pointerdown 会触发 `setPointerCapture`（该手柄收到 `gotpointercapture`、环色变琥珀），指针移出 `#stage` 边界仍继续跟随，pointerup 后 `releasePointerCapture` 且手柄环复位。",
+      "review": "部分：真实 pointer capture 获取/释放通过；移出整个 stage 边界的持续拖动未测。"
+    },
+    {
+      "scene": "forge-metallography-bench",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "DOM：仅移动指针（不按键）即可使 `window.__INTERACTION_COUNT__` 递增，事件日志追加带 `#target-id` 的行，且悬停某读片框时日志同时出现 mouseover（冒泡多次）与 mouseenter（仅一次）。",
+      "review": "部分：pointer 计数及日志可见；mouseover/mouseenter 次数差未专门计数。"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "criterion": 1,
+      "status": "verified",
+      "requirement": "DOM：#colony-a / #colony-b / #colony-c 三组合计 ≥72 条 <path>，其 d 属性中的 M 命令总数 ≥12000，且每条的 namespaceURI 均为 http://www.w3.org/2000/svg。",
+      "review": "已验：72 条原生 SVG path，共 37748 个 M 分段。"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "DOM：#colony-a、#colony-b 的 filter 写在组元素上、子 path 无 filter 属性；#colony-c 相反（组上无、24 条 path 各带 filter）。PNG 中 C 皿边缘可见互相穿插、不合并的多圈水痕，A/B 为一条连续湿边。",
+      "review": "部分：A/B 组滤镜与 C 逐路径滤镜已验；湿边连通性尚未量化。"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "criterion": 3,
+      "status": "conflict",
+      "requirement": "DOM：#warp-noise、#bleed-noise、#grain-noise 的 seed 均等于 #master-noise 的 seed；导出瞬间前两者的 baseFrequencyX 等于母版 animVal（误差 ≤1e-4），#grain-noise 等于母版初值 ×64 且与 animVal 无关。",
+      "review": "需修订：构造要求 bleed=master×2.2，原验收却要求二者相等；实际检查 ×2.2，grain 固定初值×64。"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "criterion": 4,
+      "status": "verified",
+      "requirement": "PNG：三块皿底铭牌 A-03 / B-07 / C-11 与接种日期 2026-03-14 全部清晰可读（这些文字位于 warp 与 liquid 滤镜链之外）。",
+      "review": "已验：三皿编号和接种日期均在滤镜之外并可读。"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "criterion": 5,
+      "status": "unverified",
+      "requirement": "PNG：A 皿菌落外缘 3px 环带的平均亮度比菌落内部低 ≥8%（水彩积色边成立）；同一条水平扫描线上，B 皿的亮度过零点数至少是 A 皿的 1.6 倍（turbulence 脉络 vs fractalNoise 云团）。",
+      "review": "待测：外缘亮度及 B/A 过零点比未量化。"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "PNG：灯下抖动带内每条横向基准线的左右端点 x 偏移 <1px，中段 y 起伏 ≥3px——只有纵向抖动，无横向位移。",
+      "review": "部分：已修正中性 R=.5 的位移公式；线端偏移和纵向幅度未逐像素测量。"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "criterion": 7,
+      "status": "unverified",
+      "requirement": "PNG：记录纸卡片内任取 200×200 区域，相邻像素亮度差的标准差 >3；舱内背板同尺寸区域 <1.5（纸纹存在且仅限卡片）。",
+      "review": "待测：记录纸/背板亮度差的两个标准差阈值未取样。"
+    },
+    {
+      "scene": "mycelium-culture-chamber",
+      "criterion": 8,
+      "status": "verified",
+      "requirement": "DOM + PNG：#ns-control 试片有 4 个子节点，其中恰有 1 个 namespaceURI 为 http://www.w3.org/1999/xhtml；该试片在 PNG 中只渲染出 3 根菌丝。",
+      "review": "已验：四个节点中一个 HTML namespace，最终截图仅三条曲线。"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "criterion": 1,
+      "status": "partial",
+      "requirement": "DOM：`getComputedStyle(document.querySelector('.board'))` 的 filter / clip-path / mask 分别解析到 `url(\"#ns-f-neon\")`、`url(\"#ns-clip-plate\")`、`url(\"#ns-m-tube-fade\")`，与 SVG 招牌组上的三个属性字符串逐一相同——同一枚滤镜、同一条裁切、同一张掩码被 SVG 图形与 HTML 元素同时引用。",
+      "review": "部分：HTML board 引用同一滤镜已验；clip/mask 的三重引用一致待完整断言。"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "criterion": 2,
+      "status": "unverified",
+      "requirement": "PNG：招牌笔画外法线方向 22px 处的像素红/蓝通道比台面基线高 ≥12%，粉色外晕外缘（亮度阈值轮廓）离笔画 ≥26px；HTML 价目板文字外同样距离处出现同色相外晕，两者色相角差 < 8°。",
+      "review": "待测：SVG 与 HTML 光晕宽度、通道增幅、色相误差未量化。"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "criterion": 3,
+      "status": "unverified",
+      "requirement": "PNG：做法卡③（四基元链）与卡⑤（feDropShadow）的阴影相对字形质心的偏移均为 (6,8)px ±1.5px，两卡阴影 alpha 剖面的逐点差异 < 4%。",
+      "review": "待测：四基元与 drop-shadow 的质心偏移和 alpha 剖面未量化。"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "criterion": 4,
+      "status": "partial",
+      "requirement": "PNG：半径尺中 `radius=\"10 0\"` 样件的包围盒比 `radius=\"0 0\"` 宽 ≥18px 而高度差 < 3px；`radius=\"0 10\"` 反之（高 ≥18px、宽差 < 3px）。",
+      "review": "部分：横纵 morphology 半径对照可见；18/3 px bbox 阈值未测。"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "criterion": 5,
+      "status": "partial",
+      "requirement": "PNG：三块水洼的连通亮区计数依次为 1（subtract 单月牙）、1（intersect 透镜且面积最小）、2（exclude 双月牙），且 intersect 面积 < subtract 面积 < 两层遮罩并集面积。",
+      "review": "部分：三种 CSS mask 合成形状已目视；连通域及面积排序未自动计算。"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "criterion": 6,
+      "status": "unverified",
+      "requirement": "PNG：内阴影卡的暗带完全在字形内部——形状内边缘内 3px 处亮度比字形形心低 ≥35%，形状外 3px 处亮度与卡面背景差 < 5%（与投影卡的外侧暗斑形成对照）。",
+      "review": "待测：内阴影内外 3 px 的亮度阈值未取样。"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "DOM：六块做法卡的 `getComputedStyle(...).clipPath` 依次以 `inset(`、`circle(`、`ellipse(`、`polygon(`、`path(`、`rect(`（或 `@supports` 回退后的 `inset(`）开头；全文档 `document.querySelectorAll('clipPath').length === 1`（只有共享的 `#ns-clip-plate`），证明卡片裁切全部来自 CSS 基本形状。",
+      "review": "部分：唯一共享 clipPath 已验；六张卡的 computed clipPath 列表待逐项断言。"
+    },
+    {
+      "scene": "neon-sign-workshop",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "交互与透明：合成 pointermove 到 (200,120) 与 (1200,820) 两次采样后，`#ns-morph.radiusX.baseVal` 与 `#ns-halo.stdDeviationX.baseVal` 均随之改变、`window.__INTERACTION_COUNT__` 递增，且 SVG 招牌与 HTML 价目板同一相对采样点的外晕亮度变化同号；导出的 PNG 四角 alpha = 0，全透明像素占比 ≥ 8%。",
+      "review": "部分：两次 pointer 改变 morphology/blur、RGBA 和四角透明通过；SVG/HTML 光晕变化同号未测。"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "criterion": 1,
+      "status": "verified",
+      "requirement": "冻结帧：导出时 `svg.animationsPaused() === true` 且 `svg.getCurrentTime()` 为 7.40±0.01；PNG 中擒纵叉与擒纵轮齿处于咬合冲量中段、报时锤抬起、播放头落在时序尺 x≈643。",
+      "review": "已验：冻结 7.4 秒、机构静帧和播放头已检查。"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "criterion": 2,
+      "status": "verified",
+      "requirement": "事件日志：`#event-log [data-fired=\"1\"]` 至少 8 行，且 beginEvent / repeatEvent / endEvent 三类各至少 1 行；\"拍数 #N\" 与摆轮实际 repeatEvent 次数一致（(7.40−2.40)/0.8 = 6）。",
+      "review": "已验：三种 SMIL 事件至少八行，截图拍数为六。"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "倒带可核对：调用 `setCurrentTime(2.05)` 后重截图，分针角度与 7.40 帧相差 ≥ 30°，运输固定夹在该帧仍然可见，滑块把手 x 与 t 的线性映射误差 < 2px。",
+      "review": "部分：回拨 2.05 秒与分针变换不同已测；角度 ≥30°、夹具和滑轨误差待测。"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "criterion": 4,
+      "status": "conflict",
+      "requirement": "discard：Chrome / Safari 中 t>2.5s 后 `document.getElementById('shipping-clamp') === null`；Firefox 中该元素仍在 DOM 但 computed opacity 为 0，且支持状态铭牌文字显示\"本引擎忽略，已用 set 兜底\"。",
+      "review": "需修订：当前 Chrome 忽略 discard；场景明确显示 set 兜底，不能要求此引擎把元素从 DOM 删除。"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "criterion": 5,
+      "status": "partial",
+      "requirement": "dur 对照：同一帧下主摆轮与对照次摆的 rotate 角度差 ≥ 20°，时序尺上两条泳道条宽比为 0.8 : 2.4（±2px）。",
+      "review": "部分：快慢摆轮及泳道已目视；角度差和条宽比未量化。"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "占位对照：含 visibility=\"hidden\" 夹板的组 `getBBox().width` 比 display=\"none\" 组大 ≥ 90 user units，两条虚线外框在 PNG 中均可见，且隐藏夹板内的红宝石轴承依然显影。",
+      "review": "部分：visibility/display bbox 对照可见；90 单位差待实测。"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "criterion": 7,
+      "status": "partial",
+      "requirement": "keyPoints：同一帧两枚从动件在 `#eot-cam-profile` 上的归一化弧长位置相差 ≥ 0.3（用 getPointAtLength 反查最近点），rotate=\"auto\" 箭头朝向与该点切线夹角 < 8°。",
+      "review": "部分：两从动件位置不同已目视；弧长反查与切线夹角未量化。"
+    },
+    {
+      "scene": "escapement-chronometer",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "交互：pointermove 使 `window.__INTERACTION_COUNT__` 递增且 HUD 时间读数刷新；连点 restart=\"never\" 的棘爪按钮其计数停在 1，restart=\"always\" 的计数随每次点击递增，restart=\"whenNotActive\" 只在空闲时递增。",
+      "review": "部分：pointer 计数通过；三种 restart 按钮多次真实点击计数待测。"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "criterion": 1,
+      "status": "verified",
+      "requirement": "DOM：stage.querySelectorAll('clipPath').length ≥ 14 且 mask 元素 ≥ 12；除刻意的 #missing-core 与 #nope 两处反例外，所有 clip-path / mask 的 url(#…) 都能在文档内解析到同名元素。",
+      "review": "已验：clip/mask 数量达标，局部引用检查仅豁免明确标注的 missing-core/nope 反例。"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "criterion": 2,
+      "status": "verified",
+      "requirement": "DOM：四个处理顺序格的命中缩略图都带 data-hit-ratio；含裁切的格 ≤ 0.62，纯掩码格 ≥ 0.97 —— 被裁掉的采样点未命中、被遮罩淡到不可见的采样点仍然命中。",
+      "review": "已验：命中率约 .431/.431/.431/.974，满足裁切/掩码差别。"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "criterion": 3,
+      "status": "verified",
+      "requirement": "PNG：P2 的 0% 采取率段（空 clipPath，约 x 200–400 / y 485–500）像素 alpha 全为 0；紧邻的 clip-path=\"none\" 对照段在同一扫描行 alpha > 200。",
+      "review": "已验：y=490 的 160 点 alpha 全零，相邻 none 区 alpha=255。"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "criterion": 4,
+      "status": "verified",
+      "requirement": "PNG：P4 亮度/透明度对照两格在红斑的同一相对位置上，luminance 格的合成 alpha 落在 0.18–0.25（实测参考 54/255），alpha 格 ≥ 0.98。",
+      "review": "已验（更正测量方法）：先隔离不透明面板，红色 luminance=54/255，alpha=1；整图含底板不能测遮罩自身 alpha。"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "criterion": 5,
+      "status": "verified",
+      "requirement": "PNG：P5 揭开锋面 —— y = 560 一行自 x 1038 起连续有像素，直到 x 落在 1230–1260 之间中断、其右为透明，证明前四段已冻结完成而第五段停在动画中途。",
+      "review": "已验：y=560 扫描锋面截止 x=1238，右侧透明。"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "criterion": 6,
+      "status": "verified",
+      "requirement": "交互：指针移到 (672,468) 后读数文本含「未命中」，移到 (756,414) 后含「仍命中」，且两次移动后 window.__INTERACTION_COUNT__ 均增加。",
+      "review": "已验：两指定坐标返回未命中/仍命中。"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "criterion": 7,
+      "status": "verified",
+      "requirement": "DOM：stage.getCurrentTime() === 3.2 且 stage.animationsPaused() === true，window.__VIS_READY__ === true（顺序错误时 getCurrentTime 会停在 0，可直接判失败）。",
+      "review": "已验：SMIL 暂停在 3.2 秒且就绪后才捕获。"
+    },
+    {
+      "scene": "core-sample-stratigraphy",
+      "criterion": 8,
+      "status": "partial",
+      "requirement": "PNG：整幅透明像素 ≥ 8%、可见像素 ≥ 3.5%、彩色像素 ≥ 2500（沿用仓库既有导出阈值）；P3 行3 零 bbox 那格除标注文字外无岩芯像素。",
+      "review": "部分：RGBA 和四角透明通过；零 bbox 对照已目视，未单独隔离标注取样。"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "criterion": 1,
+      "status": "partial",
+      "requirement": "相机窗左右各有约 34.3 px 的信箱暗条、上下无空隙；总览窗上下各被裁掉约 22.7；DOM 中两者 `preserveAspectRatio` 分别为 `xMidYMid meet` 与 `xMidYMid slice`。",
+      "review": "部分：meet/slice 和信箱边可见；34.3/22.7 px 的边界未单独取样。"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "criterion": 2,
+      "status": "partial",
+      "requirement": "读数条链 A/B/C 三行走时文本逐字符相同，校验灯 `data-verdict=\"match\"`；脚本连续执行一次滚轮缩放（deltaY=-300）与一次 120 px 拖拽平移后重取，仍逐字符相同且失配计数为 0；天真 offsetX 行 `data-verdict=\"drift\"` 且显示误差 > 1 s。",
+      "review": "部分：三链误差 <.001 纸单位且滚轮后仍一致；拖拽平移/逐字时间串/天真链误差待联合验证。"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "criterion": 3,
+      "status": "partial",
+      "requirement": "`document.getAnimations().length >= 2` 且其中包含 09 行的 CSS 动画与 10 行的 WAAPI 动画，11 行的 rAF 笔不在列表中；PNG 中 09/10/11 三行的已显影长度互不相同（09 行满行且笔在行上方的回程弧上）。",
+      "review": "部分：30 条动画可观测，09/10/11 行状态已目视；列表归属与显影长度未逐项断言。"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "criterion": 4,
+      "status": "partial",
+      "requirement": "标定条内 `circle[r=\"50%\"]` 的 `getBBox().width` 约 291.5（r≈145.8），且圆被 400×100 的嵌套视口裁成弧带；旁注文字给出 145.8 / 50 / 200 三个数。",
+      "review": "部分：归一化对角线公式和弧带已目视；291.5 bbox 待独立断言。"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "criterion": 5,
+      "status": "verified",
+      "requirement": "溢出三联中 `overflow:hidden` 与 `overflow:scroll` 两格的圆被裁在框线内、无滚动条，`overflow:visible` 一格的圆明显溢出到框外（PNG 可直接判读）。",
+      "review": "已验：hidden/visible/scroll 三联效果已目视。"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "criterion": 6,
+      "status": "partial",
+      "requirement": "拖动台面宽度滑轨改写相机 `width` 后，`ResizeObserver` 回调至少触发一次，时标尺子元素数量随之变化且相邻刻度间距 ≥26 px，尺端文本与 `contentRect` 的宽高一致。",
+      "review": "部分：ResizeObserver 首次回调已验；宽度滑轨拖动后的尺子重建待专门验证。"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "criterion": 7,
+      "status": "verified",
+      "requirement": "在舞台上做 `pointermove` 后 `window.__INTERACTION_COUNT__` 增加，且采样十字中心经三链回算得到的记录纸坐标与指针位置往返误差 < 0.01 记录纸单位。",
+      "review": "已验：实际 pointer 的三链纸坐标误差约 4e-5，低于 .01。"
+    },
+    {
+      "scene": "seismic-drum-console",
+      "criterion": 8,
+      "status": "unverified",
+      "requirement": "Shift 框选后命中的道带上 `data-select=\"intersect\"`（黄）或 `\"enclose\"`（绿）；在未实现 `checkIntersection` 的引擎上改为 `data-fallback=\"bbox\"` 且着色结果一致。",
+      "review": "待测：真实 Shift 框选及 checkIntersection 缺失时的 bbox 降级尚未验证。"
+    }
+  ]
+}

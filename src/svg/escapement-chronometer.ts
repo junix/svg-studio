@@ -110,7 +110,7 @@ export async function render(stage: SVGSVGElement): Promise<void> {
   root.append(mono(1330, 72, 'a_balance.onrepeat → repeatEvent 计数', { 'text-anchor': 'end', 'font-size': 10 }));
 
   // ---- 2b. Meridian calibration bar: transform="rotate(5)" pivots at the user-space origin (pv:transform=rotate).
-  const meridian = el('g', { id: 'meridian' });
+  const meridian = el('g', { id: 'meridian', transform: 'translate(18 18) scale(.85)' });
   meridian.append(el('line', { x1: 0, y1: 0, x2: 200, y2: 100, stroke: SAGE, 'stroke-width': 0.8, 'stroke-dasharray': '3 4' }));
   meridian.append(el('line', { x1: 0, y1: 0, x2: 190.5, y2: 117.0, stroke: BRASS, 'stroke-width': 0.8, 'stroke-dasharray': '3 4' }));
   meridian.append(el('path', { d: arcPath(0, 0, 223.6, 19, 38), fill: 'none', stroke: BRASS, 'stroke-width': 1, 'stroke-dasharray': '4 3' }));
@@ -118,8 +118,8 @@ export async function render(stage: SVGSVGElement): Promise<void> {
   meridian.append(el('rect', { x: 200, y: 95, width: 220, height: 10, rx: 5, fill: SAGE, 'fill-opacity': 0.35, stroke: SAGE, 'stroke-width': 1, 'stroke-dasharray': '4 3' }));
   meridian.append(el('rect', { id: 'meridian-bar', x: 200, y: 95, width: 220, height: 10, rx: 5, fill: BRASS, stroke: BROWN, transform: 'rotate(5)' }));
   meridian.append(el('circle', { cx: 0, cy: 0, r: 4, fill: RUBY }));
-  meridian.append(mono(214, 150, 'transform="rotate(5)"  支点 = 用户空间原点 (0,0)，不是杆件中心', { 'font-size': 10 }));
-  meridian.append(mono(214, 162, '↔ 轮系全部写 rotate(a cx cy)，SMIL 只叠加，基础变换永远保留', { 'font-size': 10 }));
+  meridian.append(mono(214, 160, 'transform="rotate(5)"  支点 = 用户空间原点 (0,0)，不是杆件中心', { 'font-size': 10 }));
+  meridian.append(mono(214, 172, '↔ 轮系全部写 rotate(a cx cy)，SMIL 只叠加，基础变换永远保留', { 'font-size': 10 }));
   root.append(meridian);
 
   // ---- 10c. Nameplate with a display:none tspan pulling the rest of the line left (pr:display on text).

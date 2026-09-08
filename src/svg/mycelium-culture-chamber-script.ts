@@ -71,7 +71,7 @@ export const GROWER_SCRIPT = String.raw`/*<![CDATA[*/
     var rng = mulberry32(seed);
     var buckets = [], g, i;
     for (g = 0; g < gens; g++) buckets.push([]);
-    // Inoculation: up to `points` apices inside r <= spread, headings fanned around the circle.
+    // Inoculation: up to points apices inside r <= spread, headings fanned around the circle.
     var tips = [];
     for (i = 0; i < points && tips.length < 64; i++) {
       var a = (i / points) * Math.PI * 2 + (rng() - 0.5) * 0.8, r = rng() * spread;
@@ -103,7 +103,7 @@ export const GROWER_SCRIPT = String.raw`/*<![CDATA[*/
       }
       tips = next;
     }
-    // Distribute `pathCount` paths over the generations proportionally (>= 1 per non-empty generation).
+    // Distribute pathCount paths over the generations proportionally (>= 1 per non-empty generation).
     var counts = buckets.map(function (bk) { return bk.length / 4; });
     var total = counts.reduce(function (s, n) { return s + n; }, 0);
     var alloc = counts.map(function (n) { return n ? Math.max(1, Math.round(pathCount * n / total)) : 0; });

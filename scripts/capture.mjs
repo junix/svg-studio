@@ -1,6 +1,9 @@
+import { checkCoverage, validatePlan, verifyCoverageGate } from './coverage.mjs';
+import { checkAcceptance } from './acceptance.mjs';
+import { checkPixels } from './pixels.mjs';
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { chromium } from 'playwright-core';
 import { PNG } from 'pngjs';
@@ -22,57 +25,16 @@ if (new Set(indexedComponentIds).size !== indexedComponentIds.length) throw new 
 const componentSystemCounts = Object.groupBy(arrowComponents.templates, item => item.system);
 if (componentSystemCounts.stroke?.length !== 8 || componentSystemCounts.segment?.length !== 8) throw new Error('arrow component index requires eight stroke and eight segment templates');
 const plan = JSON.parse(await readFile(new URL('../docs/svg-feature-demos.json', import.meta.url), 'utf8'));
+validatePlan(plan, catalog);
 const svgDemoIds = plan.demos.map(item => item.id);
 const coreFeaturesByDemo = Object.fromEntries(svgDemoIds.map(id => [id, plan.features.filter(feature => feature.tier === 'core' && feature.demos.includes(id)).map(feature => feature.key)]));
-const scenes = JSON.parse(process.env.SCENES ?? JSON.stringify(catalog.map(item => item.id)));
+const selection = process.env.SCENES;
+const scenes = selection ? (selection.trim().startsWith('[') ? JSON.parse(selection) : selection.split(',').map(id => id.trim()).filter(Boolean)) : catalog.map(item => item.id);
+if (!Array.isArray(scenes) || !scenes.length || new Set(scenes).size !== scenes.length) throw new Error('SCENES must be a nonempty list of unique scene IDs');
+const results = [];
+const failures = [];
 for (const scene of scenes) if (!catalog.some(item => item.id === scene) && !svgDemoIds.includes(scene)) throw new Error(`unknown scene ${scene}`);
 
-// Coverage gate: every core feature key assigned to a native SVG demo must be observable in that demo's DOM.
-// el:/at:/av:/pr:/pv: keys are derived from the live tree; api:/concept:/css: keys are declared by the demo via
-// `mark(stage, key)` (→ #stage[data-features]) because they describe behaviour rather than markup.
-const checkCoverage = (keys) => {
-  const stage = document.querySelector('#stage');
-  const all = [stage, ...stage.querySelectorAll('*')];
-  const marks = new Set((stage.dataset.features ?? '').split(/\s+/).filter(Boolean));
-  const styleText = all.filter(node => node.localName === 'style').map(node => node.textContent).join('\n');
-  const inlineStyles = all.map(node => node.getAttribute('style') ?? '').filter(Boolean).join(';\n');
-  const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const valueMatches = (actual, expected) => {
-    if (actual === null || actual === undefined) return false;
-    const norm = actual.trim();
-    if (norm === expected) return true;
-    if (norm.split(/[\s,]+/).includes(expected)) return true;
-    if (norm.replace(/[\s,]+/g, '-') === expected) return true;
-    if (expected.endsWith('()') && norm.includes(expected.slice(0, -1))) return true;
-    return false;
-  };
-  const propertyPresent = (prop, expected) => {
-    const propRe = new RegExp(`(^|[^-\\w])${escape(prop)}\\s*:\\s*([^;}]*)`, 'g');
-    const scan = source => { for (const match of source.matchAll(propRe)) { if (expected === undefined || valueMatches(match[2], expected)) return true; } return false; };
-    if (all.some(node => node.hasAttribute(prop) && (expected === undefined || valueMatches(node.getAttribute(prop), expected)))) return true;
-    return scan(styleText) || scan(inlineStyles);
-  };
-  const missing = [];
-  for (const key of keys) {
-    const colon = key.indexOf(':');
-    const kind = key.slice(0, colon), rest = key.slice(colon + 1);
-    let ok = false;
-    if (kind === 'el') ok = all.some(node => node.localName === rest);
-    else if (kind === 'at') { const dot = rest.indexOf('.'); const tag = rest.slice(0, dot), attr = rest.slice(dot + 1); ok = all.some(node => node.localName === tag && node.hasAttribute(attr)); }
-    else if (kind === 'av') {
-      const dot = rest.indexOf('.'), eq = rest.indexOf('=');
-      const tag = rest.slice(0, dot), attr = rest.slice(dot + 1, eq), expected = rest.slice(eq + 1);
-      if (attr === 'd' || attr === 'points') ok = all.some(node => node.localName === tag && new RegExp(`(^|[^A-Za-z])${escape(expected)}([^A-Za-z]|$)`).test(node.getAttribute(attr) ?? ''));
-      else ok = all.some(node => node.localName === tag && valueMatches(node.getAttribute(attr), expected));
-      if (!ok) ok = marks.has(key);
-    }
-    else if (kind === 'pr') ok = propertyPresent(rest);
-    else if (kind === 'pv') { const eq = rest.indexOf('='); ok = propertyPresent(rest.slice(0, eq), rest.slice(eq + 1)) || marks.has(key); }
-    else ok = marks.has(key);
-    if (!ok) missing.push(key);
-  }
-  return { checked: keys.length, missing, marked: marks.size, elements: all.length };
-};
 
 const findAvailablePort = () => new Promise((resolve, reject) => {
   const probe = createServer();
@@ -84,7 +46,7 @@ const findAvailablePort = () => new Promise((resolve, reject) => {
   });
 });
 const port = process.env.PORT ? Number(process.env.PORT) : await findAvailablePort();
-const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js','--host','127.0.0.1','--port',String(port),'--strictPort'], {stdio:'pipe'});
+const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js','preview','--host','127.0.0.1','--port',String(port),'--strictPort'], {stdio:'pipe'});
 const stop = () => server.kill('SIGTERM');
 process.on('exit', stop);
 await new Promise((resolve, reject) => {
@@ -96,11 +58,19 @@ await new Promise((resolve, reject) => {
 await mkdir('out', {recursive:true});
 const macChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const executablePath = process.env.CHROME_PATH ?? (process.platform === 'darwin' && existsSync(macChrome) ? macChrome : undefined); // undefined → Playwright's bundled Chromium
-const browser = await chromium.launch({headless:true, executablePath, args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
+// These scenes use Canvas 2D and SVG. Forcing SwiftShader makes nested SVG filters
+// take tens of seconds on macOS; let Chrome select its supported raster backend.
+const browser = await chromium.launch({headless:true, executablePath, args:['--force-color-profile=srgb']});
+const browserVersion = browser.version();
+let coverageGate;
 try {
+  coverageGate = await verifyCoverageGate(browser);
   for (const scene of scenes) {
     const page = await browser.newPage({viewport:{width:1400,height:900}, deviceScaleFactor:1});
+    try {
     const errors = [];
+    let coverage;
+    let acceptance;
     page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
     page.on('pageerror', error => errors.push(error.message));
     await page.route('**/*', route => {
@@ -234,15 +204,22 @@ try {
         return { nativeSvg: stage instanceof SVGSVGElement, elements: all.length, titled: Boolean(stage.querySelector(':scope > title')), broken: [...new Set(broken)] };
       });
       if (!structure.nativeSvg || structure.elements < 40 || !structure.titled) throw new Error(`${scene}: native SVG demo lacks structure ${JSON.stringify(structure)}`);
-      if (structure.broken.length) throw new Error(`${scene}: broken local references ${structure.broken.join(', ')}`);
-      const coverage = await page.evaluate(checkCoverage, coreFeaturesByDemo[scene]);
+      const expectedBroken = scene === 'core-sample-stratigraphy' ? ['missing-core', 'nope'] : [];
+      if (structure.broken.some(id => !expectedBroken.includes(id))) throw new Error(`${scene}: broken local references ${structure.broken.join(', ')}`);
+      coverage = await page.evaluate(checkCoverage, coreFeaturesByDemo[scene]);
       if (coverage.missing.length) {
         const report = `${scene}: ${coverage.missing.length}/${coverage.checked} core features not observable in DOM:\n  ${coverage.missing.join('\n  ')}`;
         if (process.env.COVERAGE === 'warn') console.warn(report); else throw new Error(report); // COVERAGE=warn keeps iterating on a partial demo
       }
       console.log(`${scene}: elements=${structure.elements}, core features observable=${coverage.checked - coverage.missing.length}/${coverage.checked} (declared marks=${coverage.marked})`);
     }
-    await stage.screenshot({path:`out/${scene}-transparent.png`, omitBackground:true});
+    const captureBox = await stage.boundingBox();
+    if (!captureBox || captureBox.width !== 1400 || captureBox.height !== 900) throw new Error(`${scene}: invalid stage dimensions`);
+    // The stage owns a fixed viewport. Capture its exact box without locator auto-scroll, which can
+    // wait indefinitely on SVG subdocuments even after their SMIL clocks and geometry have settled.
+    const captureStarted = performance.now();
+    await page.screenshot({path:`out/${scene}-transparent.png`, clip:captureBox, omitBackground:true, timeout:60000});
+    const captureMs = Math.round(performance.now() - captureStarted);
     const before = await page.evaluate(() => window.__INTERACTION_COUNT__ ?? 0);
     const box = await stage.boundingBox();
     if (!box) throw new Error(`${scene}: stage has no layout box`);
@@ -272,6 +249,7 @@ try {
       const keyed = await page.evaluate(() => window.__ARROW_COMPONENTS__?.selected);
       if (clicked !== 'P08' || keyed !== 'S02') throw new Error(`arrow-components: selection contract failed (click=${clicked}, keyboard=${keyed})`);
     }
+    if (svgDemoIds.includes(scene)) acceptance = await checkAcceptance(page, scene);
     const after = await page.evaluate(() => window.__INTERACTION_COUNT__ ?? 0);
     if (after <= before) throw new Error(`${scene}: interaction contract did not fire`);
     // Demos that deliberately show malformed markup (e.g. path-data error tolerance) declare the expected console
@@ -290,9 +268,16 @@ try {
     const pixels = png.width * png.height;
     if (transparent < pixels * 0.08 || visible < pixels * 0.035 || colorful < 2500) throw new Error(`${scene}: weak RGBA content t=${transparent} v=${visible} c=${colorful}`);
     console.log(`${scene}: ${png.width}x${png.height}, transparent=${(transparent/pixels*100).toFixed(1)}%, visible=${(visible/pixels*100).toFixed(1)}%, colorful=${colorful}`);
-    await page.close();
+    const pixelChecks = await checkPixels(page, scene, png);
+    results.push({ scene, width:png.width, height:png.height, transparent, visible, colorful, captureMs, coverage, acceptance, pixelChecks });
+    } catch (error) { failures.push({scene,error:error.message}); console.error(`${scene}: FAIL ${error.message}`); }
+    finally { await page.close(); }
   }
 } finally {
   await browser.close();
   stop();
 }
+
+await writeFile('out/verification.json', JSON.stringify({ browser:browserVersion, coverageGate, scenes:results, failures }, null, 2) + '\n');
+if (failures.length) throw new Error(`${failures.length} scene(s) failed: ${failures.map(f => f.scene).join(', ')}`);
+console.log(`Verified ${results.length} scenes; ${results.filter(r => r.coverage).length} native feature demos.`);

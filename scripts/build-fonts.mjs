@@ -7,7 +7,7 @@ import { mkdtempSync, readFileSync, readdirSync, statSync, writeFileSync } from 
 import { tmpdir, homedir } from 'node:os';
 import { join } from 'node:path';
 
-const FONT_DIR = join(homedir(), '.local/share/fonts');
+const FONT_DIR = process.env.FONT_SOURCE_DIR ?? join(homedir(), '.local/share/fonts');
 const LATIN_RANGE = 'U+0020-007E,U+00A0-00FF,U+0100-017F,U+2013,U+2014,U+2018,U+2019,U+201C,U+201D,U+2020,U+2021,U+2022,U+2026,U+2030,U+2032,U+2033,U+2044,U+20AC,U+2116,U+2122,U+2190-2199,U+21BA,U+21BB,U+2202,U+2206,U+220F,U+2211,U+2212,U+221A,U+221E,U+2248,U+2260,U+2264,U+2265,U+25A0-25CF,U+0391-03A9,U+03B1-03C9,U+2070-209F,U+00B2,U+00B3,U+00B9,U+2153-215E,U+00BC-00BE';
 const faces = [
   { family: 'Studio Serif', weight: 400, style: 'normal', file: 'latinmodern/lmroman10-regular.otf', unicodes: LATIN_RANGE },
