@@ -1,6 +1,6 @@
 # SVG Studio
 
-Fifteen transparent-canvas studies that treat vector geometry as a programmable medium. Paper.js constructs precise geometry; Rough.js supplies selective hand-drawn texture, while the arrow, icon, and component reference libraries are authored as native, editable SVG.
+Thirty-one transparent-canvas studies that treat vector geometry as a programmable medium. Twelve scenes use Paper.js for precise geometry and Rough.js for selective hand-drawn texture; the arrow, icon, and component reference libraries and the sixteen native SVG feature demos are authored as native SVG.
 
 `catalog.json` records the design use, motivating question, family, complexity, and tags for every scene.
 
@@ -38,6 +38,43 @@ Open `/?scene=arrow-components` to compare two reusable construction systems. Th
 - Editable source: [`examples/arrow-components.svg`](examples/arrow-components.svg)
 - Machine-readable template index: [`arrow-components.json`](arrow-components.json)
 - Browser API: `window.__ARROW_COMPONENTS__.select('P07')` and `getTemplate('S06')`
+
+## Native SVG feature demos
+
+Sixteen expert-level scenes built as native SVG DOM (`src/svg/<id>.ts`, mounted via `/?scene=<id>`). Together they cover all 519 core SVG features of the plan in [`docs/svg-feature-demos.md`](docs/svg-feature-demos.md) (machine-readable: [`docs/svg-feature-demos.json`](docs/svg-feature-demos.json)); detail-tier features ride along with their parents, and deprecated or unimplemented features are listed in the plan's exclusion appendix.
+
+| `celestial-astrolabe-cabinet` | `museum-label-panel` | `ship-lofting-floor` | `guilloche-intaglio-plate` |
+|---|---|---|---|
+| ![celestial-astrolabe-cabinet](out/celestial-astrolabe-cabinet-transparent.png) | ![museum-label-panel](out/museum-label-panel-transparent.png) | ![ship-lofting-floor](out/ship-lofting-floor-transparent.png) | ![guilloche-intaglio-plate](out/guilloche-intaglio-plate-transparent.png) |
+| `auroral-spectrograph` | `jacquard-loom-draft` | `stele-rubbing-hall` | `letterpress-type-specimen` |
+| ![auroral-spectrograph](out/auroral-spectrograph-transparent.png) | ![jacquard-loom-draft](out/jacquard-loom-draft-transparent.png) | ![stele-rubbing-hall](out/stele-rubbing-hall-transparent.png) | ![letterpress-type-specimen](out/letterpress-type-specimen-transparent.png) |
+| `pipeline-mimic-board` | `four-colour-press-check` | `forge-metallography-bench` | `mycelium-culture-chamber` |
+| ![pipeline-mimic-board](out/pipeline-mimic-board-transparent.png) | ![four-colour-press-check](out/four-colour-press-check-transparent.png) | ![forge-metallography-bench](out/forge-metallography-bench-transparent.png) | ![mycelium-culture-chamber](out/mycelium-culture-chamber-transparent.png) |
+| `neon-sign-workshop` | `escapement-chronometer` | `core-sample-stratigraphy` | `seismic-drum-console` |
+| ![neon-sign-workshop](out/neon-sign-workshop-transparent.png) | ![escapement-chronometer](out/escapement-chronometer-transparent.png) | ![core-sample-stratigraphy](out/core-sample-stratigraphy-transparent.png) | ![seismic-drum-console](out/seismic-drum-console-transparent.png) |
+
+| id | title | family | core features | hero features |
+|---|---|---|---|---|
+| `celestial-astrolabe-cabinet` | 铜盘星图柜 | astronomical instrument | 42 | symbol, sprite-sheet, use-of-use, view |
+| `museum-label-panel` | 博物馆展签面板 | museum curation / archives | 43 | foreignObject, foreignobject-html-text-wrapping, foreignobject-form-controls, standalone-svg-document |
+| `ship-lofting-floor` | 船体放样间 | naval architecture | 40 | path.d, path.d=A, arc-flag-combinations, smooth-cubic-reflection |
+| `guilloche-intaglio-plate` | 玫瑰线雕版 | security printing | 31 | paint-order, vector-effect=non-scaling-stroke, stroke-scales-with-ctm, transform-list-composition-order |
+| `auroral-spectrograph` | 极光分光台 | atmospheric optics / spectroscopy | 28 | radialGradient.fx, radialGradient.fr, linearGradient.spreadMethod=reflect, linearGradient.href |
+| `jacquard-loom-draft` | 提花纹版房 | weaving / textile drafting | 26 | pattern, pattern.patternTransform, nested-pattern, pattern-seams |
+| `stele-rubbing-hall` | 碑林拓片厅 | epigraphic typography | 29 | textPath, textPath.side, textpath-closed-path, writing-mode=vertical-rl |
+| `letterpress-type-specimen` | 铅字样本册 | typography | 37 | font-face-data-uri, font-feature-settings, text.textLength, text.lengthAdjust=spacingAndGlyphs |
+| `pipeline-mimic-board` | 管网模拟盘 | plant instrumentation | 40 | marker.orient=auto-start-reverse, marker-vertex-bisector, fill=context-stroke, marker-dimension-ticks |
+| `four-colour-press-check` | 四色套印检版台 | printing | 29 | feComponentTransfer, duotone-via-component-transfer, feComposite.operator=arithmetic, color-interpolation-filters |
+| `forge-metallography-bench` | 锻件金相台 | scientific instrument | 28 | feSpecularLighting, feSpotLight, lighting-alpha-bump-map, feConvolveMatrix.kernelMatrix |
+| `mycelium-culture-chamber` | 菌种培养舱 | procedural texture | 26 | feTurbulence, feDisplacementMap, watercolor-bleed-effect, animate-filter-basefrequency |
+| `neon-sign-workshop` | 霓虹招牌工坊 | filter compositing | 37 | neon-glow-morphology, feMorphology.radius, inner-shadow-technique, mask-composite |
+| `escapement-chronometer` | 擒纵天文钟 | watchmaking / horology | 33 | animate.begin=syncbase, animate.keySplines, SVGSVGElement.setCurrentTime, smil-events |
+| `core-sample-stratigraphy` | 岩芯地层揭示台 | geology / core logging | 34 | mask, mask-type, gradient-feathered-mask, animated-clippath-reveal |
+| `seismic-drum-console` | 地震记录鼓控制台 | instrument console | 35 | mouse-to-svg-coordinates, SVGGraphicsElement.getScreenCTM, wheel-zoom, DOMMatrix |
+
+Each demo exports `render(stage: SVGSVGElement)`; `src/main.ts` creates the 1400×900 transparent `#stage`, installs the pointer-interaction counter, embeds the fonts (Latin Modern and Noto Sans subsets as `@font-face` data URIs from `src/svg/font-data.ts`, regenerated by `npm run fonts`) and sets `window.__VIS_READY__` when the frame is final. Animated scenes freeze their SMIL timeline at a deliberate phase when `?export=1` is present.
+
+`scripts/capture.mjs` enforces a coverage gate for every demo: each core feature key assigned to the demo in the plan JSON must be observable in the live DOM — `el:`/`at:`/`av:`/`pr:`/`pv:` keys are derived from elements, attributes and stylesheets inside `#stage`, while behavioural `api:`/`concept:`/`css:` keys are declared by the demo with `mark(stage, key)` and read from `#stage[data-features]`. Run one scene with `SCENES='["neon-sign-workshop"]' npm run capture`; `COVERAGE=warn` downgrades the gate to a warning while iterating. `CHROME_PATH` overrides the browser (Playwright's bundled Chromium is used by default; the macOS Google Chrome install is picked up automatically).
 
 ```bash
 npm install

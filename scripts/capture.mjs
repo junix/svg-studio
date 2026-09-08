@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { mkdir, readFile } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { chromium } from 'playwright-core';
@@ -20,7 +21,59 @@ const indexedComponentIds = arrowComponents.templates.map(item => item.id);
 if (new Set(indexedComponentIds).size !== indexedComponentIds.length) throw new Error('arrow component template ids must be unique');
 const componentSystemCounts = Object.groupBy(arrowComponents.templates, item => item.system);
 if (componentSystemCounts.stroke?.length !== 8 || componentSystemCounts.segment?.length !== 8) throw new Error('arrow component index requires eight stroke and eight segment templates');
+const plan = JSON.parse(await readFile(new URL('../docs/svg-feature-demos.json', import.meta.url), 'utf8'));
+const svgDemoIds = plan.demos.map(item => item.id);
+const coreFeaturesByDemo = Object.fromEntries(svgDemoIds.map(id => [id, plan.features.filter(feature => feature.tier === 'core' && feature.demos.includes(id)).map(feature => feature.key)]));
 const scenes = JSON.parse(process.env.SCENES ?? JSON.stringify(catalog.map(item => item.id)));
+for (const scene of scenes) if (!catalog.some(item => item.id === scene) && !svgDemoIds.includes(scene)) throw new Error(`unknown scene ${scene}`);
+
+// Coverage gate: every core feature key assigned to a native SVG demo must be observable in that demo's DOM.
+// el:/at:/av:/pr:/pv: keys are derived from the live tree; api:/concept:/css: keys are declared by the demo via
+// `mark(stage, key)` (→ #stage[data-features]) because they describe behaviour rather than markup.
+const checkCoverage = (keys) => {
+  const stage = document.querySelector('#stage');
+  const all = [stage, ...stage.querySelectorAll('*')];
+  const marks = new Set((stage.dataset.features ?? '').split(/\s+/).filter(Boolean));
+  const styleText = all.filter(node => node.localName === 'style').map(node => node.textContent).join('\n');
+  const inlineStyles = all.map(node => node.getAttribute('style') ?? '').filter(Boolean).join(';\n');
+  const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const valueMatches = (actual, expected) => {
+    if (actual === null || actual === undefined) return false;
+    const norm = actual.trim();
+    if (norm === expected) return true;
+    if (norm.split(/[\s,]+/).includes(expected)) return true;
+    if (norm.replace(/[\s,]+/g, '-') === expected) return true;
+    if (expected.endsWith('()') && norm.includes(expected.slice(0, -1))) return true;
+    return false;
+  };
+  const propertyPresent = (prop, expected) => {
+    const propRe = new RegExp(`(^|[^-\\w])${escape(prop)}\\s*:\\s*([^;}]*)`, 'g');
+    const scan = source => { for (const match of source.matchAll(propRe)) { if (expected === undefined || valueMatches(match[2], expected)) return true; } return false; };
+    if (all.some(node => node.hasAttribute(prop) && (expected === undefined || valueMatches(node.getAttribute(prop), expected)))) return true;
+    return scan(styleText) || scan(inlineStyles);
+  };
+  const missing = [];
+  for (const key of keys) {
+    const colon = key.indexOf(':');
+    const kind = key.slice(0, colon), rest = key.slice(colon + 1);
+    let ok = false;
+    if (kind === 'el') ok = all.some(node => node.localName === rest);
+    else if (kind === 'at') { const dot = rest.indexOf('.'); const tag = rest.slice(0, dot), attr = rest.slice(dot + 1); ok = all.some(node => node.localName === tag && node.hasAttribute(attr)); }
+    else if (kind === 'av') {
+      const dot = rest.indexOf('.'), eq = rest.indexOf('=');
+      const tag = rest.slice(0, dot), attr = rest.slice(dot + 1, eq), expected = rest.slice(eq + 1);
+      if (attr === 'd' || attr === 'points') ok = all.some(node => node.localName === tag && new RegExp(`(^|[^A-Za-z])${escape(expected)}([^A-Za-z]|$)`).test(node.getAttribute(attr) ?? ''));
+      else ok = all.some(node => node.localName === tag && valueMatches(node.getAttribute(attr), expected));
+      if (!ok) ok = marks.has(key);
+    }
+    else if (kind === 'pr') ok = propertyPresent(rest);
+    else if (kind === 'pv') { const eq = rest.indexOf('='); ok = propertyPresent(rest.slice(0, eq), rest.slice(eq + 1)) || marks.has(key); }
+    else ok = marks.has(key);
+    if (!ok) missing.push(key);
+  }
+  return { checked: keys.length, missing, marked: marks.size, elements: all.length };
+};
+
 const findAvailablePort = () => new Promise((resolve, reject) => {
   const probe = createServer();
   probe.once('error', reject);
@@ -41,7 +94,9 @@ await new Promise((resolve, reject) => {
 });
 
 await mkdir('out', {recursive:true});
-const browser = await chromium.launch({headless:true, executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
+const macChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const executablePath = process.env.CHROME_PATH ?? (process.platform === 'darwin' && existsSync(macChrome) ? macChrome : undefined); // undefined → Playwright's bundled Chromium
+const browser = await chromium.launch({headless:true, executablePath, args:['--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist']});
 try {
   for (const scene of scenes) {
     const page = await browser.newPage({viewport:{width:1400,height:900}, deviceScaleFactor:1});
@@ -168,6 +223,24 @@ try {
       if (!structure.nativeSvg || JSON.stringify(structure.ids) !== expectedIds || JSON.stringify(structure.apiIds) !== expectedIds) throw new Error(`arrow-components: SVG/JSON id mismatch ${JSON.stringify(structure)}`);
       if (structure.systems !== 2 || structure.systemCounts.stroke?.length !== 8 || structure.systemCounts.segment?.length !== 8 || structure.primitiveContracts !== 16 || structure.primitiveKinds < 5 || structure.markers < 4 || structure.markerReferences < 9 || structure.textPaths < 1 || structure.gradients < 1 || structure.clipPaths < 1 || structure.loopArcSegments < 2 || structure.roundedRouteCommands < 2 || structure.curvedConnectorCommands < 1 || !structure.chevronBand.closed || !structure.chevronBand.distinct || !structure.chevronBand.hasInnerAndOuterTips || structure.clippedSegmentStrips < 6 || structure.brokenReferences.length || structure.titledSpecimens !== 16 || structure.strokeWithMarker !== 8 || structure.segmentWithSolidGeometry !== 8 || structure.selected !== 'S01' || !structure.templateAvailable) throw new Error(`arrow-components: incomplete native SVG structure ${JSON.stringify(structure)}`);
       console.log(`arrow-components: specimens=${structure.ids.length}, systems=${structure.systems}, markers=${structure.markers}, primitives=${structure.primitiveKinds}, clippedStrips=${structure.clippedSegmentStrips}`);
+    }
+    if (svgDemoIds.includes(scene)) {
+      const structure = await page.evaluate(() => {
+        const stage = document.querySelector('#stage');
+        const all = [...stage.querySelectorAll('*')];
+        const hrefIds = all.filter(node => !['a', 'image'].includes(node.localName)).flatMap(node => ['href', 'xlink:href'].map(name => node.getAttribute(name)).filter(Boolean)).map(value => value.startsWith('#') ? value.slice(1) : null);
+        const paintIds = all.flatMap(node => ['fill', 'stroke', 'filter', 'mask', 'clip-path', 'marker-start', 'marker-mid', 'marker-end'].map(name => node.getAttribute(name)).filter(Boolean)).map(value => value.startsWith('url(#') ? value.slice(5, value.indexOf(')')) : null);
+        const broken = [...hrefIds, ...paintIds].filter(id => id && !/^svgView\(|^xpointer\(/.test(id) && !document.getElementById(id) && !stage.querySelector(`[id="${id}"]`));
+        return { nativeSvg: stage instanceof SVGSVGElement, elements: all.length, titled: Boolean(stage.querySelector(':scope > title')), broken: [...new Set(broken)] };
+      });
+      if (!structure.nativeSvg || structure.elements < 40 || !structure.titled) throw new Error(`${scene}: native SVG demo lacks structure ${JSON.stringify(structure)}`);
+      if (structure.broken.length) throw new Error(`${scene}: broken local references ${structure.broken.join(', ')}`);
+      const coverage = await page.evaluate(checkCoverage, coreFeaturesByDemo[scene]);
+      if (coverage.missing.length) {
+        const report = `${scene}: ${coverage.missing.length}/${coverage.checked} core features not observable in DOM:\n  ${coverage.missing.join('\n  ')}`;
+        if (process.env.COVERAGE === 'warn') console.warn(report); else throw new Error(report); // COVERAGE=warn keeps iterating on a partial demo
+      }
+      console.log(`${scene}: elements=${structure.elements}, core features observable=${coverage.checked - coverage.missing.length}/${coverage.checked} (declared marks=${coverage.marked})`);
     }
     await stage.screenshot({path:`out/${scene}-transparent.png`, omitBackground:true});
     const before = await page.evaluate(() => window.__INTERACTION_COUNT__ ?? 0);

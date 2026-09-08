@@ -3,6 +3,8 @@ import rough from 'roughjs/bundled/rough.esm.js';
 import { mountArrowComponents } from './arrow-components';
 import { mountArrowLibrary } from './arrow-library';
 import { mountIconLibrary } from './icon-library';
+import { SVG_DEMOS, isSvgDemo } from './svg/index';
+import { SVG_NS, STAGE_W, STAGE_H, ensureFonts } from './svg/lib';
 import './style.css';
 
 declare global { interface Window { __VIS_READY__?: boolean; __INTERACTION_COUNT__?: number } }
@@ -10,6 +12,30 @@ declare global { interface Window { __VIS_READY__?: boolean; __INTERACTION_COUNT
 const W = 1400, H = 900;
 const scene = new URLSearchParams(location.search).get('scene') ?? 'botanical';
 const app = document.querySelector<HTMLDivElement>('#app')!;
+
+async function mountSvgDemo(id: string): Promise<void> {
+  const stage = document.createElementNS(SVG_NS, 'svg');
+  stage.setAttribute('id', 'stage');
+  stage.setAttribute('xmlns', SVG_NS);
+  stage.setAttribute('width', String(STAGE_W));
+  stage.setAttribute('height', String(STAGE_H));
+  stage.setAttribute('viewBox', `0 0 ${STAGE_W} ${STAGE_H}`);
+  stage.setAttribute('data-scene', id);
+  app.replaceChildren(stage);
+  window.__INTERACTION_COUNT__ = 0;
+  const bump = () => { window.__INTERACTION_COUNT__ = (window.__INTERACTION_COUNT__ ?? 0) + 1; };
+  stage.addEventListener('pointermove', bump);
+  stage.addEventListener('pointerdown', bump);
+  await ensureFonts();
+  const demo = await SVG_DEMOS[id]();
+  await demo.render(stage);
+  await document.fonts.ready;
+  window.__VIS_READY__ = true;
+}
+
+if (isSvgDemo(scene)) {
+  mountSvgDemo(scene).catch(error => { console.error(error); throw error; });
+} else {
 app.innerHTML = `<canvas id="stage" width="${W}" height="${H}" aria-label="${scene}"></canvas>`;
 const canvas = document.querySelector<HTMLCanvasElement>('#stage')!;
 paper.setup(canvas);
@@ -193,4 +219,5 @@ if (scene === 'arrow-components') {
   canvas.addEventListener('pointermove', () => { window.__INTERACTION_COUNT__ = (window.__INTERACTION_COUNT__ ?? 0)+1; canvas.style.filter='saturate(1.04)'; });
   canvas.addEventListener('pointerdown', () => { window.__INTERACTION_COUNT__ = (window.__INTERACTION_COUNT__ ?? 0)+1; });
   window.__VIS_READY__ = true;
+}
 }
