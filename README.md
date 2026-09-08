@@ -88,7 +88,7 @@ The font builder requires `uvx` with fonttools/brotli. Noto TTC sources are avai
 
 ```bash
 npm install
-npm run dev    # open http://localhost:5173/gallery.html for the gallery, or http://localhost:5173/?scene=<id> for a single scene
+npm run dev    # open http://localhost:5173/ for the gallery, or http://localhost:5173/?scene=<id> for a single scene
 npm test
 ```
 
