@@ -25,13 +25,13 @@ export const cardStylesheetPi = (): string => encode(
 
 /**
  * Card 2 — concept:svg-as-image-external-font-blocked. Its own <style> colours the glyphs (proving embedded
- * stylesheets work in image mode) and declares 'Specimen Roman' from a same-origin URL that exists on the server —
+ * stylesheets work in image mode) and declares 'Praktika VF' from a same-origin URL that exists on the server —
  * but SVG-as-image documents may not fetch external resources, so the face falls back to the generic serif.
  */
 export const cardExternalFont = (): string => encode(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">` +
-  `<style>@font-face{font-family:'Specimen Roman';src:url(/letterpress-type-specimen/specimen-micro.woff2) format('woff2')}` +
-  `text{fill:#1d7a4b;font-family:'Specimen Roman',serif}.cap{font-family:sans-serif;font-size:8px}</style>` +
+  `<style>@font-face{font-family:'Praktika VF';src:url(/letterpress-type-specimen/specimen-micro.woff2) format('woff2')}` +
+  `text{fill:#1d7a4b;font-family:'Praktika VF',serif}.cap{font-family:sans-serif;font-size:8px}</style>` +
   frame +
   `<text x="58" y="56" text-anchor="middle" font-size="46">Hg</text>` +
   `<text class="cap" x="58" y="74" text-anchor="middle">url(/…/specimen-micro.woff2)</text>` +
@@ -44,8 +44,8 @@ export const cardExternalFont = (): string => encode(
  */
 export const cardDataUriFont = (): string => encode(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">` +
-  `<style>@font-face{font-family:'Specimen Roman';src:url(${MICRO_FONT_DATA_URI}) format('woff2')}` +
-  `text{fill:#1c2733;font-family:'Specimen Roman',serif}.cap{font-family:sans-serif;font-size:8px;fill:#5b5246}</style>` +
+  `<style>@font-face{font-family:'Praktika VF';src:url(${MICRO_FONT_DATA_URI}) format('woff2')}` +
+  `text{fill:#1c2733;font-family:'Praktika VF',serif}.cap{font-family:sans-serif;font-size:8px;fill:#5b5246}</style>` +
   frame +
   `<text x="58" y="56" text-anchor="middle" font-size="46">Hg</text>` +
   `<text class="cap" x="58" y="74" text-anchor="middle">@font-face data:font/woff2</text>` +

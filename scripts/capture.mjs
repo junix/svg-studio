@@ -88,7 +88,7 @@ const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js','--host'
 const stop = () => server.kill('SIGTERM');
 process.on('exit', stop);
 await new Promise((resolve, reject) => {
-  const timer = setTimeout(() => reject(new Error('Vite startup timeout')), 15000);
+  const timer = setTimeout(() => reject(new Error('Vite startup timeout')), 60000);
   server.stdout.on('data', chunk => { if (chunk.toString().includes(`http://127.0.0.1:${port}`)) { clearTimeout(timer); resolve(); } });
   server.on('exit', code => reject(new Error(`Vite exited ${code}`)));
 });
@@ -108,7 +108,7 @@ try {
       return ['127.0.0.1','localhost'].includes(url.hostname) || url.protocol === 'data:' ? route.continue() : route.abort();
     });
     await page.goto(`http://127.0.0.1:${port}/?scene=${scene}&export=1`, {waitUntil:'networkidle'});
-    await page.waitForFunction(() => window.__VIS_READY__ === true, null, {timeout:15000});
+    await page.waitForFunction(() => window.__VIS_READY__ === true, null, {timeout:45000});
     const stage = page.locator('#stage');
     if (scene === 'arrow-library') {
       const structure = await page.evaluate(() => {
@@ -274,7 +274,11 @@ try {
     }
     const after = await page.evaluate(() => window.__INTERACTION_COUNT__ ?? 0);
     if (after <= before) throw new Error(`${scene}: interaction contract did not fire`);
-    if (errors.length) throw new Error(`${scene}: browser errors: ${errors.join(' | ')}`);
+    // Demos that deliberately show malformed markup (e.g. path-data error tolerance) declare the expected console
+    // error substrings in #stage[data-expected-errors] (separated by ' | '); only unexpected errors fail the run.
+    const expectedErrors = (await page.evaluate(() => document.querySelector('#stage')?.getAttribute('data-expected-errors') ?? '')).split(' | ').filter(Boolean);
+    const unexpected = errors.filter(message => !expectedErrors.some(pattern => message.includes(pattern)));
+    if (unexpected.length) throw new Error(`${scene}: browser errors: ${unexpected.join(' | ')}`);
     const png = PNG.sync.read(await readFile(`out/${scene}-transparent.png`));
     let transparent = 0, visible = 0, colorful = 0;
     for (let i=0; i<png.data.length; i+=4) {

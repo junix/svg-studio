@@ -1,5 +1,6 @@
-// letterpress-type-specimen — shared palette, fonts and small drawing helpers used by the section builders.
-import { el, FONT_CJK, FONT_MONO } from './lib';
+// letterpress-type-specimen — shared palette, fonts, layers and measurement helpers used by the section builders.
+import { el, FONT_CJK, FONT_MONO, type Attrs } from './lib';
+import { EMBEDDED_FACES } from './font-data';
 
 // Ink palette from the plan (§3.8 构造要点 1).
 export const INK = '#1c2733';       // 墨色
@@ -12,11 +13,26 @@ export const PAPER = '#f4ead6';     // 暖白纸
 export const TITLE_FILL = '#f6f1e6';
 export const NOTE = '#5b5246';      // 图注灰褐
 
-/** The specimen face: Latin Modern Roman re-declared in-stage as 'Specimen Roman' via @font-face data URIs. */
-export const SPEC = "'Specimen Roman', 'Studio Serif', serif";
-export const MONO_CJK = `${FONT_MONO.split(',')[0]}, 'Studio CJK', ${FONT_MONO.split(',').slice(1).join(',')}`;
+/**
+ * The specimen face. The plan names it "Praktika VF"; this repository has no variable font, so the alias is bound
+ * in-stage (css:font-face-data-uri) to the embedded Latin Modern Roman 10 subsets (400 / 700 / italic, GUST Font
+ * License, `--layout-features='*'`). It therefore has liga/dlig/kern/onum/lnum/pnum/tnum but NO wght/wdth axes and
+ * no smcp — the specimen measures and prints exactly that instead of claiming otherwise.
+ */
+export const FAMILY = 'Praktika VF';
+export const SPEC = `'${FAMILY}', 'Studio Serif', serif`;
+export const MONO = FONT_MONO;
 export const CJK = FONT_CJK;
 export const XML_NS = 'http://www.w3.org/XML/1998/namespace';
+
+/** `@font-face` rules binding the alias to the embedded Latin Modern Roman data URIs. */
+export function specimenFontFaceCss(): string {
+  return EMBEDDED_FACES.filter(face => face.family === 'Studio Serif')
+    .map(face => `@font-face{font-family:'${FAMILY}';font-weight:${face.weight};font-style:${face.style};src:url(${face.dataUri}) format('woff2')}`)
+    .join('\n');
+}
+/** Regular-weight data URI (used by the pixel probe documents). */
+export const regularFaceUri = (): string => EMBEDDED_FACES.find(face => face.family === 'Studio Serif' && face.weight === 400 && face.style === 'normal')?.dataUri ?? '';
 
 export const f2 = (n: number): string => n.toFixed(2);
 export const f1 = (n: number): string => n.toFixed(1);
@@ -42,19 +58,19 @@ export interface Report {
   probes: SVGTextElement[];
   /** Default hit for the export still: the 32pt ladder row. */
   defaultProbe?: SVGTextElement;
+  /** Deferred asynchronous checks (pixel probes) resolved before the frame is declared final. */
+  pending: Promise<void>[];
 }
-
-type Attrs = Record<string, string | number | boolean | null | undefined>;
 
 export const txt = (x: number, y: number, content: string, attrs: Attrs = {}): SVGTextElement =>
   el('text', { x, y, ...attrs }, content);
-/** Small Chinese/Latin caption (class .lab → Studio CJK 11px, note colour). */
+/** Small Chinese/Latin caption (class .lab → CJK 11px, note colour). */
 export const lab = (x: number, y: number, s: string, attrs: Attrs = {}): SVGTextElement => txt(x, y, s, { class: 'lab', ...attrs });
 /** Tabular readout (class .num → mono + tabular-nums). */
 export const mono = (x: number, y: number, s: string, attrs: Attrs = {}): SVGTextElement => txt(x, y, s, { class: 'num', ...attrs });
-/** Specimen sample in the embedded face; `probe` makes it hit-testable by the pointer cursor. */
+/** Specimen sample in the embedded face; class `probe` makes it hit-testable by the pointer cursor. */
 export const spec = (x: number, y: number, s: string, size: number, attrs: Attrs = {}): SVGTextElement =>
-  txt(x, y, s, { class: 'spec probe', 'font-size': size, ...attrs });
+  txt(x, y, s, { class: 'spec probe', 'font-size': size, fill: INK, ...attrs });
 
 export const hline = (x1: number, x2: number, y: number, stroke = HAIR, width = 0.5, attrs: Attrs = {}): SVGLineElement =>
   el('line', { x1, x2, y1: y, y2: y, stroke, 'stroke-width': width, ...attrs });
@@ -84,26 +100,24 @@ export function anchorTicks(t: SVGTextContentElement, y1: number, y2: number, st
   return g;
 }
 
-/** A small letterpress "stamp": rotated outlined box + bold CJK text. */
-export function stamp(x: number, y: number, s: string, color: string, rotate = -3): SVGGElement {
+/** A small letterpress "stamp": slightly rotated dashed box + bold CJK text, fitted after insertion. */
+export function stamp(parent: SVGElement, x: number, y: number, s: string, color: string, rotate = -2, size = 10.5): SVGGElement {
   const g = el('g', { class: 'stamp', transform: `rotate(${rotate} ${x} ${y})` });
-  const t = txt(x + 5, y, s, { class: 'lab', 'font-weight': 700, fill: color, 'font-size': 11 });
+  const t = lab(x + 4, y, s, { 'font-weight': 700, fill: color, 'font-size': size });
   g.append(t);
-  // width is resolved after insertion by the caller via fitStamp()
-  return g;
-}
-export function fitStamp(g: SVGGElement, color: string): void {
-  const t = g.querySelector('text')!;
+  parent.append(g);
   const b = t.getBBox();
-  g.prepend(el('rect', { x: b.x - 5, y: b.y - 1.5, width: b.width + 10, height: b.height + 3, rx: 2, fill: 'none', stroke: color, 'stroke-width': 0.8, 'stroke-dasharray': '3 1.5' }));
+  g.prepend(el('rect', { x: b.x - 4, y: b.y + 0.5, width: b.width + 8, height: b.height - 1, rx: 1.5, fill: 'none', stroke: color, 'stroke-width': 0.8, 'stroke-dasharray': '3 1.5' }));
+  return g;
 }
 
 /**
  * Section header on a flood plate (concept:text-background-box-via-flood): `<text filter="url(#plate-id)">` whose
  * filter is feFlood → feMerge. The filter region (-4% / -30% / 108% / 160%) is relative to the text bbox, so the
- * plate grows and shrinks with the label — no rect element anywhere. `--plate` on the <filter> drives flood-color
- * (css:custom-properties-in-filter); `currentColor: true` instead uses flood-color="currentColor" resolved against
- * the <filter>'s own `color` (pv:flood-color=currentColor).
+ * plate grows and shrinks with the label — no rect element anywhere (concept:flood-fills-filter-region). `--plate`
+ * on the <filter> drives flood-color through `.plate{flood-color:var(--plate)}` (css:custom-properties-in-filter);
+ * `currentColor: true` instead writes flood-color="currentColor", which resolves against the <filter>'s own `color`
+ * (pv:flood-color=currentColor) — not against the colour of the referencing text.
  */
 export function plateHeader(L: Layers, R: Report, id: string, color: string, x: number, y: number, s: string, opts: { currentColor?: boolean } = {}): SVGTextElement {
   const flood = opts.currentColor
@@ -118,6 +132,11 @@ export function plateHeader(L: Layers, R: Report, id: string, color: string, x: 
   const t = txt(x, y, s, { class: 'head', filter: `url(#plate-${id})`, 'data-plate': id });
   L.rows.append(t);
   R.headers.push(t);
+  // css:flood-color-transition — hovering the label swaps the custom property; `.plate{transition:flood-color .4s}` tweens it.
+  if (!opts.currentColor) {
+    t.addEventListener('pointerenter', () => filter.style.setProperty('--plate', INK));
+    t.addEventListener('pointerleave', () => filter.style.setProperty('--plate', color));
+  }
   return t;
 }
 
@@ -127,4 +146,35 @@ export function inkMetrics(size: number, family = SPEC): { xHeight: number; capH
   ctx.font = `${size}px ${family}`;
   const x = ctx.measureText('x'), H = ctx.measureText('H');
   return { xHeight: x.actualBoundingBoxAscent, capHeight: H.actualBoundingBoxAscent, ascent: H.fontBoundingBoxAscent, descent: H.fontBoundingBoxDescent };
+}
+
+// ---- pixel probe -------------------------------------------------------------------------------------------
+// Some OpenType switches (onum/lnum, decorations, rendering hints) change glyph shapes without changing the advance
+// width, so a width Δ of 0 does not prove "no difference". The probe renders two variants of the same sample into a
+// tiny standalone SVG document (carrying the specimen face as a data URI, exactly like proof card 3), rasterises each
+// through <canvas>, and counts pixels whose alpha differs.
+const PROBE_W = 320, PROBE_H = 44;
+function probeImage(sample: string, attrs: string): Promise<ImageData> {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${PROBE_W}" height="${PROBE_H}">` +
+    `<style>@font-face{font-family:'${FAMILY}';src:url(${regularFaceUri()}) format('woff2')}</style>` +
+    `<text x="4" y="30" font-family="'${FAMILY}',serif" font-size="22" ${attrs}>${sample.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</text></svg>`;
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = PROBE_W; canvas.height = PROBE_H;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0);
+      resolve(ctx.getImageData(0, 0, PROBE_W, PROBE_H));
+    };
+    img.onerror = () => resolve(new ImageData(PROBE_W, PROBE_H));
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  });
+}
+/** Number of pixels that differ between two renderings of `sample` (attribute strings are raw SVG markup). */
+export async function pixelDiff(sample: string, attrsA: string, attrsB: string): Promise<number> {
+  const [a, b] = await Promise.all([probeImage(sample, attrsA), probeImage(sample, attrsB)]);
+  let diff = 0;
+  for (let i = 3; i < a.data.length; i += 4) if (Math.abs(a.data[i] - b.data[i]) > 24) diff++;
+  return diff;
 }

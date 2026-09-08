@@ -4,7 +4,7 @@
 // jig references, a morphology radius ruler, CMY/RGB blend inspection, and puddles cut with CSS masks.
 // Layer order inside #stage: #wall (HTML tiles) → #svg-base → #world-html (HTML board) → #svg-glow (screen) → #svg-ui.
 import { el, fragment, html, mark, mulberry32, fmt, isExport, type Attrs } from './lib';
-import { stageCss, TUBE_D, TUBE_W, TUBE_FILL_BOX, TUBE_STROKE_BOX, WALL_TILE_URI } from './neon-sign-workshop-css';
+import { stageCss, TUBE_D, TUBE_W, TUBE_FILL_BOX, TUBE_STROKE_BOX } from './neon-sign-workshop-css';
 
 declare global { interface Window { __sceneReady?: boolean } }
 
@@ -12,6 +12,7 @@ const CARD_W = 212, CARD_FACE_H = 150, CARD_Y = 466;
 const cardX = (i: number) => 34 + i * 224;
 const label = (x: number, y: number, str: string, attrs: Attrs = {}) => el('text', { x, y, 'font-size': 11, fill: 'currentColor', ...attrs }, str);
 const mono = (x: number, y: number, str: string, attrs: Attrs = {}) => label(x, y, str, { class: 'mono', ...attrs });
+const DIM = '#8fd8ff';
 
 /** Puddle basin for #ns-m-puddle: a seeded-noise superellipse in objectBoundingBox units. */
 function puddleBasin(seed: number): string {
@@ -33,29 +34,30 @@ function puddleBasin(seed: number): string {
 // ---------------------------------------------------------------------------------------------------------
 function buildDefs(): SVGDefsElement {
   const defs = el('defs', { id: 'ns-defs' });
-  // Shared neon filter (构造要点 4). concept:neon-glow-morphology — dilate alpha FIRST, blur second, so the halo
-  // leaves the stroke instead of hugging it. concept:filter-input-wiring — the named `halo` result feeds feMerge twice.
-  // pr:color-interpolation-filters locked to sRGB; region widened to -45%/190% or the default -10%/120% cuts the halo.
-  const neon = (id: string, cif: string, withAnim: boolean) => `
-    <filter id="${id}" x="-45%" y="-45%" width="190%" height="190%" color-interpolation-filters="${cif}">
-      <feMorphology ${withAnim ? 'id="ns-morph"' : ''} in="SourceAlpha" operator="dilate" radius="3" result="fat"/>
-      <feGaussianBlur ${withAnim ? 'id="ns-halo"' : ''} in="fat" stdDeviation="10" result="soft">${withAnim
-        // concept:animate-filter-stddeviation — the only start-up flicker: additive on top of the pointer-written base value
-        ? '<animate attributeName="stdDeviation" additive="sum" values="0;2.6;.4;3.2;0" dur="2.4s" repeatCount="indefinite"/>' : ''}</feGaussianBlur>
+  const region = 'x="-40%" y="-60%" width="180%" height="220%" color-interpolation-filters="sRGB"';
+  defs.append(fragment(`
+    <!-- Shared neon filter (构造要点 4). concept:neon-glow-morphology — dilate alpha FIRST, blur second, so the halo
+         leaves the stroke instead of hugging it. concept:filter-input-wiring — the named "halo" result feeds feMerge
+         twice. pr:color-interpolation-filters locked to sRGB; region widened to -45%/190% (default -10%/120% cuts the halo). -->
+    <filter id="ns-f-neon" x="-45%" y="-45%" width="190%" height="190%" color-interpolation-filters="sRGB">
+      <feMorphology id="ns-morph" in="SourceAlpha" operator="dilate" radius="3" result="fat"/>
+      <feGaussianBlur id="ns-halo" in="fat" stdDeviation="10" result="soft">
+        <!-- concept:animate-filter-stddeviation — the only start-up flicker: additive on top of the pointer-written base value -->
+        <animate attributeName="stdDeviation" additive="sum" values="0;2.6;.4;3.2;0" dur="2.4s" repeatCount="indefinite"/>
+      </feGaussianBlur>
       <feFlood flood-color="#ff2f9d" result="pink"/>
       <feComposite in="pink" in2="soft" operator="in" result="halo"/>
       <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="coreSoft"/>
       <feFlood flood-color="#8ff6ff" result="cyan"/>
       <feComposite in="cyan" in2="coreSoft" operator="in" result="core"/>
       <feMerge><feMergeNode in="halo"/><feMergeNode in="halo"/><feMergeNode in="core"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>`;
-  defs.append(fragment(`
-    ${neon('ns-f-neon', 'sRGB', true)}
-    ${neon('ns-f-ref-srgb', 'sRGB', false)}
-    ${neon('ns-f-ref-linear', 'linearRGB', false)}
+    </filter>
+    <!-- pr:color-interpolation-filters — the same blur over a pink|cyan seam: sRGB keeps the seam dark, linearRGB brightens it -->
+    <filter id="ns-f-cif-srgb" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="ns-f-cif-linear" x="-20%" y="-60%" width="140%" height="220%" color-interpolation-filters="linearRGB"><feGaussianBlur stdDeviation="5"/></filter>
 
     <!-- card 1 · concept:morphology-outline-stroke — dilate alpha, flood, composite OUT the original -->
-    <filter id="ns-f-outline" x="-40%" y="-60%" width="180%" height="220%" color-interpolation-filters="sRGB">
+    <filter id="ns-f-outline" ${region}>
       <feMorphology in="SourceAlpha" operator="dilate" radius="4" result="fat"/>
       <feFlood flood-color="#ff2f9d" result="pink"/>
       <feComposite in="pink" in2="fat" operator="in" result="fatPink"/>
@@ -63,7 +65,7 @@ function buildDefs(): SVGDefsElement {
       <feMerge><feMergeNode in="ring"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <!-- card 2 · concept:outline-stroke-via-alpha-dilate — blur alpha, threshold with feFuncA discrete, flood -->
-    <filter id="ns-f-threshold" x="-40%" y="-60%" width="180%" height="220%" color-interpolation-filters="sRGB">
+    <filter id="ns-f-threshold" ${region}>
       <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="soft"/>
       <feComponentTransfer in="soft" result="hard"><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer>
       <feFlood flood-color="#8ff6ff" result="cyan"/>
@@ -71,7 +73,7 @@ function buildDefs(): SVGDefsElement {
       <feMerge><feMergeNode in="halo"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <!-- card 3 · concept:classic-drop-shadow-chain — SourceAlpha → blur → offset → flood/in → merge -->
-    <filter id="ns-f-classic" x="-40%" y="-60%" width="180%" height="220%" color-interpolation-filters="sRGB">
+    <filter id="ns-f-classic" ${region}>
       <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
       <feOffset in="blur" dx="6" dy="8" result="shifted"/>
       <feFlood flood-color="#001f2e" flood-opacity=".95" result="ink"/>
@@ -79,7 +81,7 @@ function buildDefs(): SVGDefsElement {
       <feMerge><feMergeNode in="shadow"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <!-- card 4 · concept:inner-shadow-technique — offset alpha, blur, composite OUT of SourceAlpha keeps only the inner band -->
-    <filter id="ns-f-inner" x="-40%" y="-60%" width="180%" height="220%" color-interpolation-filters="sRGB">
+    <filter id="ns-f-inner" ${region}>
       <feOffset in="SourceAlpha" dx="0" dy="5" result="shifted"/>
       <feGaussianBlur in="shifted" stdDeviation="6" result="soft"/>
       <feComposite in="SourceAlpha" in2="soft" operator="out" result="band"/>
@@ -88,7 +90,7 @@ function buildDefs(): SVGDefsElement {
       <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="inner"/></feMerge>
     </filter>
     <!-- card 5 · el:feDropShadow — one primitive, parameters identical to card 3 for pixel comparison -->
-    <filter id="ns-f-drop" x="-40%" y="-60%" width="180%" height="220%" color-interpolation-filters="sRGB">
+    <filter id="ns-f-drop" ${region}>
       <feDropShadow dx="6" dy="8" stdDeviation="4" flood-color="#001f2e" flood-opacity=".95"/>
     </filter>
     <!-- card 6 · tint used inside a CSS filter chain -->
@@ -97,15 +99,15 @@ function buildDefs(): SVGDefsElement {
     </filter>
 
     <!-- radius ruler · at:feMorphology.radius with two values (anisotropic); region widened for the dilation -->
-    <filter id="ns-f-r00" x="-30%" y="-40%" width="160%" height="180%" color-interpolation-filters="sRGB"><feMorphology in="SourceGraphic" operator="dilate" radius="0 0"/></filter>
-    <filter id="ns-f-r10" x="-30%" y="-40%" width="160%" height="180%" color-interpolation-filters="sRGB">
+    <filter id="ns-f-r00" x="-30%" y="-50%" width="160%" height="200%" color-interpolation-filters="sRGB"><feMorphology in="SourceGraphic" operator="dilate" radius="0 0"/></filter>
+    <filter id="ns-f-r10" x="-30%" y="-50%" width="160%" height="200%" color-interpolation-filters="sRGB">
       <feMorphology in="SourceGraphic" operator="dilate" radius="10 0">
-        <!-- concept:smil-animate-morphology-radius — the press rests at 10 0 for the first 40% so the still frame reads the labelled value -->
+        <!-- concept:smil-animate-morphology-radius — the press rests at "10 0" for the first 40% so the still frame reads the labelled value -->
         <animate attributeName="radius" values="10 0;10 0;2 8;9 1;10 0" keyTimes="0;.4;.6;.8;1" dur="4.2s" calcMode="spline" keySplines=".4 0 .2 1;.4 0 .2 1;.4 0 .2 1;.4 0 .2 1" repeatCount="indefinite"/>
       </feMorphology>
     </filter>
-    <filter id="ns-f-r01" x="-30%" y="-40%" width="160%" height="180%" color-interpolation-filters="sRGB"><feMorphology in="SourceGraphic" operator="dilate" radius="0 10"/></filter>
-    <filter id="ns-f-r77" x="-30%" y="-40%" width="160%" height="180%" color-interpolation-filters="sRGB"><feMorphology in="SourceGraphic" operator="dilate" radius="7 7"/></filter>
+    <filter id="ns-f-r01" x="-30%" y="-50%" width="160%" height="200%" color-interpolation-filters="sRGB"><feMorphology in="SourceGraphic" operator="dilate" radius="0 10"/></filter>
+    <filter id="ns-f-r77" x="-30%" y="-50%" width="160%" height="200%" color-interpolation-filters="sRGB"><feMorphology in="SourceGraphic" operator="dilate" radius="7 7"/></filter>
     <!-- av:feGaussianBlur.stdDeviation=0 — zero parameter is identity, but the element is still filtered -->
     <filter id="ns-f-blur0" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="0"/></filter>
     <!-- at:feMorphology.operator — erode to hairline, dilate to chunky -->
@@ -131,7 +133,7 @@ function buildDefs(): SVGDefsElement {
     <linearGradient id="ns-g-far" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1b3a4c"/><stop offset=".5" stop-color="#2a5068"/><stop offset="1" stop-color="#1b3a4c"/></linearGradient>
     <linearGradient id="ns-g-patch" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8ff6ff"/><stop offset="1" stop-color="#ff2f9d"/></linearGradient>
     <linearGradient id="ns-g-rain" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ff0ff"/><stop offset="1" stop-color="#2b7aa0"/></linearGradient>
-    <pattern id="ns-pat-stripes" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="14" height="14" fill="#0c1e2a"/><rect width="6" height="14" fill="#245066"/></pattern>
+    <pattern id="ns-pat-stripes" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="14" height="14" fill="#0a1a24"/><rect width="6" height="14" fill="#3f88a8"/></pattern>
   `));
   return defs;
 }
@@ -177,64 +179,70 @@ function benchBase(): SVGGElement {
   g.append(el('rect', { class: 'plate-morph', x: 206, y: 146, width: 320, height: 180, fill: '#0b1723', 'fill-opacity': .96 }));
   // bench top strip (inspection area)
   g.append(el('rect', { x: 40, y: 352, width: 652, height: 92, rx: 6, fill: '#0e1c27', 'fill-opacity': .92 }));
-  // colour-interpolation reference pair (right column): same wiring, sRGB vs linearRGB
-  g.append(el('text', { x: 560, y: 190, 'font-size': 22, 'font-weight': 700, 'letter-spacing': 3, fill: 'currentColor', filter: 'url(#ns-f-ref-srgb)' }, 'OPEN'));
-  g.append(el('text', { x: 560, y: 262, 'font-size': 22, 'font-weight': 700, 'letter-spacing': 3, fill: 'currentColor', filter: 'url(#ns-f-ref-linear)' }, 'OPEN'));
+  // pr:color-interpolation-filters — identical pink|cyan seams blurred in sRGB vs linearRGB (right column of the bench)
+  const seam = (y: number, filterId: string) => el('g', { filter: `url(#${filterId})` },
+    el('rect', { x: 556, y, width: 54, height: 24, fill: '#ff2f9d' }), el('rect', { x: 610, y, width: 54, height: 24, fill: '#3cff5a' }));
+  g.append(seam(176, 'ns-f-cif-srgb'), seam(246, 'ns-f-cif-linear'));
   // isolation switches A/B (pr:isolation): identical screen-blended mini signs on one striped backdrop
   g.append(el('rect', { x: 48, y: 358, width: 250, height: 82, rx: 4, fill: 'url(#ns-pat-stripes)' }));
   const miniSign = (x: number, isolate: boolean) => el('g', { style: isolate ? 'isolation:isolate' : 'isolation:auto' },
-    el('rect', { x, y: 368, width: 108, height: 60, rx: 4, fill: '#14283a', 'fill-opacity': .55 }),
-    el('text', { x: x + 54, y: 411, 'text-anchor': 'middle', 'font-size': 32, 'font-weight': 700, fill: '#ff2f9d', style: 'mix-blend-mode:screen' }, '24H'));
+    el('rect', { x, y: 364, width: 108, height: 58, rx: 4, fill: '#0c1a26', 'fill-opacity': .5 }),
+    // pv:mix-blend-mode=screen — additive blend; in A the group is isolated so the stripes never reach the blend
+    el('text', { x: x + 54, y: 406, 'text-anchor': 'middle', 'font-size': 32, 'font-weight': 700, fill: '#ff2f9d', style: 'mix-blend-mode:screen' }, '24H'));
   g.append(miniSign(60, true), miniSign(180, false));
   // pr:mix-blend-mode — CMY multiply on a white lightbox (subtractive) beside RGB screen on the dark bench (additive)
   const triad = (cx: number, cy: number, colours: string[], mode: string) => colours.map((c, i) => {
     const a = -Math.PI / 2 + i * (Math.PI * 2 / 3);
     return el('circle', { cx: fmt(cx + 17.32 * Math.cos(a)), cy: fmt(cy + 17.32 * Math.sin(a)), r: 26, fill: c, style: `mix-blend-mode:${mode}` });
   });
-  g.append(el('g', { style: 'isolation:isolate' }, el('rect', { x: 470, y: 358, width: 104, height: 82, rx: 4, fill: '#fdfdfd' }), ...triad(522, 403, ['#00b7eb', '#ec008c', '#fff100'], 'multiply')));
-  g.append(el('g', { style: 'isolation:isolate' }, el('rect', { x: 586, y: 358, width: 104, height: 82, rx: 4, fill: '#06111a' }), ...triad(638, 403, ['#ff2222', '#22ff44', '#2a5cff'], 'screen')));
+  g.append(el('g', { style: 'isolation:isolate' }, el('rect', { x: 470, y: 358, width: 104, height: 82, rx: 4, fill: '#fdfdfd' }), ...triad(522, 399, ['#00b7eb', '#ec008c', '#fff100'], 'multiply')));
+  g.append(el('g', { style: 'isolation:isolate' }, el('rect', { x: 586, y: 358, width: 104, height: 82, rx: 4, fill: '#06111a' }), ...triad(638, 399, ['#ff2222', '#22ff44', '#2a5cff'], 'screen')));
   return g;
 }
 
-/** Jig: three copies of the tube clipped with inset(10%) against fill-box / stroke-box / view-box. */
+/** Jig: three copies of the tube clipped with inset(10%) against fill-box / stroke-box / view-box.
+ *  Each copy sits directly inside its own nested <svg> and is scaled by the viewBox, not by a transform,
+ *  so `view-box` really is that 400×458 viewBox and the printed clip numbers are in tube units. */
 function jigPanel(): SVGGElement {
   const g = el('g', { id: 'ns-jig' });
-  const s = .3, cellW = 96, cellH = 110, cellY = 130;
-  const cells: Array<[string, string]> = [['jig-fill', 'fill-box'], ['jig-stroke', 'stroke-box'], ['jig-view', 'view-box']];
-  const boxes = { 'fill-box': TUBE_FILL_BOX, 'stroke-box': TUBE_STROKE_BOX } as Record<string, { x: number; y: number; w: number; h: number }>;
-  cells.forEach(([cls, name], i) => {
+  const cellW = 96, cellH = 104, cellY = 130;
+  const VB = { x: -60, y: -146.5, w: 400, h: 433 }; // 400/433 ≈ 96/104, tube centred, 10% inset (40 × 43.3) clears the stroke box
+  const cells: Array<[string, string, { x: number; y: number; w: number; h: number }]> = [
+    ['jig-fill', 'fill-box', TUBE_FILL_BOX], ['jig-stroke', 'stroke-box', TUBE_STROKE_BOX], ['jig-view', 'view-box', VB]];
+  cells.forEach(([cls, name, box], i) => {
     const cx = 1066 + i * 104;
-    // each sample sits in its own nested <svg>, so `view-box` resolves to this 96×110 viewport
-    const cell = el('svg', { x: cx, y: cellY, width: cellW, height: cellH, viewBox: `0 0 ${cellW} ${cellH}`, overflow: 'visible' });
-    cell.append(el('rect', { x: .5, y: .5, width: cellW - 1, height: cellH - 1, rx: 4, fill: '#0b1620', stroke: '#2a4758' }));
-    cell.append(el('g', { transform: `translate(6 34) scale(${s})` }, tube({ class: cls, stroke: '#ffd166' })));
+    const cell = el('svg', { x: cx, y: cellY, width: cellW, height: cellH, viewBox: `${VB.x} ${VB.y} ${VB.w} ${VB.h}` });
+    cell.append(el('rect', { x: VB.x + 2, y: VB.y + 2, width: VB.w - 4, height: VB.h - 4, rx: 16, fill: '#0b1620', stroke: '#2a4758', 'stroke-width': 4 }));
+    // ghost of the unclipped tube so the eye can read what each reference box removed
+    cell.append(tube({ stroke: '#ffd166', 'stroke-opacity': .16 }));
+    cell.append(tube({ class: cls, stroke: '#ffd166' }));
     g.append(cell);
-    const box = boxes[name];
-    const line1 = box ? `${name} ${fmt(box.w * s, 1)}×${fmt(box.h * s, 1)}px` : `${name} ${cellW}×${cellH}px`;
-    const line2 = box ? `inset ${fmt(box.w * s * .1, 1)} / ${fmt(box.h * s * .1, 1)}px` : `inset ${fmt(cellW * .1, 1)} / ${fmt(cellH * .1, 1)}px`;
-    g.append(mono(cx + 4, 252, line1), mono(cx + 4, 265, line2, { fill: '#8fd8ff' }));
+    const ix = box.w * .1, iy = box.h * .1;
+    g.append(label(cx + 2, 245, name, { 'font-weight': 700 }));
+    g.append(mono(cx + 2, 256, `box ${fmt(box.w, 1)}×${fmt(box.h, 1)} u`));
+    g.append(mono(cx + 2, 267, `inset ${fmt(ix, 1)} ${fmt(iy, 1)} u`, { fill: DIM }));
   });
   return g;
 }
 
-/** Radius ruler: same tube at .25 scale under dilate radius 0 0 / 10 0 / 0 10 / 7 7, plus erode/dilate on text. */
+/** Radius ruler: same tube at .22 scale under dilate radius 0 0 / 10 0 / 0 10 / 7 7, plus erode/dilate on text. */
 function rulerPanel(): SVGGElement {
   const g = el('g', { id: 'ns-ruler' });
-  const s = .25;
+  const s = .22;
   // filter on the OUTER group: primitive units stay in stage pixels while the tube itself is scaled
   const sample = (x: number, y: number, id: string, filterId: string) =>
     el('g', { id, filter: `url(#${filterId})` }, el('g', { transform: `translate(${x} ${y}) scale(${s})` }, tube({ stroke: '#ffd166' })));
-  g.append(sample(1074, 316, 'ns-r00', 'ns-f-r00'), sample(1170, 316, 'ns-r10', 'ns-f-r10'));
-  g.append(sample(1074, 384, 'ns-r01', 'ns-f-r01'), sample(1168, 384, 'ns-r77', 'ns-f-r77'));
+  g.append(sample(1082, 314, 'ns-r00', 'ns-f-r00'), sample(1182, 314, 'ns-r10', 'ns-f-r10'));
+  g.append(sample(1082, 388, 'ns-r01', 'ns-f-r01'), sample(1182, 388, 'ns-r77', 'ns-f-r77'));
   // concept:morphology-zero-radius beside a stdDeviation=0 blur: zero parameters are identities, not vanishing
-  g.append(el('circle', { cx: 1150, cy: 322, r: 5, fill: '#8ff6ff', filter: 'url(#ns-f-blur0)' }));
-  g.append(mono(1074, 372, 'radius="0 0" 恒等'), mono(1140, 372, 'σ=0', { fill: '#8fd8ff' }));
-  g.append(mono(1170, 372, 'radius="10 0" 横胀 · 加压中'));
-  g.append(mono(1074, 446, 'radius="0 10" 纵胀'), mono(1168, 446, 'radius="7 7" 各向同性'));
+  g.append(el('circle', { cx: 1158, cy: 320, r: 5, fill: '#8ff6ff', filter: 'url(#ns-f-blur0)' }));
+  g.append(mono(1070, 366, 'r="0 0" 恒等'), mono(1070, 379, '● σ=0 亦恒等', { fill: DIM }));
+  g.append(mono(1170, 366, 'r="10 0" 只横胀'), mono(1170, 379, 'animate 来回加压', { fill: DIM }));
+  g.append(mono(1070, 440, 'r="0 10" 只纵胀'), mono(1170, 440, 'r="7 7" 各向同性'));
   // operator column · concept:morphology-thicken-text
-  g.append(el('text', { x: 1312, y: 346, 'text-anchor': 'middle', 'font-size': 30, 'font-weight': 700, fill: 'currentColor', filter: 'url(#ns-f-erode)' }, '霓虹'));
-  g.append(el('text', { x: 1312, y: 420, 'text-anchor': 'middle', 'font-size': 30, 'font-weight': 700, fill: 'currentColor', filter: 'url(#ns-f-dilate)' }, '霓虹'));
-  g.append(mono(1268, 372, 'erode r=2 发丝'), mono(1268, 446, 'dilate r=5 胖体'));
+  g.append(el('text', { x: 1318, y: 344, 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 700, fill: 'currentColor', filter: 'url(#ns-f-erode)' }, '霓虹'));
+  g.append(el('text', { x: 1318, y: 420, 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 700, fill: 'currentColor', filter: 'url(#ns-f-dilate)' }, '霓虹'));
+  g.append(mono(1318, 366, 'erode r=2', { 'text-anchor': 'middle' }), mono(1318, 440, 'dilate r=5', { 'text-anchor': 'middle' }));
   return g;
 }
 
@@ -245,20 +253,20 @@ function cardsBand(): SVGGElement {
   const glyph = (cx: number, cy: number, attrs: Attrs = {}) => el('text', { x: cx, y: cy + 20, 'text-anchor': 'middle', 'font-size': 56, 'font-weight': 700, fill: 'currentColor', ...attrs }, '霓虹');
   const rectSupported = typeof CSS !== 'undefined' && CSS.supports('clip-path', 'rect(0 auto auto 0)');
   const specs: CardSpec[] = [
-    { cls: 'card-1', filter: 'ns-f-outline', caption: ['dilate 4 → flood → comp out → merge', 'clip inset(6px round 12px)'] },
-    { cls: 'card-2', filter: 'ns-f-threshold', caption: ['blur 4 → feFuncA discrete 0 1 → in', 'clip circle(46% at 50% 48%)'] },
-    { cls: 'card-3', filter: 'ns-f-classic', caption: ['SA → blur 4 → offset 6 8 → in → merge', 'clip ellipse(48% 44%)'] },
-    { cls: 'card-4', caption: ['offset dy5 → blur 6 → out SA → in → merge', 'clip polygon(… 缺角铭牌)'], build: (g, cx, cy) => {
+    { cls: 'card-1', filter: 'ns-f-outline', caption: ['dilate 4→flood→out(SA)→merge', 'inset(6px round 12px)'] },
+    { cls: 'card-2', filter: 'ns-f-threshold', caption: ['blur 4→feFuncA discrete→in', 'circle(46% at 50% 48%)'] },
+    { cls: 'card-3', filter: 'ns-f-classic', caption: ['SA→blur 4→offset 6 8→in→merge', 'ellipse(48% 44%)'] },
+    { cls: 'card-4', caption: ['offset dy5→blur 6→out(SA)→in', 'polygon(…) 缺角铭牌'], build: (g, cx, cy) => {
       // inner shadow needs a filled shape to look recessed: plate + glyph share one SourceAlpha
       g.append(el('g', { filter: 'url(#ns-f-inner)' }, el('rect', { x: cx - 80, y: cy - 42, width: 160, height: 84, rx: 12, fill: '#5fb9e6' }), glyph(cx, cy, { fill: '#0b2230', 'font-size': 50 })));
     } },
-    { cls: 'card-5', filter: 'ns-f-drop', caption: ['feDropShadow dx6 dy8 σ4 (≡ card 3)', 'clip path("M6 22 Q6 6 22 6 …")'] },
-    { cls: 'card-6', caption: ['url(#tint) drop-shadow blur(.4px) · 换序小样', rectSupported ? 'clip rect(4px auto auto 4px)' : 'clip inset(4px) ← rect() 回退'], build: (g, cx, cy) => {
+    { cls: 'card-5', filter: 'ns-f-drop', caption: ['feDropShadow dx6 dy8 σ4 ≡ 卡3', 'path("M6 22 Q6 6 22 6 …")'] },
+    { cls: 'card-6', caption: ['url(#tint) drop-shadow blur', rectSupported ? 'rect(4px auto auto 4px)' : 'inset(4px) ← rect() 回退'], build: (g, cx, cy) => {
       g.append(glyph(cx, cy - 8, { class: 'chain-a' }));
       // reorder sample: the tint placed AFTER drop-shadow colours the shadow too
-      g.append(mono(cx - 96, cy + 46, 'url()→shadow', { fill: '#8fd8ff' }), mono(cx + 10, cy + 46, 'shadow→url()', { fill: '#8fd8ff' }));
+      g.append(mono(cx - 62, cy + 46, 'url()→shadow', { fill: DIM, 'text-anchor': 'middle' }), mono(cx + 50, cy + 46, 'shadow→url()', { fill: DIM, 'text-anchor': 'middle' }));
       g.append(el('text', { x: cx - 62, y: cy + 68, 'text-anchor': 'middle', 'font-size': 20, 'font-weight': 700, fill: 'currentColor', class: 'chain-a' }, '霓虹'));
-      g.append(el('text', { x: cx + 46, y: cy + 68, 'text-anchor': 'middle', 'font-size': 20, 'font-weight': 700, fill: 'currentColor', class: 'chain-b' }, '霓虹'));
+      g.append(el('text', { x: cx + 50, y: cy + 68, 'text-anchor': 'middle', 'font-size': 20, 'font-weight': 700, fill: 'currentColor', class: 'chain-b' }, '霓虹'));
     } },
   ];
   specs.forEach((spec, i) => {
@@ -268,7 +276,7 @@ function cardsBand(): SVGGElement {
     if (spec.build) spec.build(card, cx, cy);
     else card.append(glyph(cx, cy, { filter: `url(#${spec.filter})` }));
     band.append(card);
-    band.append(mono(x + 4, 634, `${i + 1} ${spec.caption[0]}`), mono(x + 4, 648, spec.caption[1], { fill: '#8fd8ff' }));
+    band.append(mono(x + 4, 634, `${i + 1} ${spec.caption[0]}`), mono(x + 4, 648, `clip-path: ${spec.caption[1]}`, { fill: DIM }));
   });
   return band;
 }
@@ -303,9 +311,9 @@ function glowLayer(): SVGSVGElement {
   const sign = el('g', { id: 'ns-sign', filter: 'url(#ns-f-neon)', 'clip-path': 'url(#ns-clip-plate)', mask: 'url(#ns-m-tube-fade)' });
   // invisible padding rect: widens the objectBoundingBox so clip + mask leave room for the halo; alpha 0 so it adds no glow
   sign.append(el('rect', { x: 182, y: 122, width: 368, height: 228, fill: '#000', 'fill-opacity': 0 }));
-  sign.append(tube({ transform: 'translate(226 166)' }));
+  sign.append(tube({ transform: 'translate(226 166)' }));   // frame 226–506 × 166–306, inner stubs at x=286 / 446
   sign.append(el('text', { x: 366, y: 240, 'text-anchor': 'middle', 'font-size': 58, 'font-weight': 700, fill: 'currentColor' }, '霓虹'));
-  sign.append(el('text', { x: 366, y: 284, 'text-anchor': 'middle', 'font-size': 20, 'letter-spacing': 5, fill: 'currentColor' }, 'OPEN · 24H'));
+  sign.append(el('text', { x: 366, y: 278, 'text-anchor': 'middle', 'font-size': 16, 'letter-spacing': 3, fill: 'currentColor' }, 'OPEN · 24H'));
   svg.append(sign);
   return svg;
 }
@@ -316,35 +324,36 @@ function glowLayer(): SVGSVGElement {
 function uiLayer(): SVGGElement {
   const g = el('g', { id: 'svg-ui', 'pointer-events': 'none' });
   // title band
-  g.append(el('text', { x: 48, y: 72, 'font-size': 26, 'font-weight': 700, fill: 'currentColor' }, '霓虹招牌工坊', el('tspan', { 'font-size': 15, 'font-weight': 400, fill: '#8fd8ff', dx: 14 }, 'Neon Sign Workshop · 手工接线的光晕、辉光、内阴影与投影')));
-  g.append(mono(48, 90, 'filter:url(#ns-f-neon) · clip-path:url(#ns-clip-plate) · mask:url(#ns-m-tube-fade) — 同一枚滤镜 / 裁切 / 遮罩，<svg> 招牌与 HTML 价目板共用；辉光层 <svg style="mix-blend-mode:screen">', { fill: '#8fd8ff' }));
+  g.append(el('text', { x: 48, y: 70, 'font-size': 26, 'font-weight': 700, fill: 'currentColor' }, '霓虹招牌工坊', el('tspan', { 'font-size': 15, 'font-weight': 400, fill: DIM, dx: 14 }, 'Neon Sign Workshop · 手工接线的光晕、辉光、内阴影与投影')));
+  g.append(mono(48, 88, 'filter:url(#ns-f-neon) · clip-path:url(#ns-clip-plate) · mask:url(#ns-m-tube-fade) — 同一枚滤镜 / 裁切 / 遮罩，<svg> 招牌与 HTML 价目板共用；辉光层 <svg style="mix-blend-mode:screen">', { fill: DIM }));
   // hover morph sample (triangle → hexagon, six vertices both) — in the ui layer but hit-testable
   g.append(el('rect', { class: 'morph-sample hit', x: 1318, y: 42, width: 40, height: 40, fill: '#ffd166', 'pointer-events': 'auto' }));
   g.append(label(1306, 90, 'hover: polygon() 三角→六边', { 'text-anchor': 'end' }));
   // bench annotations
   g.append(label(48, 128, '两界并置 · 同一枚 #ns-f-neon', { 'font-size': 12, 'font-weight': 700 }));
-  g.append(label(48, 198, '背景不透明 → 胀的是整块 alpha ✗', { fill: '#ff8fc6' }));
-  g.append(label(48, 266, '背景透明 → 胀的是字形 alpha ✓', { fill: '#8ff6ff' }));
-  g.append(mono(48, 292, 'clipPathUnits / maskContentUnits'), mono(48, 305, '= objectBoundingBox：归一化坐标'), mono(48, 318, '同时套住 SVG bbox 与 HTML 盒'));
+  g.append(label(48, 200, '背景不透明 → 胀的是整块 alpha ✗', { fill: '#ff8fc6' }));
+  g.append(label(48, 270, '背景透明 → 胀的是字形 alpha ✓', { fill: '#8ff6ff' }));
+  g.append(mono(48, 294, 'clipPathUnits / maskContentUnits'), mono(48, 307, '= objectBoundingBox：归一化坐标'), mono(48, 320, '同时套住 SVG bbox 与 HTML 盒'));
   g.append(label(540, 128, 'color-interpolation-filters', { 'font-size': 12, 'font-weight': 700 }));
-  g.append(label(540, 212, 'sRGB（锁定）— 粉晕保持粉色', { fill: '#8ff6ff' }));
-  g.append(label(540, 284, 'linearRGB（默认）— 晕更亮更白', { fill: '#ff8fc6' }));
-  g.append(mono(540, 308, 'x=-45% y=-45% w=190% h=190%'), mono(540, 321, '默认 -10%/120% 会削掉外晕'));
-  g.append(label(60, 450, 'A isolation:isolate — 条纹被挡在组外'), label(180, 450, 'B 不隔离 — 条纹透过 screen 可见', { x: 186 }));
+  g.append(mono(540, 148, 'blur σ=5 压在粉|绿交界', { fill: DIM }));
+  g.append(label(540, 168, 'sRGB（锁定）交界偏暗', { fill: '#8ff6ff' }));
+  g.append(label(540, 238, 'linearRGB（默认）交界发亮', { fill: '#ff8fc6' }));
+  g.append(mono(540, 296, '滤镜区 -45% / 190%'), mono(540, 309, '默认 -10%/120% 会把'), mono(540, 322, 'σ≈10 的外晕削掉'));
+  g.append(label(60, 438, 'A isolate · 组内干净', { 'font-size': 11 }), label(180, 438, 'B auto · 条纹透过 screen', { 'font-size': 11 }));
   g.append(label(322, 380, '检验位', { 'font-size': 12, 'font-weight': 700 }), mono(322, 396, 'multiply 减色 → RGB+黑'), mono(322, 410, 'screen 加色 → 向白'), mono(322, 424, '霓虹 = 加色逻辑'));
-  g.append(label(470, 450, 'multiply · 白灯箱'), label(586, 450, 'screen · 深色台面'));
+  g.append(label(470, 452, 'multiply · 白灯箱'), label(586, 452, 'screen · 深色台面'));
   // jig + ruler headers
   g.append(label(1068, 122, '夹具三参照 · clip-path: inset(10%) <geometry-box>', { 'font-size': 12, 'font-weight': 700 }));
   g.append(label(1068, 302, '弯管半径尺 · feMorphology radius="x y"', { 'font-size': 12, 'font-weight': 700 }));
   // ground labels
-  g.append(mono(48, 692, 'mask-image: linear-gradient(to bottom,#000 30%,transparent) — 远端地面渐隐，全程没有 <mask> 元素', { fill: '#8fd8ff' }));
+  g.append(mono(48, 692, 'mask-image: linear-gradient(to bottom,#000 30%,transparent) — 远端地面渐隐，全程没有 <mask> 元素', { fill: DIM }));
   ['subtract → 单月牙', 'intersect → 透镜', 'exclude → 双月牙'].forEach((t, i) => g.append(mono(146 + i * 200, 848, t, { 'text-anchor': 'middle' })));
-  g.append(mono(50, 862, 'mask-image: radial-gradient ×2 · mask-composite（-webkit-mask-composite: source-out / source-in / xor 并写）', { fill: '#8fd8ff' }));
-  g.append(mono(716, 864, 'HTML 倒影 · mask: url(#ns-m-puddle) luminance, linear-gradient(...) alpha', { fill: '#8fd8ff' }));
+  g.append(mono(50, 862, 'mask-image: radial-gradient ×2 · mask-composite（-webkit-mask-composite: source-out / source-in / xor 并写）', { fill: DIM }));
+  g.append(mono(716, 854, 'HTML 倒影 · mask: url(#ns-m-puddle) luminance,', { fill: DIM }), mono(716, 865, '                 linear-gradient(#000, transparent 78%) alpha', { fill: DIM }));
   g.append(label(1056, 778, 'mask-mode: alpha'), label(1056, 858, 'mask-mode: luminance'));
-  g.append(mono(1056, 692, '同一张遮罩，两种读法', { fill: '#8fd8ff' }));
-  g.append(mono(1150, 692, 'mask-size 40px · repeat', { fill: '#8fd8ff' }), mono(1262, 692, 'contain · no-repeat', { fill: '#8fd8ff' }));
-  g.append(label(1150, 860, '雨点窗口：同一颗水滴 data-URI，尺度不同'));
+  g.append(mono(1056, 692, '同一遮罩两种读法', { fill: DIM }));
+  g.append(mono(1150, 692, '40px repeat', { fill: DIM }), mono(1262, 692, 'contain no-repeat', { fill: DIM }));
+  g.append(label(1186, 862, '同一颗水滴 URI，尺度不同'));
   return g;
 }
 

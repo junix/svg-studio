@@ -97,7 +97,7 @@ export function makeScreenBitmap(): string {
 /** 128×128 blue-ish noise: seeded white noise minus its 3×3 mean (a cheap high-pass), re-centred at 0.5. */
 export function makeNoiseBitmap(): string {
   const n = 128;
-  const rnd = mulberry32(0xb1ue);
+  const rnd = mulberry32(0xb14e);
   const white = Float32Array.from({ length: n * n }, () => rnd());
   const [c, ctx] = canvas2d(n, n);
   const img = ctx.createImageData(n, n);

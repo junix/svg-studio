@@ -195,6 +195,8 @@ function styleSheet(): string {
 /* css:presentation-attribute-specificity — the line is authored stroke="#999"; this rule wins */
 .label .rule{stroke:var(--accent);stroke-width:2}
 .label .stamp,.label .caption{font-family:var(--font-mono);font-size:11px;fill:var(--rule)}
+.label .seal-mark{fill:none;stroke:var(--accent);stroke-width:1.4;stroke-linejoin:round;stroke-dasharray:2 2}
+.label .seal-text{font-size:11px;fill:var(--accent)}
 .label .dot{fill:var(--accent);animation:breathe 1.6s ease-in-out infinite}
 @keyframes breathe{0%,100%{opacity:.2;r:3}50%{opacity:1;r:4.5}}
 @supports (color: light-dark(#fff,#000)){.label .ld{fill:light-dark(#b4452a,#e5936c)}}
@@ -268,12 +270,10 @@ ${identityBlock('(max-width: 420px)', 'narrow', NARROW)}`;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
-// The document script (CDATA). Runs in <object>/<iframe> copies and — re-created by the host — in the inline copy; it
-// never runs inside <img> (`concept:svg-script-security-context`). Deterministic: no Date / Math.random.
-const SCRIPT = `(function () {
-  var here = document.currentScript;
-  var root = here && here.closest ? here.closest('svg') : null;
-  if (!root) root = document.documentElement;
+// The document script (CDATA). Runs in <object>/<iframe> copies and — invoked by the host with the inline root as
+// `root` — in the inline copy; it never runs inside <img> (`concept:svg-script-security-context`).
+// Deterministic: no Date / Math.random. `SCRIPT_BODY` expects a `root` binding (the <svg class="label"> element).
+export const SCRIPT_BODY = `
   var doc = root.ownerDocument, win = doc.defaultView;
   var standalone = root === doc.documentElement;
   var $ = function (s) { return root.querySelector(s); };
@@ -373,7 +373,8 @@ const SCRIPT = `(function () {
   if (frac && fallback && frac.getBoundingClientRect().height < 8) { fallback.style.display = 'block'; $('math').style.display = 'none'; }
   placeCursor();
   announce();
-})();`;
+`;
+const SCRIPT = `(function (root) {${SCRIPT_BODY}})(document.documentElement);`;
 
 // ---------------------------------------------------------------------------------------------------------------------
 export function buildLabelDocument(): string {
@@ -462,6 +463,13 @@ export function buildLabelDocument(): string {
 <text class="heading-narrow" x="776" y="120" text-anchor="end">${ACCESSION}</text>
 <text class="heading-en" x="320" y="120">Painted pottery amphora with two handles · Majiayao culture, c. 3200 BCE</text>
 <text class="accession" x="776" y="100" text-anchor="end">${ACCESSION}</text>
+<g class="seal" aria-hidden="true">
+  <!-- external link chip: the hand-drawn seal is the placeholder; the https <image> covers it only when the network
+       allows (never inside <img>: secure static mode loads no external resources) -->
+  <path class="seal-mark" d="M 742 42 h 30 v 30 h -30 Z M 747 49 h 20 M 747 57 h 20 M 747 65 h 12" />
+  <text class="seal-text" x="757" y="80" text-anchor="middle">占位</text>
+  <image href="https://museum.invalid/seal/${ACCESSION}.png" x="740" y="40" width="34" height="34"/>
+</g>
 <line class="rule" x1="320" y1="130" x2="776" y2="130" stroke="#999" stroke-width="2"/>
 <foreignObject id="fo-desc" x="320" y="150" width="456" height="176" mask="url(#m-fade)">
   <div xmlns="http://www.w3.org/1999/xhtml" class="html desc-box" lang="zh-Hans">

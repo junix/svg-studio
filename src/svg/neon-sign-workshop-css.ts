@@ -1,7 +1,7 @@
 // neon-sign-workshop — stylesheet, data-URI SVG tiles and the shared tube-path generator.
 // The <style> block lives inside #stage (an inline SVG in an HTML document, so it is a document-wide
 // stylesheet); every selector is scoped with `#stage` and every id carries the `ns-` prefix so several
-// inline SVGs can share one HTML document without id collisions.
+// inline SVGs can share one HTML document without id collisions (concept:inline-svg-id-collisions).
 import { fmt } from './lib';
 import { EMBEDDED_FACES } from './font-data';
 
@@ -30,8 +30,10 @@ export function tubePath(points: Pt[], r: number): string {
   return parts.join(' ');
 }
 
-/** Skeleton of the sign frame in local units (280×140, open at the bottom like a real tube). */
-export const TUBE_SKELETON: Pt[] = [[120, 140], [0, 140], [0, 0], [280, 0], [280, 140], [160, 140]];
+/** Skeleton of the sign frame in local units (280×140): a frame open at the bottom whose two tube ends turn
+ *  inward and run up to y=60, the way a real tube dives back to the transformer. The inner stubs are what
+ *  survives `clip-path: inset(10%) fill-box` in the jig — a plain perimeter would be clipped away entirely. */
+export const TUBE_SKELETON: Pt[] = [[60, 60], [60, 140], [0, 140], [0, 0], [280, 0], [280, 140], [220, 140], [220, 60]];
 export const TUBE_R = 26;
 export const TUBE_W = 22;
 export const TUBE_D = tubePath(TUBE_SKELETON, TUBE_R);
@@ -50,17 +52,18 @@ export const svgDataUri = (markup: string): string => 'data:image/svg+xml,' + ma
  * `concept:svg-as-css-background-image` — the wall tile. A media query inside the SVG reacts to the *box*
  * it is painted into: at background-size:120px (#wall) the full annotated tube drawing shows, at 48px
  * (.board-frame) only the two end dots remain. The same URI is reused once more as a CSS mask-image.
+ * Colours are kept low-contrast: the tile is a texture under 11px labels, not a subject.
  */
 export const WALL_TILE_URI = svgDataUri(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>
   <style>.tube,.anno{display:none}@media (min-width:96px){.tube,.anno{display:block}}</style>
-  <path class='tube' d='M18 96V44a22 22 0 0 1 22-22h56' fill='none' stroke='#2a4758' stroke-width='5' stroke-linecap='round'/>
-  <circle cx='18' cy='96' r='3.5' fill='#3d6f82'/><circle cx='96' cy='22' r='3.5' fill='#3d6f82'/>
-  <g class='anno' fill='none' stroke='#4c7789' stroke-width='1'>
+  <path class='tube' d='M18 96V44a22 22 0 0 1 22-22h56' fill='none' stroke='#1a2e3c' stroke-width='5' stroke-linecap='round'/>
+  <circle cx='18' cy='96' r='3.5' fill='#254859'/><circle cx='96' cy='22' r='3.5' fill='#254859'/>
+  <g class='anno' fill='none' stroke='#274453' stroke-width='1'>
     <path d='M18 44h22v-22' stroke-dasharray='3 3'/>
     <path d='M30 44a10 10 0 0 1 10-10'/>
     <path d='M8 96v-52M12 96h-8M12 44h-8'/>
-    <text x='46' y='42' font-size='9' fill='#4c7789' stroke='none' font-family='monospace'>r22</text>
-    <text x='60' y='110' font-size='9' fill='#4c7789' stroke='none' font-family='monospace'>%23 → %2523</text>
+    <text x='46' y='42' font-size='9' fill='#2f5062' stroke='none' font-family='monospace'>r22</text>
+    <text x='60' y='110' font-size='9' fill='#2f5062' stroke='none' font-family='monospace'>%23 → %2523</text>
   </g>
 </svg>`);
 
@@ -99,7 +102,7 @@ ${neonFontFaces()}
 #stage .mono{font-family:'Studio Mono','Latin Modern Mono',Menlo,monospace}
 #stage .html-root{position:relative;width:1400px;height:900px;margin:0;pointer-events:none}
 /* concept:svg-as-css-background-image — same data-URI tile, two box sizes, two renderings (media query inside the SVG) */
-#stage .wall-panel{position:absolute;box-sizing:border-box;border-radius:10px;background:rgba(9,19,29,.88) url("${WALL_TILE_URI}") repeat;background-size:120px 120px}
+#stage .wall-panel{position:absolute;box-sizing:border-box;border-radius:10px;background:rgba(9,19,29,.9) url("${WALL_TILE_URI}") repeat;background-size:120px 120px}
 #stage .board-frame{position:absolute;left:716px;top:104px;width:328px;height:348px;box-sizing:border-box;border-radius:10px;border:1px solid rgba(143,246,255,.18);background:rgba(10,21,32,.9) url("${WALL_TILE_URI}") repeat;background-size:48px 48px}
 /* css:svg-filter-on-html-element + concept:clip-path-html-to-svg-reference + concept:mask-html-to-svg-reference —
    the HTML board carries exactly the three references the SVG sign group carries as attributes */
@@ -108,9 +111,10 @@ ${neonFontFaces()}
 #stage .row{display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:baseline;padding:5px 0 4px;font-size:15px;border-bottom:1px dotted rgba(191,233,255,.55)}
 #stage .row b{font-weight:400;font-family:'Studio Mono',monospace;font-size:14px}
 #stage .foot{margin:10px 0 0;font-size:13px;letter-spacing:.32em;text-align:center}
-#stage .board-bad,#stage .board-ok{position:absolute;left:48px;width:124px;height:42px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;letter-spacing:.12em;border-radius:5px;filter:url(#ns-f-neon)}
-#stage .board-bad{top:142px;background:#12202c}
-#stage .board-ok{top:210px;background:transparent}
+/* the wrong/right pair: same filter, only the element's own background differs (构造要点 5) */
+#stage .board-bad,#stage .board-ok{position:absolute;left:74px;width:112px;height:40px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;letter-spacing:.12em;border-radius:5px;filter:url(#ns-f-neon)}
+#stage .board-bad{top:144px;background:#12202c}
+#stage .board-ok{top:214px;background:transparent}
 /* css:mask-layers + css:mask-mode — SVG <mask> read as luminance, gradient read as alpha; both constrain the HTML reflection */
 #stage .reflection{position:absolute;left:716px;top:700px;width:328px;height:150px;overflow:hidden;color:#9fe0ff;filter:url(#ns-f-neon);
   mask:url(#ns-m-puddle) luminance,linear-gradient(#000 0%,transparent 78%) alpha;mask-mode:luminance,alpha;
