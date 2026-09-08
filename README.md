@@ -41,6 +41,7 @@ Open `/?scene=arrow-components` to compare two reusable construction systems. Th
 
 ```bash
 npm install
+npm run dev    # open http://localhost:5173/gallery.html for the gallery, or http://localhost:5173/?scene=<id> for a single scene
 npm test
 ```
 

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SVG Studio · Gallery</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111a2e;
+      --panel-2: #16223b;
+      --line: #233454;
+      --ink: #dce8f5;
+      --ink-dim: #8aa1bf;
+      --accent: #54d6c6;
+      --accent-warm: #ffd166;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      grid-template-rows: 1fr;
+    }
+    aside {
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      overflow-y: auto;
+      padding: 20px 16px;
+    }
+    aside h1 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    aside p.sub {
+      margin: 0 0 18px;
+      color: var(--ink-dim);
+      font-size: 12px;
+    }
+    .filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .filters button {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      color: var(--ink-dim);
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .filters button.active { color: var(--accent); border-color: var(--accent); }
+    .filters button:hover { color: var(--ink); }
+
+    nav.scene-list { display: flex; flex-direction: column; gap: 4px; }
+    nav.scene-list a {
+      display: block;
+      padding: 9px 10px;
+      border-radius: 8px;
+      color: var(--ink);
+      text-decoration: none;
+      background: transparent;
+      border: 1px solid transparent;
+    }
+    nav.scene-list a:hover { background: var(--panel-2); }
+    nav.scene-list a.active {
+      background: var(--panel-2);
+      border-color: var(--line);
+    }
+    nav.scene-list a .id {
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent-warm);
+      display: block;
+      margin-bottom: 2px;
+    }
+    nav.scene-list a .use {
+      font-size: 13px;
+      font-weight: 600;
+      display: block;
+    }
+    nav.scene-list a .family {
+      font-size: 11px;
+      color: var(--ink-dim);
+    }
+
+    main {
+      position: relative;
+      background: #0a1426;
+      overflow: hidden;
+    }
+    main iframe,
+    main .empty {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    main iframe {
+      border: 0;
+      background: transparent;
+    }
+    main .empty[hidden] { display: none; }
+    main .empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--ink-dim);
+      font-size: 13px;
+    }
+    main .badge {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: rgba(17,26,46,.85);
+      border: 1px solid var(--line);
+      padding: 4px 10px;
+      font-size: 11px;
+      color: var(--ink-dim);
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .loading { padding: 32px; color: var(--ink-dim); font-size: 12px; }
+    .err { padding: 24px; color: #ff8d8d; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <aside>
+    <h1>SVG Studio</h1>
+    <p class="sub">Gallery · <span id="count">…</span> scenes</p>
+    <div class="filters" id="filters">
+      <button data-filter="all" class="active">All</button>
+    </div>
+    <nav class="scene-list" id="list"><div class="loading">Loading catalog…</div></nav>
+  </aside>
+  <main>
+    <div class="badge" id="badge">Pick a scene</div>
+    <div class="empty" id="empty">← pick a scene from the left</div>
+    <iframe id="frame" hidden title="scene preview"></iframe>
+  </main>
+
+  <script type="module">
+    const list = document.getElementById('list');
+    const filters = document.getElementById('filters');
+    const count = document.getElementById('count');
+    const frame = document.getElementById('frame');
+    const badge = document.getElementById('badge');
+    const empty = document.getElementById('empty');
+
+    let catalog = [];
+    let currentId = null;
+
+    async function loadCatalog() {
+      try {
+        const res = await fetch('./catalog.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        catalog = await res.json();
+      } catch (e) {
+        list.innerHTML = `<div class="err">Failed to load catalog.json: ${e.message}</div>`;
+        return;
+      }
+      render();
+      // Auto-select from hash or first scene
+      const fromHash = location.hash.replace(/^#/, '');
+      const initial = catalog.find(s => s.id === fromHash) ? fromHash : catalog[0]?.id;
+      if (initial) select(initial, { push: false });
+    }
+
+    function render() {
+      count.textContent = String(catalog.length);
+      list.innerHTML = catalog
+        .map(
+          s => `<a href="#${s.id}" data-id="${s.id}">
+                  <span class="id">${s.id}</span>
+                  <span class="use">${s.use}</span>
+                  <span class="family">${s.family}</span>
+                </a>`,
+        )
+        .join('');
+      list.querySelectorAll('a').forEach(a =>
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          select(a.dataset.id);
+        }),
+      );
+
+      // Build family filter buttons
+      const families = ['all', ...new Set(catalog.map(s => s.family))];
+      filters.innerHTML = families
+        .map(f => `<button data-filter="${f}"${f === 'all' ? ' class="active"' : ''}>${f}</button>`)
+        .join('');
+      filters.querySelectorAll('button').forEach(b =>
+        b.addEventListener('click', () => {
+          filters.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          const f = b.dataset.filter;
+          list.querySelectorAll('a').forEach(a => {
+            const s = catalog.find(x => x.id === a.dataset.id);
+            a.style.display = f === 'all' || s.family === f ? '' : 'none';
+          });
+        }),
+      );
+    }
+
+    function select(id, { push = true } = {}) {
+      const scene = catalog.find(s => s.id === id);
+      if (!scene) return;
+      currentId = id;
+      list.querySelectorAll('a').forEach(a =>
+        a.classList.toggle('active', a.dataset.id === id),
+      );
+      empty.hidden = true;
+      frame.hidden = false;
+      frame.src = `/?scene=${encodeURIComponent(id)}`;
+      badge.textContent = `${scene.id} · ${scene.family}`;
+      if (push) history.replaceState(null, '', `#${id}`);
+    }
+
+    window.addEventListener('hashchange', () => {
+      const id = location.hash.replace(/^#/, '');
+      if (id && id !== currentId) select(id);
+    });
+
+    loadCatalog();
+  </script>
+</body>
+</html>
