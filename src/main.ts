@@ -36,8 +36,14 @@ async function mountSvgDemo(id: string): Promise<void> {
 if (isSvgDemo(scene)) {
   mountSvgDemo(scene).catch(error => { console.error(error); throw error; });
 } else {
-app.innerHTML = `<canvas id="stage" width="${W}" height="${H}" aria-label="${scene}"></canvas>`;
-const canvas = document.querySelector<HTMLCanvasElement>('#stage')!;
+const renderers:Record<string,()=>void>={botanical,metro,orbits,topology,'isometric-city':isometricCity,'wave-lab':waveLab,'contour-map':contourMap,circuit,timeline,molecule,loom,'type-system':typeSystem};
+const knownScene = Object.hasOwn(renderers, scene) || scene === 'arrow-components' || scene === 'icon-library' || scene === 'arrow-library';
+const canvas = document.createElement('canvas');
+canvas.setAttribute('id', 'stage');
+canvas.setAttribute('width', String(W));
+canvas.setAttribute('height', String(H));
+canvas.setAttribute('aria-label', knownScene ? scene : `Unknown scene "${scene}" — showing botanical`);
+app.replaceChildren(canvas);
 paper.setup(canvas);
 paper.project.clear();
 
@@ -203,8 +209,6 @@ function typeSystem() {
   const sizes=[12,15,19,24,30,38];sizes.forEach((s,i)=>{label(`${s}  Aa Bb 0123`,[900,210+i*57],s,'#8eabc0');new paper.Path.Circle({center:[850,205+i*57],radius:3+i*1.3,fillColor:color(['#54d6c6','#7b9cff','#ff6f91'][i%3])})});
   label('GRID / RHYTHM / CONTRAST / HIERARCHY',[75,785],14,'#7f9cb0');
 }
-
-const renderers:Record<string,()=>void>={botanical,metro,orbits,topology,'isometric-city':isometricCity,'wave-lab':waveLab,'contour-map':contourMap,circuit,timeline,molecule,loom,'type-system':typeSystem};
 
 if (scene === 'arrow-components') {
   mountArrowComponents(app);

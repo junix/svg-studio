@@ -273,6 +273,38 @@ try {
     } catch (error) { failures.push({scene,error:error.message}); console.error(`${scene}: FAIL ${error.message}`); }
     finally { await page.close(); }
   }
+  // The scene query value must stay an accessible label: quotes/angle brackets land in the canvas
+  // aria-label as attribute text (DOM APIs + setAttribute), never as parsed markup.
+  {
+    const hostile = '"><img src=x onerror="window.__PWNED__=1"><span>pwned</span>';
+    const expectedLabel = `Unknown scene "${hostile}" — showing botanical`;
+    const page = await browser.newPage({viewport:{width:1400,height:900}, deviceScaleFactor:1});
+    try {
+      const errors = [];
+      page.on('pageerror', error => errors.push(error.message));
+      await page.route('**/*', route => {
+        const url = new URL(route.request().url());
+        return ['127.0.0.1','localhost'].includes(url.hostname) || url.protocol === 'data:' ? route.continue() : route.abort();
+      });
+      await page.goto(`http://127.0.0.1:${port}/?scene=${encodeURIComponent(hostile)}&export=1`, {waitUntil:'networkidle'});
+      await page.waitForFunction(() => window.__VIS_READY__ === true, null, {timeout:45000});
+      const probe = await page.evaluate(expectedLabel => {
+        const stage = document.querySelector('#stage');
+        return {
+          canvas: stage instanceof HTMLCanvasElement,
+          label: stage?.getAttribute('aria-label') ?? '',
+          injected: Boolean(window.__PWNED__) || document.querySelectorAll('#app > *').length !== 1 || document.querySelector('#app img, #app span') !== null,
+        };
+      }, expectedLabel);
+      if (!probe.canvas || probe.injected || probe.label !== expectedLabel) throw new Error(`hostile scene name escaped the aria-label: ${JSON.stringify(probe)}`);
+      if (errors.length) throw new Error(`hostile scene probe browser errors: ${errors.join(' | ')}`);
+      await page.goto(`http://127.0.0.1:${port}/?scene=metro&export=1`, {waitUntil:'networkidle'});
+      await page.waitForFunction(() => window.__VIS_READY__ === true, null, {timeout:45000});
+      const knownLabel = await page.evaluate(() => document.querySelector('#stage')?.getAttribute('aria-label') ?? '');
+      if (knownLabel !== 'metro') throw new Error(`known scene lost its label: ${JSON.stringify(knownLabel)}`);
+      console.log('aria-label: hostile scene names stay attribute text; known scenes keep their id');
+    } finally { await page.close(); }
+  }
 } finally {
   await browser.close();
   stop();
