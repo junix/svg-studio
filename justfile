@@ -24,6 +24,17 @@ gallery:
 gallery-check:
     python3 scripts/gen-gallery.py --check
 
+# Render gallery/covers/<scene>.webp thumbnails and refresh gallery.html.
+# Reuses the vite preview + playwright capture pipeline. Needs dist/ (via build)
+# and Playwright Chromium unless CHROME_PATH is set.
+covers: build
+    #!/usr/bin/env bash
+    if [[ -z "${CHROME_PATH:-}" ]]; then
+      npx --no-install playwright-core install chromium
+    fi
+    node scripts/gen-covers.mjs
+    python3 scripts/gen-gallery.py
+
 # Remove local build caches and documentation intermediates.
 clean: clean-artifacts
 

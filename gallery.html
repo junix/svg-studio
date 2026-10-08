@@ -77,8 +77,8 @@
       flex-direction: column; box-shadow: var(--card-shadow);
       transition: box-shadow .15s, border-color .15s; }
     article.card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); border-color: var(--accent-dim); }
-    article.card .shot { position: relative; height: 180px; overflow: hidden;
-      display: flex; align-items: center; justify-content: center; }
+    article.card .shot { position: relative; aspect-ratio: 1400 / 900; height: auto; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; background: #101820; }
     article.card .shot img { width: 100%; height: 100%; object-fit: cover; display: block;
       position: relative; z-index: 1; }
     article.card .shot .placeholder { position: absolute; inset: 0; display: flex;
@@ -113,7 +113,6 @@
       header { padding: .6rem .8rem; }
       nav.cats { padding: .5rem .8rem; }
       main { padding: .8rem; gap: .75rem; }
-      article.card .shot { height: 140px; }
     }
     </style>
     </head>
@@ -162,7 +161,7 @@
   <h2>organic geometry <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="organic geometry How can layered Bézier petals encode radial structure? organic geometry bezier paper.js botanical" data-family="organic geometry">
-  <a class="shot" href="/?scene=botanical" aria-label="Open organic geometry"><img src="out/botanical-transparent.png" alt="organic geometry rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">botanical</div></a>
+  <a class="shot" href="/?scene=botanical" aria-label="Open organic geometry"><img src="gallery/covers/botanical.webp" alt="organic geometry cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">botanical</div></a>
   <div class="body">
     <h3>organic geometry</h3>
     <p class="desc">How can layered Bézier petals encode radial structure?</p>
@@ -170,7 +169,7 @@
     <div class="tags"><span>bezier</span><span>paper.js</span><span>botanical</span></div>
     <div class="links">
       <a href="/?scene=botanical">Open scene</a>
-      <a href="out/botanical-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/botanical.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -178,7 +177,7 @@
   <h2>information design <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="information design How can a synthetic transit system remain legible across crossings? information design network routing rough.js" data-family="information design">
-  <a class="shot" href="/?scene=metro" aria-label="Open information design"><img src="out/metro-transparent.png" alt="information design rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a5c5c,#2daaaa)">metro</div></a>
+  <a class="shot" href="/?scene=metro" aria-label="Open information design"><img src="gallery/covers/metro.webp" alt="information design cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a5c5c,#2daaaa)">metro</div></a>
   <div class="body">
     <h3>information design</h3>
     <p class="desc">How can a synthetic transit system remain legible across crossings?</p>
@@ -186,7 +185,7 @@
     <div class="tags"><span>network</span><span>routing</span><span>rough.js</span></div>
     <div class="links">
       <a href="/?scene=metro">Open scene</a>
-      <a href="out/metro-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/metro.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -194,7 +193,7 @@
   <h2>scientific illustration <span style="color:var(--muted);font-weight:400;font-size:.8em">(2)</span></h2>
 </section>
 <article class="card" data-search="scientific illustration How can nested orbital families show resonance and eccentricity? scientific illustration parametric annotation astronomy" data-family="scientific illustration">
-  <a class="shot" href="/?scene=orbits" aria-label="Open scientific illustration"><img src="out/orbits-transparent.png" alt="scientific illustration rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">orbits</div></a>
+  <a class="shot" href="/?scene=orbits" aria-label="Open scientific illustration"><img src="gallery/covers/orbits.webp" alt="scientific illustration cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">orbits</div></a>
   <div class="body">
     <h3>scientific illustration</h3>
     <p class="desc">How can nested orbital families show resonance and eccentricity?</p>
@@ -202,12 +201,12 @@
     <div class="tags"><span>parametric</span><span>annotation</span><span>astronomy</span></div>
     <div class="links">
       <a href="/?scene=orbits">Open scene</a>
-      <a href="out/orbits-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/orbits.webp">Cover</a>
     </div>
   </div>
 </article>
 <article class="card" data-search="scientific illustration How can bonding geometry and functional groups be read at a glance? scientific illustration molecule graph chemistry" data-family="scientific illustration">
-  <a class="shot" href="/?scene=molecule" aria-label="Open scientific illustration"><img src="out/molecule-transparent.png" alt="scientific illustration rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">molecule</div></a>
+  <a class="shot" href="/?scene=molecule" aria-label="Open scientific illustration"><img src="gallery/covers/molecule.webp" alt="scientific illustration cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">molecule</div></a>
   <div class="body">
     <h3>scientific illustration</h3>
     <p class="desc">How can bonding geometry and functional groups be read at a glance?</p>
@@ -215,7 +214,7 @@
     <div class="tags"><span>molecule</span><span>graph</span><span>chemistry</span></div>
     <div class="links">
       <a href="/?scene=molecule">Open scene</a>
-      <a href="out/molecule-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/molecule.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -223,7 +222,7 @@
   <h2>system diagram <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="system diagram How do services, queues, and stores form one observable topology? system diagram architecture edges clusters" data-family="system diagram">
-  <a class="shot" href="/?scene=topology" aria-label="Open system diagram"><img src="out/topology-transparent.png" alt="system diagram rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a1a5c,#2d2daa)">topology</div></a>
+  <a class="shot" href="/?scene=topology" aria-label="Open system diagram"><img src="gallery/covers/topology.webp" alt="system diagram cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a1a5c,#2d2daa)">topology</div></a>
   <div class="body">
     <h3>system diagram</h3>
     <p class="desc">How do services, queues, and stores form one observable topology?</p>
@@ -231,7 +230,7 @@
     <div class="tags"><span>architecture</span><span>edges</span><span>clusters</span></div>
     <div class="links">
       <a href="/?scene=topology">Open scene</a>
-      <a href="out/topology-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/topology.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -239,7 +238,7 @@
   <h2>spatial diagram <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="spatial diagram How can an isometric district communicate layers and circulation? spatial diagram isometric urban depth" data-family="spatial diagram">
-  <a class="shot" href="/?scene=isometric-city" aria-label="Open spatial diagram"><img src="out/isometric-city-transparent.png" alt="spatial diagram rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c4a1a,#aaaa2d)">isometric-city</div></a>
+  <a class="shot" href="/?scene=isometric-city" aria-label="Open spatial diagram"><img src="gallery/covers/isometric-city.webp" alt="spatial diagram cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c4a1a,#aaaa2d)">isometric-city</div></a>
   <div class="body">
     <h3>spatial diagram</h3>
     <p class="desc">How can an isometric district communicate layers and circulation?</p>
@@ -247,7 +246,7 @@
     <div class="tags"><span>isometric</span><span>urban</span><span>depth</span></div>
     <div class="links">
       <a href="/?scene=isometric-city">Open scene</a>
-      <a href="out/isometric-city-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/isometric-city.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -255,7 +254,7 @@
   <h2>scientific dashboard <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="scientific dashboard How do four signal views explain one coupled oscillator? scientific dashboard waveform small-multiples annotation" data-family="scientific dashboard">
-  <a class="shot" href="/?scene=wave-lab" aria-label="Open scientific dashboard"><img src="out/wave-lab-transparent.png" alt="scientific dashboard rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a1a5c,#6a2daa)">wave-lab</div></a>
+  <a class="shot" href="/?scene=wave-lab" aria-label="Open scientific dashboard"><img src="gallery/covers/wave-lab.webp" alt="scientific dashboard cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a1a5c,#6a2daa)">wave-lab</div></a>
   <div class="body">
     <h3>scientific dashboard</h3>
     <p class="desc">How do four signal views explain one coupled oscillator?</p>
@@ -263,7 +262,7 @@
     <div class="tags"><span>waveform</span><span>small-multiples</span><span>annotation</span></div>
     <div class="links">
       <a href="/?scene=wave-lab">Open scene</a>
-      <a href="out/wave-lab-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/wave-lab.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -271,7 +270,7 @@
   <h2>cartography <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="cartography How can routes, contours, and landmarks coexist without a basemap? cartography contour route map" data-family="cartography">
-  <a class="shot" href="/?scene=contour-map" aria-label="Open cartography"><img src="out/contour-map-transparent.png" alt="cartography rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a5c5c,#2daaaa)">contour-map</div></a>
+  <a class="shot" href="/?scene=contour-map" aria-label="Open cartography"><img src="gallery/covers/contour-map.webp" alt="cartography cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a5c5c,#2daaaa)">contour-map</div></a>
   <div class="body">
     <h3>cartography</h3>
     <p class="desc">How can routes, contours, and landmarks coexist without a basemap?</p>
@@ -279,7 +278,7 @@
     <div class="tags"><span>contour</span><span>route</span><span>map</span></div>
     <div class="links">
       <a href="/?scene=contour-map">Open scene</a>
-      <a href="out/contour-map-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/contour-map.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -287,7 +286,7 @@
   <h2>technical schematic <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="technical schematic How does signal flow through an analog synthesizer voice? technical schematic circuit schematic signal" data-family="technical schematic">
-  <a class="shot" href="/?scene=circuit" aria-label="Open technical schematic"><img src="out/circuit-transparent.png" alt="technical schematic rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a5c5c,#2daaaa)">circuit</div></a>
+  <a class="shot" href="/?scene=circuit" aria-label="Open technical schematic"><img src="gallery/covers/circuit.webp" alt="technical schematic cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a5c5c,#2daaaa)">circuit</div></a>
   <div class="body">
     <h3>technical schematic</h3>
     <p class="desc">How does signal flow through an analog synthesizer voice?</p>
@@ -295,7 +294,7 @@
     <div class="tags"><span>circuit</span><span>schematic</span><span>signal</span></div>
     <div class="links">
       <a href="/?scene=circuit">Open scene</a>
-      <a href="out/circuit-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/circuit.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -303,7 +302,7 @@
   <h2>narrative <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="narrative How can a mission timeline expose parallel work and dependencies? narrative timeline lanes milestones" data-family="narrative">
-  <a class="shot" href="/?scene=timeline" aria-label="Open narrative"><img src="out/timeline-transparent.png" alt="narrative rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a4a,#aa2d7a)">timeline</div></a>
+  <a class="shot" href="/?scene=timeline" aria-label="Open narrative"><img src="gallery/covers/timeline.webp" alt="narrative cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a4a,#aa2d7a)">timeline</div></a>
   <div class="body">
     <h3>narrative</h3>
     <p class="desc">How can a mission timeline expose parallel work and dependencies?</p>
@@ -311,7 +310,7 @@
     <div class="tags"><span>timeline</span><span>lanes</span><span>milestones</span></div>
     <div class="links">
       <a href="/?scene=timeline">Open scene</a>
-      <a href="out/timeline-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/timeline.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -319,7 +318,7 @@
   <h2>generative vector <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="generative vector How can crossing ribbons reveal a repeatable weaving grammar? generative vector ribbons pattern masking" data-family="generative vector">
-  <a class="shot" href="/?scene=loom" aria-label="Open generative vector"><img src="out/loom-transparent.png" alt="generative vector rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">loom</div></a>
+  <a class="shot" href="/?scene=loom" aria-label="Open generative vector"><img src="gallery/covers/loom.webp" alt="generative vector cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">loom</div></a>
   <div class="body">
     <h3>generative vector</h3>
     <p class="desc">How can crossing ribbons reveal a repeatable weaving grammar?</p>
@@ -327,7 +326,7 @@
     <div class="tags"><span>ribbons</span><span>pattern</span><span>masking</span></div>
     <div class="links">
       <a href="/?scene=loom">Open scene</a>
-      <a href="out/loom-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/loom.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -335,7 +334,7 @@
   <h2>editorial graphic <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="editorial graphic How can a modular typographic scale become a reusable poster system? editorial graphic typography grid poster" data-family="editorial graphic">
-  <a class="shot" href="/?scene=type-system" aria-label="Open editorial graphic"><img src="out/type-system-transparent.png" alt="editorial graphic rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a1a3a,#aa2d6a)">type-system</div></a>
+  <a class="shot" href="/?scene=type-system" aria-label="Open editorial graphic"><img src="gallery/covers/type-system.webp" alt="editorial graphic cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a1a3a,#aa2d6a)">type-system</div></a>
   <div class="body">
     <h3>editorial graphic</h3>
     <p class="desc">How can a modular typographic scale become a reusable poster system?</p>
@@ -343,7 +342,7 @@
     <div class="tags"><span>typography</span><span>grid</span><span>poster</span></div>
     <div class="links">
       <a href="/?scene=type-system">Open scene</a>
-      <a href="out/type-system-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/type-system.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -351,7 +350,7 @@
   <h2>annotated connectors <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="diagram reference library How can agents reliably draw varied SVG lines, arrowheads, and labels as one connected system? annotated connectors svg arrow connector textPath annotation latex" data-family="annotated connectors">
-  <a class="shot" href="/?scene=arrow-library" aria-label="Open diagram reference library"><img src="out/arrow-library-transparent.png" alt="diagram reference library rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a1a5c,#2d2daa)">arrow-library</div></a>
+  <a class="shot" href="/?scene=arrow-library" aria-label="Open diagram reference library"><img src="gallery/covers/arrow-library.webp" alt="diagram reference library cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a1a5c,#2d2daa)">arrow-library</div></a>
   <div class="body">
     <h3>diagram reference library</h3>
     <p class="desc">How can agents reliably draw varied SVG lines, arrowheads, and labels as one connected system?</p>
@@ -359,7 +358,7 @@
     <div class="tags"><span>svg</span><span>arrow</span><span>connector</span><span>textPath</span></div>
     <div class="links">
       <a href="/?scene=arrow-library">Open scene</a>
-      <a href="out/arrow-library-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/arrow-library.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -367,7 +366,7 @@
   <h2>native SVG icons <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="icon design reference library How can one SVG teach agents multiple coherent icon construction styles? native SVG icons svg icon outline filled duotone gradient mask" data-family="native SVG icons">
-  <a class="shot" href="/?scene=icon-library" aria-label="Open icon design reference library"><img src="out/icon-library-transparent.png" alt="icon design reference library rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a1a,#aa2d2d)">icon-library</div></a>
+  <a class="shot" href="/?scene=icon-library" aria-label="Open icon design reference library"><img src="gallery/covers/icon-library.webp" alt="icon design reference library cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a1a,#aa2d2d)">icon-library</div></a>
   <div class="body">
     <h3>icon design reference library</h3>
     <p class="desc">How can one SVG teach agents multiple coherent icon construction styles?</p>
@@ -375,7 +374,7 @@
     <div class="tags"><span>svg</span><span>icon</span><span>outline</span><span>filled</span></div>
     <div class="links">
       <a href="/?scene=icon-library">Open scene</a>
-      <a href="out/icon-library-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/icon-library.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -383,7 +382,7 @@
   <h2>stroke arrows and Powerline segments <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="reusable arrow component reference When should an arrow be a path with a marker, and when should it be overlapping solid segment geometry? stroke arrows and Powerline segments svg arrow marker arc loop powerline segment polygon" data-family="stroke arrows and Powerline segments">
-  <a class="shot" href="/?scene=arrow-components" aria-label="Open reusable arrow component reference"><img src="out/arrow-components-transparent.png" alt="reusable arrow component reference rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a4a,#aa2d7a)">arrow-components</div></a>
+  <a class="shot" href="/?scene=arrow-components" aria-label="Open reusable arrow component reference"><img src="gallery/covers/arrow-components.webp" alt="reusable arrow component reference cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a4a,#aa2d7a)">arrow-components</div></a>
   <div class="body">
     <h3>reusable arrow component reference</h3>
     <p class="desc">When should an arrow be a path with a marker, and when should it be overlapping solid segment geometry?</p>
@@ -391,7 +390,7 @@
     <div class="tags"><span>svg</span><span>arrow</span><span>marker</span><span>arc</span></div>
     <div class="links">
       <a href="/?scene=arrow-components">Open scene</a>
-      <a href="out/arrow-components-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/arrow-components.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -399,7 +398,7 @@
   <h2>astronomical instrument <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="star atlas cabinet 一套 symbol 母版加一墙具名视口，能不能在从不重绘任何一颗星的前提下，装下整份星表？ astronomical instrument astronomy symbol-sprite use-instancing viewbox-fragments shadow-tree brass-instrument" data-family="astronomical instrument">
-  <a class="shot" href="/?scene=celestial-astrolabe-cabinet" aria-label="Open star atlas cabinet"><img src="out/celestial-astrolabe-cabinet-transparent.png" alt="star atlas cabinet rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a1a,#aa2d2d)">celestial-astrolabe-cabinet</div></a>
+  <a class="shot" href="/?scene=celestial-astrolabe-cabinet" aria-label="Open star atlas cabinet"><img src="gallery/covers/celestial-astrolabe-cabinet.webp" alt="star atlas cabinet cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a1a,#aa2d2d)">celestial-astrolabe-cabinet</div></a>
   <div class="body">
     <h3>star atlas cabinet</h3>
     <p class="desc">一套 symbol 母版加一墙具名视口，能不能在从不重绘任何一颗星的前提下，装下整份星表？</p>
@@ -407,7 +406,7 @@
     <div class="tags"><span>astronomy</span><span>symbol-sprite</span><span>use-instancing</span><span>viewbox-fragments</span></div>
     <div class="links">
       <a href="/?scene=celestial-astrolabe-cabinet">Open scene</a>
-      <a href="out/celestial-astrolabe-cabinet-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/celestial-astrolabe-cabinet.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -415,7 +414,7 @@
   <h2>museum curation / archives <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="museum label system 一份能被单独打开的 SVG 文档，究竟能承载多少博物馆展签系统——会换行的正文、成分公式、观众留言表单，还有一版打印稿？ museum curation / archives foreignobject standalone-svg accessibility media-queries forms museum" data-family="museum curation / archives">
-  <a class="shot" href="/?scene=museum-label-panel" aria-label="Open museum label system"><img src="out/museum-label-panel-transparent.png" alt="museum label system rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a1a3a,#aa2d6a)">museum-label-panel</div></a>
+  <a class="shot" href="/?scene=museum-label-panel" aria-label="Open museum label system"><img src="gallery/covers/museum-label-panel.webp" alt="museum label system cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a1a3a,#aa2d6a)">museum-label-panel</div></a>
   <div class="body">
     <h3>museum label system</h3>
     <p class="desc">一份能被单独打开的 SVG 文档，究竟能承载多少博物馆展签系统——会换行的正文、成分公式、观众留言表单，还有一版打印稿？</p>
@@ -423,7 +422,7 @@
     <div class="tags"><span>foreignobject</span><span>standalone-svg</span><span>accessibility</span><span>media-queries</span></div>
     <div class="links">
       <a href="/?scene=museum-label-panel">Open scene</a>
-      <a href="out/museum-label-panel-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/museum-label-panel.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -431,7 +430,7 @@
   <h2>naval architecture <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="technical lofting 路径语法里的每一条命令，能不能都化成一根真实的船体型线足尺画出，并当场与它自己的控制网核对无误？ naval architecture path-grammar bezier elliptical-arcs lofting matrix-projection control-net" data-family="naval architecture">
-  <a class="shot" href="/?scene=ship-lofting-floor" aria-label="Open technical lofting"><img src="out/ship-lofting-floor-transparent.png" alt="technical lofting rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a4a6c,#2d7aaa)">ship-lofting-floor</div></a>
+  <a class="shot" href="/?scene=ship-lofting-floor" aria-label="Open technical lofting"><img src="gallery/covers/ship-lofting-floor.webp" alt="technical lofting cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a4a6c,#2d7aaa)">ship-lofting-floor</div></a>
   <div class="body">
     <h3>technical lofting</h3>
     <p class="desc">路径语法里的每一条命令，能不能都化成一根真实的船体型线足尺画出，并当场与它自己的控制网核对无误？</p>
@@ -439,7 +438,7 @@
     <div class="tags"><span>path-grammar</span><span>bezier</span><span>elliptical-arcs</span><span>lofting</span></div>
     <div class="links">
       <a href="/?scene=ship-lofting-floor">Open scene</a>
-      <a href="out/ship-lofting-floor-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/ship-lofting-floor.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -447,7 +446,7 @@
   <h2>security printing <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="security engraving 上千根发丝细纹如何叠成一幅可读的雕版，而不是一团摩尔纹？ security printing guilloche intaglio hairline non-scaling-stroke paint-order transform-order ctm security-printing" data-family="security printing">
-  <a class="shot" href="/?scene=guilloche-intaglio-plate" aria-label="Open security engraving"><img src="out/guilloche-intaglio-plate-transparent.png" alt="security engraving rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a1a5c,#6a2daa)">guilloche-intaglio-plate</div></a>
+  <a class="shot" href="/?scene=guilloche-intaglio-plate" aria-label="Open security engraving"><img src="gallery/covers/guilloche-intaglio-plate.webp" alt="security engraving cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a1a5c,#6a2daa)">guilloche-intaglio-plate</div></a>
   <div class="body">
     <h3>security engraving</h3>
     <p class="desc">上千根发丝细纹如何叠成一幅可读的雕版，而不是一团摩尔纹？</p>
@@ -455,7 +454,7 @@
     <div class="tags"><span>guilloche</span><span>intaglio</span><span>hairline</span><span>non-scaling-stroke</span></div>
     <div class="links">
       <a href="/?scene=guilloche-intaglio-plate">Open scene</a>
-      <a href="out/guilloche-intaglio-plate-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/guilloche-intaglio-plate.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -463,7 +462,7 @@
   <h2>atmospheric optics / spectroscopy <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="scientific instrument panel 只用 gradient 的 stop，能把一片连续光场推到多远？ atmospheric optics / spectroscopy gradient paint-server smil stops spectroscopy aurora conic-emulation" data-family="atmospheric optics / spectroscopy">
-  <a class="shot" href="/?scene=auroral-spectrograph" aria-label="Open scientific instrument panel"><img src="out/auroral-spectrograph-transparent.png" alt="scientific instrument panel rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a1a5c,#2d2daa)">auroral-spectrograph</div></a>
+  <a class="shot" href="/?scene=auroral-spectrograph" aria-label="Open scientific instrument panel"><img src="gallery/covers/auroral-spectrograph.webp" alt="scientific instrument panel cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a1a5c,#2d2daa)">auroral-spectrograph</div></a>
   <div class="body">
     <h3>scientific instrument panel</h3>
     <p class="desc">只用 gradient 的 stop，能把一片连续光场推到多远？</p>
@@ -471,7 +470,7 @@
     <div class="tags"><span>gradient</span><span>paint-server</span><span>smil</span><span>stops</span></div>
     <div class="links">
       <a href="/?scene=auroral-spectrograph">Open scene</a>
-      <a href="out/auroral-spectrograph-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/auroral-spectrograph.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -479,7 +478,7 @@
   <h2>weaving / textile drafting <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="textile drafting 当一整幅织物纹样都由 pattern 平铺拼出时，平铺究竟在哪里露出破绽？ weaving / textile drafting pattern tiling seams weaving filter raster" data-family="weaving / textile drafting">
-  <a class="shot" href="/?scene=jacquard-loom-draft" aria-label="Open textile drafting"><img src="out/jacquard-loom-draft-transparent.png" alt="textile drafting rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a1a5c,#2d2daa)">jacquard-loom-draft</div></a>
+  <a class="shot" href="/?scene=jacquard-loom-draft" aria-label="Open textile drafting"><img src="gallery/covers/jacquard-loom-draft.webp" alt="textile drafting cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a1a5c,#2d2daa)">jacquard-loom-draft</div></a>
   <div class="body">
     <h3>textile drafting</h3>
     <p class="desc">当一整幅织物纹样都由 pattern 平铺拼出时，平铺究竟在哪里露出破绽？</p>
@@ -487,7 +486,7 @@
     <div class="tags"><span>pattern</span><span>tiling</span><span>seams</span><span>weaving</span></div>
     <div class="links">
       <a href="/?scene=jacquard-loom-draft">Open scene</a>
-      <a href="out/jacquard-loom-draft-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/jacquard-loom-draft.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -495,7 +494,7 @@
   <h2>epigraphic typography <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="epigraphic typography 当文字随石形而走、而不是随一条直线走时，一方碑刻靠什么维持它的读序？ epigraphic typography textpath vertical-writing bidi text-clip conditional-processing epigraphy rubbing glyph-rotation" data-family="epigraphic typography">
-  <a class="shot" href="/?scene=stele-rubbing-hall" aria-label="Open epigraphic typography"><img src="out/stele-rubbing-hall-transparent.png" alt="epigraphic typography rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a1a,#aa2d2d)">stele-rubbing-hall</div></a>
+  <a class="shot" href="/?scene=stele-rubbing-hall" aria-label="Open epigraphic typography"><img src="gallery/covers/stele-rubbing-hall.webp" alt="epigraphic typography cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a1a,#aa2d2d)">stele-rubbing-hall</div></a>
   <div class="body">
     <h3>epigraphic typography</h3>
     <p class="desc">当文字随石形而走、而不是随一条直线走时，一方碑刻靠什么维持它的读序？</p>
@@ -503,7 +502,7 @@
     <div class="tags"><span>textpath</span><span>vertical-writing</span><span>bidi</span><span>text-clip</span></div>
     <div class="links">
       <a href="/?scene=stele-rubbing-hall">Open scene</a>
-      <a href="out/stele-rubbing-hall-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/stele-rubbing-hall.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -511,7 +510,7 @@
   <h2>typography <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="type specimen 一页样本册如何在自己的纸面上证明：关于这套字体的每一条度量声明都是可实测的，而不是排版者的宣称？ typography typography type-specimen text-metrics opentype css-cascade letterpress" data-family="typography">
-  <a class="shot" href="/?scene=letterpress-type-specimen" aria-label="Open type specimen"><img src="out/letterpress-type-specimen-transparent.png" alt="type specimen rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">letterpress-type-specimen</div></a>
+  <a class="shot" href="/?scene=letterpress-type-specimen" aria-label="Open type specimen"><img src="gallery/covers/letterpress-type-specimen.webp" alt="type specimen cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#4a3a1a,#8a6a2d)">letterpress-type-specimen</div></a>
   <div class="body">
     <h3>type specimen</h3>
     <p class="desc">一页样本册如何在自己的纸面上证明：关于这套字体的每一条度量声明都是可实测的，而不是排版者的宣称？</p>
@@ -519,7 +518,7 @@
     <div class="tags"><span>typography</span><span>type-specimen</span><span>text-metrics</span><span>opentype</span></div>
     <div class="links">
       <a href="/?scene=letterpress-type-specimen">Open scene</a>
-      <a href="out/letterpress-type-specimen-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/letterpress-type-specimen.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -527,7 +526,7 @@
   <h2>plant instrumentation <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="process mimic board 一套 marker 定义能独自扛起多少工艺图语义——流向、阀态、仪表类型与尺寸标注？ plant instrumentation marker context-paint p-and-id arrowheads dimensioning smil" data-family="plant instrumentation">
-  <a class="shot" href="/?scene=pipeline-mimic-board" aria-label="Open process mimic board"><img src="out/pipeline-mimic-board-transparent.png" alt="process mimic board rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a1a,#aa2d2d)">pipeline-mimic-board</div></a>
+  <a class="shot" href="/?scene=pipeline-mimic-board" aria-label="Open process mimic board"><img src="gallery/covers/pipeline-mimic-board.webp" alt="process mimic board cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a1a,#aa2d2d)">pipeline-mimic-board</div></a>
   <div class="body">
     <h3>process mimic board</h3>
     <p class="desc">一套 marker 定义能独自扛起多少工艺图语义——流向、阀态、仪表类型与尺寸标注？</p>
@@ -535,7 +534,7 @@
     <div class="tags"><span>marker</span><span>context-paint</span><span>p-and-id</span><span>arrowheads</span></div>
     <div class="links">
       <a href="/?scene=pipeline-mimic-board">Open scene</a>
-      <a href="out/pipeline-mimic-board-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/pipeline-mimic-board.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -543,7 +542,7 @@
   <h2>printing <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="prepress proofing 检版台怎样把一张样张拆成四色墨版，又当场证明这次分色能原样叠回来？ printing prepress halftone color-separation svg-filters duotone registration color-space" data-family="printing">
-  <a class="shot" href="/?scene=four-colour-press-check" aria-label="Open prepress proofing"><img src="out/four-colour-press-check-transparent.png" alt="prepress proofing rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a1a5c,#6a2daa)">four-colour-press-check</div></a>
+  <a class="shot" href="/?scene=four-colour-press-check" aria-label="Open prepress proofing"><img src="gallery/covers/four-colour-press-check.webp" alt="prepress proofing cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a1a5c,#6a2daa)">four-colour-press-check</div></a>
   <div class="body">
     <h3>prepress proofing</h3>
     <p class="desc">检版台怎样把一张样张拆成四色墨版，又当场证明这次分色能原样叠回来？</p>
@@ -551,7 +550,7 @@
     <div class="tags"><span>prepress</span><span>halftone</span><span>color-separation</span><span>svg-filters</span></div>
     <div class="links">
       <a href="/?scene=four-colour-press-check">Open scene</a>
-      <a href="out/four-colour-press-check-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/four-colour-press-check.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -559,7 +558,7 @@
   <h2>scientific instrument <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="materials inspection 如果一块钢印铭牌只剩下一张 alpha 高度图，光照滤镜还能从中还原出多少真实的金相判读？ scientific instrument lighting-filters bump-map convolution metallography pointer-drag smil brushed-metal chrome" data-family="scientific instrument">
-  <a class="shot" href="/?scene=forge-metallography-bench" aria-label="Open materials inspection"><img src="out/forge-metallography-bench-transparent.png" alt="materials inspection rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a4a,#aa2d7a)">forge-metallography-bench</div></a>
+  <a class="shot" href="/?scene=forge-metallography-bench" aria-label="Open materials inspection"><img src="gallery/covers/forge-metallography-bench.webp" alt="materials inspection cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a4a,#aa2d7a)">forge-metallography-bench</div></a>
   <div class="body">
     <h3>materials inspection</h3>
     <p class="desc">如果一块钢印铭牌只剩下一张 alpha 高度图，光照滤镜还能从中还原出多少真实的金相判读？</p>
@@ -567,7 +566,7 @@
     <div class="tags"><span>lighting-filters</span><span>bump-map</span><span>convolution</span><span>metallography</span></div>
     <div class="links">
       <a href="/?scene=forge-metallography-bench">Open scene</a>
-      <a href="out/forge-metallography-bench-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/forge-metallography-bench.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -575,7 +574,7 @@
   <h2>procedural texture <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="laboratory illustration 菌落能不能不靠手绘、而是从一张噪声里长出来？ procedural texture feturbulence displacement-map watercolor l-system smil svg-filters mycology" data-family="procedural texture">
-  <a class="shot" href="/?scene=mycelium-culture-chamber" aria-label="Open laboratory illustration"><img src="out/mycelium-culture-chamber-transparent.png" alt="laboratory illustration rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a5c1a,#6aaa2d)">mycelium-culture-chamber</div></a>
+  <a class="shot" href="/?scene=mycelium-culture-chamber" aria-label="Open laboratory illustration"><img src="gallery/covers/mycelium-culture-chamber.webp" alt="laboratory illustration cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a5c1a,#6aaa2d)">mycelium-culture-chamber</div></a>
   <div class="body">
     <h3>laboratory illustration</h3>
     <p class="desc">菌落能不能不靠手绘、而是从一张噪声里长出来？</p>
@@ -583,7 +582,7 @@
     <div class="tags"><span>feturbulence</span><span>displacement-map</span><span>watercolor</span><span>l-system</span></div>
     <div class="links">
       <a href="/?scene=mycelium-culture-chamber">Open scene</a>
-      <a href="out/mycelium-culture-chamber-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/mycelium-culture-chamber.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -591,7 +590,7 @@
   <h2>filter compositing <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="signage graphics 当光晕、辉光、内阴影与投影不再靠一句简写、而是各自由 filter 基元手工接线时，它们到底差在哪里？ filter compositing neon svg-filters css-masking clip-path html-svg-interop morphology blend-modes" data-family="filter compositing">
-  <a class="shot" href="/?scene=neon-sign-workshop" aria-label="Open signage graphics"><img src="out/neon-sign-workshop-transparent.png" alt="signage graphics rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a5c4a,#2d8a6e)">neon-sign-workshop</div></a>
+  <a class="shot" href="/?scene=neon-sign-workshop" aria-label="Open signage graphics"><img src="gallery/covers/neon-sign-workshop.webp" alt="signage graphics cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a5c4a,#2d8a6e)">neon-sign-workshop</div></a>
   <div class="body">
     <h3>signage graphics</h3>
     <p class="desc">当光晕、辉光、内阴影与投影不再靠一句简写、而是各自由 filter 基元手工接线时，它们到底差在哪里？</p>
@@ -599,7 +598,7 @@
     <div class="tags"><span>neon</span><span>svg-filters</span><span>css-masking</span><span>clip-path</span></div>
     <div class="links">
       <a href="/?scene=neon-sign-workshop">Open scene</a>
-      <a href="out/neon-sign-workshop-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/neon-sign-workshop.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -607,7 +606,7 @@
   <h2>watchmaking / horology <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="declarative timing schematic 机械擒纵能否完全由声明式的时序关系装配出来，让时间轴本身成为那套轮系？ watchmaking / horology smil syncbase timeline-scrubbing escapement declarative-animation keysplines horology" data-family="watchmaking / horology">
-  <a class="shot" href="/?scene=escapement-chronometer" aria-label="Open declarative timing schematic"><img src="out/escapement-chronometer-transparent.png" alt="declarative timing schematic rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a3a5c,#2d5caa)">escapement-chronometer</div></a>
+  <a class="shot" href="/?scene=escapement-chronometer" aria-label="Open declarative timing schematic"><img src="gallery/covers/escapement-chronometer.webp" alt="declarative timing schematic cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#1a3a5c,#2d5caa)">escapement-chronometer</div></a>
   <div class="body">
     <h3>declarative timing schematic</h3>
     <p class="desc">机械擒纵能否完全由声明式的时序关系装配出来，让时间轴本身成为那套轮系？</p>
@@ -615,7 +614,7 @@
     <div class="tags"><span>smil</span><span>syncbase</span><span>timeline-scrubbing</span><span>escapement</span></div>
     <div class="links">
       <a href="/?scene=escapement-chronometer">Open scene</a>
-      <a href="out/escapement-chronometer-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/escapement-chronometer.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -623,7 +622,7 @@
   <h2>geology / core logging <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="core log interpretation 当层界本身是半透明的软过渡时，裁切与掩码的真实差别到底在哪里？ geology / core logging clip-path mask hit-testing effect-order smil stratigraphy" data-family="geology / core logging">
-  <a class="shot" href="/?scene=core-sample-stratigraphy" aria-label="Open core log interpretation"><img src="out/core-sample-stratigraphy-transparent.png" alt="core log interpretation rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a1a5c,#6a2daa)">core-sample-stratigraphy</div></a>
+  <a class="shot" href="/?scene=core-sample-stratigraphy" aria-label="Open core log interpretation"><img src="gallery/covers/core-sample-stratigraphy.webp" alt="core log interpretation cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#3a1a5c,#6a2daa)">core-sample-stratigraphy</div></a>
   <div class="body">
     <h3>core log interpretation</h3>
     <p class="desc">当层界本身是半透明的软过渡时，裁切与掩码的真实差别到底在哪里？</p>
@@ -631,7 +630,7 @@
     <div class="tags"><span>clip-path</span><span>mask</span><span>hit-testing</span><span>effect-order</span></div>
     <div class="links">
       <a href="/?scene=core-sample-stratigraphy">Open scene</a>
-      <a href="out/core-sample-stratigraphy-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/core-sample-stratigraphy.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -639,7 +638,7 @@
   <h2>instrument console <span style="color:var(--muted);font-weight:400;font-size:.8em">(1)</span></h2>
 </section>
 <article class="card" data-search="seismic recording console 一段记录的坐标真相究竟住在 viewBox 里、CTM 里，还是指针里？ instrument console seismology viewbox-camera coordinate-mapping pointer-events motion-path matrix-math nested-viewport" data-family="instrument console">
-  <a class="shot" href="/?scene=seismic-drum-console" aria-label="Open seismic recording console"><img src="out/seismic-drum-console-transparent.png" alt="seismic recording console rendered preview" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a4a,#aa2d7a)">seismic-drum-console</div></a>
+  <a class="shot" href="/?scene=seismic-drum-console" aria-label="Open seismic recording console"><img src="gallery/covers/seismic-drum-console.webp" alt="seismic recording console cover" loading="lazy" decoding="async" onerror="this.style.display='none'"><div class="placeholder" style="background:linear-gradient(135deg,#5c1a4a,#aa2d7a)">seismic-drum-console</div></a>
   <div class="body">
     <h3>seismic recording console</h3>
     <p class="desc">一段记录的坐标真相究竟住在 viewBox 里、CTM 里，还是指针里？</p>
@@ -647,7 +646,7 @@
     <div class="tags"><span>seismology</span><span>viewbox-camera</span><span>coordinate-mapping</span><span>pointer-events</span></div>
     <div class="links">
       <a href="/?scene=seismic-drum-console">Open scene</a>
-      <a href="out/seismic-drum-console-transparent.png">Rendered PNG</a>
+      <a href="gallery/covers/seismic-drum-console.webp">Cover</a>
     </div>
   </div>
 </article>
@@ -1101,8 +1100,8 @@
 }
 ];
 
-    var HAS_PNG = {};
-    'arrow-components arrow-library auroral-spectrograph botanical celestial-astrolabe-cabinet circuit contour-map core-sample-stratigraphy escapement-chronometer forge-metallography-bench four-colour-press-check guilloche-intaglio-plate icon-library isometric-city jacquard-loom-draft letterpress-type-specimen loom metro molecule museum-label-panel mycelium-culture-chamber neon-sign-workshop orbits pipeline-mimic-board seismic-drum-console ship-lofting-floor stele-rubbing-hall timeline topology type-system wave-lab'.split(' ').forEach(function(k){ if(k) HAS_PNG[k]=true; });
+    var HAS_COVER = {};
+    'arrow-components arrow-library auroral-spectrograph botanical celestial-astrolabe-cabinet circuit contour-map core-sample-stratigraphy escapement-chronometer forge-metallography-bench four-colour-press-check guilloche-intaglio-plate icon-library isometric-city jacquard-loom-draft letterpress-type-specimen loom metro molecule museum-label-panel mycelium-culture-chamber neon-sign-workshop orbits pipeline-mimic-board seismic-drum-console ship-lofting-floor stele-rubbing-hall timeline topology type-system wave-lab'.split(' ').forEach(function(k){ if(k) HAS_COVER[k]=true; });
 
     var grid = document.getElementById('grid');
     var q = document.getElementById('q');

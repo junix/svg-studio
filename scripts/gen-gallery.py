@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 """Deterministic gallery.html generator from catalog.json.
 
+Cover thumbnails are committed at gallery/covers/<scene>.webp (see scripts/gen-covers.mjs).
+Cards reference those files. A missing or broken cover falls back to the gradient placeholder.
+The old out/<scene>-transparent.png renders are not linked: they are local capture output,
+not part of the published gallery.
+
 Usage:
     python3 scripts/gen-gallery.py          # write gallery.html
     python3 scripts/gen-gallery.py --check  # compare without writing (exit 1 on drift)
 """
-import json, pathlib, sys, hashlib, textwrap
+import json, pathlib, re, sys, textwrap
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "catalog.json"
 OUT = ROOT / "gallery.html"
+COVER_DIR = ROOT / "gallery" / "covers"
+# Loading underlay only. Covers are opaque; gen-covers.mjs bakes ink or paper per scene.
+COVER_BACKGROUND = "#101820"
+SCENE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
 def gradient_for(fam: str) -> str:
     h = 0
@@ -27,17 +36,18 @@ def gradient_for(fam: str) -> str:
 def esc(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
+def cover_rel(sid: str) -> str | None:
+    if not SCENE_ID.fullmatch(sid):
+        return None
+    name = f"{sid}.webp"
+    if (COVER_DIR / name).is_file():
+        return f"gallery/covers/{name}"
+    return None
+
 def generate() -> str:
     catalog = json.loads(CATALOG.read_text())
 
-    # Discover which scenes have rendered PNGs
-    out_dir = ROOT / "out"
-    has_png = set()
-    if out_dir.is_dir():
-        for f in out_dir.iterdir():
-            if f.suffix == ".png" and f.name.endswith("-transparent.png"):
-                sid = f.name.removesuffix("-transparent.png")
-                has_png.add(sid)
+    has_cover = {s["id"] for s in catalog if cover_rel(s["id"])}
 
     # Determine family order (first-seen)
     families = []
@@ -49,7 +59,7 @@ def generate() -> str:
 
     catalog_js = json.dumps(catalog, ensure_ascii=False, indent=0)
 
-    has_png_js = " ".join(sorted(has_png))
+    has_cover_js = " ".join(sorted(has_cover))
 
     # Build category nav and card sections
     catnav_links = []
@@ -72,20 +82,18 @@ def generate() -> str:
         cards_html = []
         for s in group:
             sid = s["id"]
+            cover = cover_rel(sid)
             shot_inner = f'<div class="placeholder" style="background:{gradient_for(fam)}">{esc(sid)}</div>'
-            if sid in has_png:
+            if cover:
                 shot_inner = (
-                    f'<img src="out/{esc(sid)}-transparent.png" '
-                    f'alt="{esc(s["use"])} rendered preview" '
+                    f'<img src="{esc(cover)}" '
+                    f'alt="{esc(s["use"])} cover" '
                     f'loading="lazy" decoding="async" onerror="this.style.display=\'none\'">'
                     + shot_inner
                 )
             tags = "".join(f"<span>{esc(t)}</span>" for t in s["tags"][:4])
             cx = "exp" if s["complexity"] == "expert" else "adv"
-            png_link = (
-                f'<a href="out/{esc(sid)}-transparent.png">Rendered PNG</a>'
-                if sid in has_png else ""
-            )
+            cover_link = f'<a href="{esc(cover)}">Cover</a>' if cover else ""
             card = textwrap.dedent(f"""\
             <article class="card" data-search="{esc(' '.join([s['use'], s['question'], s['family']] + s['tags']))}" data-family="{esc(fam)}">
               <a class="shot" href="/?scene={esc(sid)}" aria-label="Open {esc(s['use'])}">{shot_inner}</a>
@@ -96,7 +104,7 @@ def generate() -> str:
                 <div class="tags">{tags}</div>
                 <div class="links">
                   <a href="/?scene={esc(sid)}">Open scene</a>
-                  {png_link}
+                  {cover_link}
                 </div>
               </div>
             </article>""")
@@ -187,8 +195,8 @@ def generate() -> str:
       flex-direction: column; box-shadow: var(--card-shadow);
       transition: box-shadow .15s, border-color .15s; }}
     article.card:hover {{ box-shadow: 0 4px 12px rgba(0,0,0,.1); border-color: var(--accent-dim); }}
-    article.card .shot {{ position: relative; height: 180px; overflow: hidden;
-      display: flex; align-items: center; justify-content: center; }}
+    article.card .shot {{ position: relative; aspect-ratio: 1400 / 900; height: auto; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; background: {COVER_BACKGROUND}; }}
     article.card .shot img {{ width: 100%; height: 100%; object-fit: cover; display: block;
       position: relative; z-index: 1; }}
     article.card .shot .placeholder {{ position: absolute; inset: 0; display: flex;
@@ -223,7 +231,6 @@ def generate() -> str:
       header {{ padding: .6rem .8rem; }}
       nav.cats {{ padding: .5rem .8rem; }}
       main {{ padding: .8rem; gap: .75rem; }}
-      article.card .shot {{ height: 140px; }}
     }}
     </style>
     </head>
@@ -245,8 +252,8 @@ def generate() -> str:
     <script>
     var CATALOG = {catalog_js};
 
-    var HAS_PNG = {{}};
-    '{has_png_js}'.split(' ').forEach(function(k){{ if(k) HAS_PNG[k]=true; }});
+    var HAS_COVER = {{}};
+    '{has_cover_js}'.split(' ').forEach(function(k){{ if(k) HAS_COVER[k]=true; }});
 
     var grid = document.getElementById('grid');
     var q = document.getElementById('q');
