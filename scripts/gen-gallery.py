@@ -24,7 +24,7 @@ CATPPUCCIN_SNIPPET = pathlib.Path(__file__).with_name("catppuccin-theme.html")
 
 
 def with_catppuccin(page: str) -> str:
-    """Add the shared Catppuccin theme: Mocha dark (default), Latte light, auto/light/dark toggle."""
+    """Add the shared Catppuccin theme: Mocha dark (default), apple.com-like light, auto/light/dark toggle."""
     snippet = CATPPUCCIN_SNIPPET.read_text(encoding="utf-8")
     block = re.compile(r"<!-- catppuccin-theme v\d+:.*?</script>\n?", re.S)
     if block.search(page):
